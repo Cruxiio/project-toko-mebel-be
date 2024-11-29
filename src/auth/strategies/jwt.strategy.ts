@@ -5,7 +5,6 @@ import { AuthService } from '../auth.service';
 import { ConfigService } from '@nestjs/config';
 import { TokenPayload } from '../dto/token-payload.interface';
 import { UserRepository } from 'src/database/mongodb/repositories/user.repository';
-// import { UserRepository } from 'src/user/user.repository';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
