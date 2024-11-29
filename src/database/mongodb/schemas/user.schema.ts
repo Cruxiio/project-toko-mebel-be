@@ -7,7 +7,7 @@ import { Document } from 'mongoose';
 
 export type UserDocument = User & Document;
 
-@Schema()
+@Schema({ timestamps: true })
 export class User {
   @Prop({ index: true, unique: true, type: Number, auto: true })
   id: number;
@@ -33,6 +33,12 @@ export class User {
     ],
   })
   role: string;
+
+  @Prop({ required: true, type: String, unique: true })
+  email: string;
+
+  @Prop({ type: Date, default: null })
+  deleted_at?: Date;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 // import { UserRepository } from './user.repository';
@@ -18,6 +18,15 @@ export class UserService {
   }
 
   async handleCreateUser(createUserDto: CreateUserDto) {
+    // cek username sudah ada atau belum
+    const kembar = await this.userRepository.validateUserUniqueField({
+      username: createUserDto.username,
+    });
+
+    if (kembar) {
+      throw new BadRequestException('Username already exists');
+    }
+
     return await this.userRepository.create({
       ...createUserDto,
       password: await hash(createUserDto.password, 10),

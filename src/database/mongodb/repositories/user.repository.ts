@@ -13,6 +13,10 @@ export class UserRepository {
     NOTE: ini sebenarnya func CRUD bisa diabtraksi, coba cari tau lebih lanjut tentang cara proses abstraksinya gimana
   */
 
+  // repo itu anggapannya sama seperti manager
+
+  /* FUNC CRUD generic */
+
   //filterQuery itu adalah query yang akan dijalankan di database
   async findOne(userFilterQuery: FilterQuery<User>): Promise<User> {
     const userData = await this.userModel.findOne(userFilterQuery);
@@ -57,5 +61,14 @@ export class UserRepository {
     const CounterModel = this.userModel.db.collection('counters');
     await CounterModel.deleteOne({ id: fieldName as any });
     await this.userModel.deleteMany({});
+  }
+
+  /*FUNC NON CRUD*/
+
+  async validateUserUniqueField(
+    userField: FilterQuery<User>,
+  ): Promise<boolean> {
+    const user = await this.userModel.findOne(userField);
+    return user ? true : false;
   }
 }
