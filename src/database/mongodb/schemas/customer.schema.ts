@@ -1,10 +1,10 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 
-export type SupplierDocument = Supplier & Document;
+export type CustomerDocument = Customer & Document;
 
-@Schema({ timestamps: true, collection: 'supplier' })
-export class Supplier {
+@Schema({ timestamps: true, collection: 'customer' })
+export class Customer {
   @Prop({ index: true, unique: true, type: Number, auto: true })
   id: number;
 
@@ -20,14 +20,15 @@ export class Supplier {
   @Prop({
     required: true,
     type: String,
+    unique: true,
   })
-  alamat: string;
+  no_telp: string;
 
   @Prop({ type: Date, default: null })
   deleted_at?: Date;
 }
 
-export const SupplierSchema = SchemaFactory.createForClass(Supplier);
+export const CustomerSchema = SchemaFactory.createForClass(Customer);
 
 // Membuat composite unique index untuk no_rekening dan nama_bank
-SupplierSchema.index({ no_rekening: 1, nama_bank: 1 }, { unique: true });
+CustomerSchema.index({ no_rekening: 1, nama_bank: 1 }, { unique: true });

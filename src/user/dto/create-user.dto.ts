@@ -2,8 +2,8 @@ import { IsIn, IsNotEmpty, IsString } from 'class-validator';
 
 export class CreateUserDto {
   @IsString()
-  @IsNotEmpty({ message: 'Name is required' })
-  name: string;
+  @IsNotEmpty({ message: 'nama is required' })
+  nama: string;
 
   @IsString()
   @IsNotEmpty()
