@@ -1,8 +1,8 @@
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsIn, IsNotEmpty, IsString } from 'class-validator';
 
 export class CreateUserDto {
   @IsString()
-  @IsNotEmpty()
+  @IsNotEmpty({ message: 'Name is required' })
   name: string;
 
   @IsString()
@@ -13,7 +13,17 @@ export class CreateUserDto {
   @IsNotEmpty()
   password: string;
 
-  @IsString()
+  @IsString({})
+  @IsIn(
+    [
+      'superadmin',
+      'adminkantor',
+      'karyawankantor',
+      'adminworkshop',
+      'karyawanworkshop',
+    ],
+    { message: 'Role harus salah satu dari role yang disediakan' },
+  )
   @IsNotEmpty()
   role: string;
 
