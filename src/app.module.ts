@@ -3,9 +3,9 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
 import { UserModule } from './user/user.module';
-import { MongooseModule } from '@nestjs/mongoose';
 import { AuthModule } from './auth/auth.module';
 import { DatabaseModule } from './database/database.module';
+import { SupplierModule } from './supplier/supplier.module';
 
 @Module({
   imports: [
@@ -19,6 +19,7 @@ import { DatabaseModule } from './database/database.module';
     UserModule,
     AuthModule,
     DatabaseModule,
+    SupplierModule,
   ],
   controllers: [AppController],
   providers: [AppService],

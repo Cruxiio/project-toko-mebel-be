@@ -1,6 +1,7 @@
 import { getConnectionToken, MongooseModule } from '@nestjs/mongoose';
 import { User, UserSchema } from './schemas/user.schema';
 import { Connection } from 'mongoose';
+import { Supplier, SupplierSchema } from './schemas/supplier.schema';
 
 // kasih tau mongoose schema mana yang mau diimport
 export const MongoDBProvider = MongooseModule.forFeatureAsync([
@@ -14,6 +15,21 @@ export const MongoDBProvider = MongooseModule.forFeatureAsync([
       schema.plugin(AutoIncrement, {
         inc_field: 'id',
         id: 'user_id_counter', //ini nama unik untuk counter id customer yang disimpan di collection counters
+      });
+      return schema;
+    },
+    inject: [getConnectionToken()],
+  },
+  {
+    name: Supplier.name,
+    useFactory: async (connection: Connection) => {
+      const schema = SupplierSchema;
+
+      const AutoIncrement = require('mongoose-sequence')(connection);
+
+      schema.plugin(AutoIncrement, {
+        inc_field: 'id',
+        id: 'supplier_id_counter', //ini nama unik untuk counter id supplier yang disimpan di collection counters
       });
       return schema;
     },

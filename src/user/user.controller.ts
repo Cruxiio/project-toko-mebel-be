@@ -37,6 +37,7 @@ export class UserController {
     };
   }
 
+  @Roles('superadmin')
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.userService.handleFindOneUser(+id);

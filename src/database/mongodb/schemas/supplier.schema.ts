@@ -3,7 +3,10 @@ import { Document } from 'mongoose';
 
 export type SupplierDocument = Supplier & Document;
 
-@Schema({ timestamps: true, collection: 'supplier' })
+@Schema({
+  timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' },
+  collection: 'supplier',
+})
 export class Supplier {
   @Prop({ index: true, unique: true, type: Number, auto: true })
   id: number;
@@ -18,13 +21,22 @@ export class Supplier {
   nama_bank: string;
 
   @Prop({
-    required: true,
     type: String,
+    default: null,
+  })
+  no_telepon: string;
+
+  @Prop({
+    type: String,
+    default: null,
   })
   alamat: string;
 
   @Prop({ type: Date, default: null })
   deleted_at?: Date;
+
+  created_at?: Date;
+  updated_at?: Date;
 }
 
 export const SupplierSchema = SchemaFactory.createForClass(Supplier);
