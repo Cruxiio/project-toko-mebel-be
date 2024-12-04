@@ -21,7 +21,7 @@ import { Roles } from 'src/auth/custom_decorator/role.decorator';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Roles('superadmin', 'admin')
+  @Roles('superadmin')
   @Get()
   async findAll(@Request() req: any) {
     // console.log(req.user);
