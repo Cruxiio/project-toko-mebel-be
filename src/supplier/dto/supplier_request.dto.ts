@@ -41,7 +41,37 @@ export class CreateSupplierDto {
   alamat: string;
 }
 
-export class UpdateSupplierDto extends PartialType(CreateSupplierDto) {}
+export class UpdateSupplierDto {
+  @IsString()
+  @IsNotEmpty({ message: 'nama is required' })
+  nama: string;
+
+  @IsString()
+  @IsNotEmpty({ message: 'no_rekening is required' })
+  @MinLength(10, { message: 'no_rekening must be at least 10 characters' })
+  @IsNumberString(
+    { no_symbols: true },
+    { message: 'no_rekening must be a number' },
+  )
+  no_rekening: string;
+
+  @IsString()
+  @IsNotEmpty({ message: 'nama_bank is required' })
+  nama_bank: string;
+
+  @IsString()
+  @IsNotEmpty({ message: 'no_telepon is required' })
+  @MinLength(10, { message: 'no_telepon must be at least 10 characters' })
+  @IsNumberString(
+    { no_symbols: true },
+    { message: 'no_telepon must be a number' },
+  )
+  no_telepon: string;
+
+  @IsString()
+  @IsNotEmpty({ message: 'alamat is required' })
+  alamat: string;
+}
 
 export class FindAllSupplierDto {
   @IsString()

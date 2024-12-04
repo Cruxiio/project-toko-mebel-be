@@ -115,6 +115,11 @@ export class SupplierService {
   }
 
   async HandleFindOneSupplier(id: number) {
+    // cek apakah id adalah int atau bukan
+    if (Number.isNaN(id)) {
+      throw new BadRequestException('id must be a number');
+    }
+
     // find supplier by id
     const supplierData = await this.SupplierRepo.findOne({
       id,
@@ -141,6 +146,11 @@ export class SupplierService {
   }
 
   async HandleUpdateSupplier(id: number, updateSupplierDto: UpdateSupplierDto) {
+    // cek apakah id adalah int atau bukan
+    if (Number.isNaN(id)) {
+      throw new BadRequestException('id must be a number');
+    }
+
     //cek apakah no rekening sudah ada atau belum
     let ada = await this.SupplierRepo.findOne({
       no_rekening: updateSupplierDto.no_rekening,
@@ -192,6 +202,11 @@ export class SupplierService {
   }
 
   async HandleDeleteSupplier(id: number) {
+    // cek apakah id adalah int atau bukan
+    if (Number.isNaN(id)) {
+      throw new BadRequestException('id must be a number');
+    }
+
     // update data supplier
     const updatedSupplierData = await this.SupplierRepo.update(
       { id, deleted_at: null },
