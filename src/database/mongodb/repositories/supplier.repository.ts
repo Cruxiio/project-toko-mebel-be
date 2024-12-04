@@ -47,7 +47,7 @@ export class SupplierRepository {
   // ini buat dapetin seluruh jumlah data berdasarkan syarat filter
   async countAll(supplierFilterQuery: FilterQuery<Supplier>) {
     // buat temporary object untuk isi filter sesuai syarat yang diberikan
-    let filter: FilterQuery<Supplier> = {};
+    let filter: FilterQuery<Supplier> = { deleted_at: null };
 
     if (supplierFilterQuery.nama != '') {
       filter = {

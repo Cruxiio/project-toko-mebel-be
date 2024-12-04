@@ -6,6 +6,7 @@ import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { DatabaseModule } from './database/database.module';
 import { SupplierModule } from './supplier/supplier.module';
+import { CustomerModule } from './customer/customer.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { SupplierModule } from './supplier/supplier.module';
     AuthModule,
     DatabaseModule,
     SupplierModule,
+    CustomerModule,
   ],
   controllers: [AppController],
   providers: [AppService],

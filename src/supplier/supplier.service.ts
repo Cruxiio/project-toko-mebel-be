@@ -30,7 +30,9 @@ export class SupplierService {
 
     if (ada) {
       throw new BadRequestException(
-        'No rekening pada bank ' + createSupplierDto.nama_bank + ' sudah ada',
+        'No rekening pada bank ' +
+          createSupplierDto.nama_bank +
+          ' sudah terdaftar',
       );
     }
 
@@ -147,7 +149,9 @@ export class SupplierService {
 
     if (ada && ada.id !== id) {
       throw new BadRequestException(
-        'No rekening pada bank ' + updateSupplierDto.nama_bank + ' sudah ada',
+        'No rekening pada bank ' +
+          updateSupplierDto.nama_bank +
+          ' sudah terdaftar',
       );
     }
 

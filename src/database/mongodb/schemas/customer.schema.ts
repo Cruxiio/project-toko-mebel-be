@@ -3,7 +3,10 @@ import { Document } from 'mongoose';
 
 export type CustomerDocument = Customer & Document;
 
-@Schema({ timestamps: true, collection: 'customer' })
+@Schema({
+  timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' },
+  collection: 'customer',
+})
 export class Customer {
   @Prop({ index: true, unique: true, type: Number, auto: true })
   id: number;
@@ -22,10 +25,16 @@ export class Customer {
     unique: true,
     default: null,
   })
-  no_telp: string;
+  no_telepon: string;
+
+  @Prop({ type: String, default: null })
+  alamat: string;
 
   @Prop({ type: Date, default: null })
   deleted_at?: Date;
+
+  created_at?: Date;
+  updated_at?: Date;
 }
 
 export const CustomerSchema = SchemaFactory.createForClass(Customer);

@@ -1,5 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { Supplier, SupplierDocument } from '../schemas/supplier.schema';
+import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { FilterQuery, Model } from 'mongoose';
 import { Customer, CustomerDocument } from '../schemas/customer.schema';
@@ -11,17 +10,17 @@ export class CustomerRepository {
     private readonly CustomerModel: Model<CustomerDocument>,
   ) {}
 
-  async findOne(customerFilterQuery: FilterQuery<Supplier>) {
+  async findOne(customerFilterQuery: FilterQuery<Customer>) {
     const customerData = await this.CustomerModel.findOne(customerFilterQuery);
     return customerData;
   }
 
   async findAll(
-    customerFilterQuery: FilterQuery<Supplier>,
+    customerFilterQuery: FilterQuery<Customer>,
     paginationQuery: any,
   ) {
     // buat temporary object untuk isi filter sesuai syarat yang diberikan
-    let filter: FilterQuery<Supplier> = { deleted_at: null };
+    let filter: FilterQuery<Customer> = { deleted_at: null };
 
     if (customerFilterQuery.nama != '') {
       filter = {
@@ -46,9 +45,9 @@ export class CustomerRepository {
   }
 
   // ini buat dapetin seluruh jumlah data berdasarkan syarat filter
-  async countAll(customerFilterQuery: FilterQuery<Supplier>) {
+  async countAll(customerFilterQuery: FilterQuery<Customer>) {
     // buat temporary object untuk isi filter sesuai syarat yang diberikan
-    let filter: FilterQuery<Supplier> = {};
+    let filter: FilterQuery<Customer> = { deleted_at: null };
 
     if (customerFilterQuery.nama != '') {
       filter = {
@@ -67,7 +66,7 @@ export class CustomerRepository {
     return await this.CustomerModel.countDocuments(filter);
   }
 
-  async create(customerData: Partial<Supplier>) {
+  async create(customerData: Partial<Customer>) {
     try {
       const newCustomer = new this.CustomerModel(customerData);
       return await newCustomer.save();
@@ -78,8 +77,8 @@ export class CustomerRepository {
   }
 
   async update(
-    customerFilterQuery: FilterQuery<Supplier>,
-    customerData: Partial<Supplier>,
+    customerFilterQuery: FilterQuery<Customer>,
+    customerData: Partial<Customer>,
   ) {
     try {
       const updatedCustomer = await this.CustomerModel.findOneAndUpdate(
@@ -94,7 +93,7 @@ export class CustomerRepository {
     }
   }
 
-  async delete(customerFilterQuery: FilterQuery<Supplier>) {
+  async delete(customerFilterQuery: FilterQuery<Customer>) {
     return await this.CustomerModel.deleteOne(customerFilterQuery);
   }
 }
