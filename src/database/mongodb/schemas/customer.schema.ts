@@ -11,16 +11,16 @@ export class Customer {
   @Prop({ required: true, type: String })
   nama: string;
 
-  @Prop({ required: true, type: String, minlength: 10 })
+  @Prop({ type: String, minlength: 10, default: null })
   no_rekening: string;
 
-  @Prop({ required: true, type: String })
+  @Prop({ type: String, default: null })
   nama_bank: string;
 
   @Prop({
-    required: true,
     type: String,
     unique: true,
+    default: null,
   })
   no_telp: string;
 
