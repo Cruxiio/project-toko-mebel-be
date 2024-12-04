@@ -25,12 +25,25 @@ export class SupplierService {
     let ada = await this.SupplierRepo.findOne({
       no_rekening: createSupplierDto.no_rekening,
       nama_bank: createSupplierDto.nama_bank,
+      deleted_at: null,
     });
 
     if (ada) {
       throw new BadRequestException(
         'No rekening pada bank ' + createSupplierDto.nama_bank + ' sudah ada',
       );
+    }
+
+    // cek apakah no telepon sudah ada atau belum
+    if (createSupplierDto.no_telepon != null) {
+      ada = await this.SupplierRepo.findOne({
+        no_telepon: createSupplierDto.no_telepon,
+        deleted_at: null,
+      });
+
+      if (ada) {
+        throw new BadRequestException('No Telepon sudah terdaftar');
+      }
     }
 
     // create new supplier
@@ -136,6 +149,18 @@ export class SupplierService {
       throw new BadRequestException(
         'No rekening pada bank ' + updateSupplierDto.nama_bank + ' sudah ada',
       );
+    }
+
+    // cek apakah no telepon sudah ada atau belum
+    if (updateSupplierDto.no_telepon != null) {
+      ada = await this.SupplierRepo.findOne({
+        no_telepon: updateSupplierDto.no_telepon,
+        deleted_at: null,
+      });
+
+      if (ada && ada.id !== id) {
+        throw new BadRequestException('No Telepon sudah terdaftar');
+      }
     }
 
     // update data supplier
