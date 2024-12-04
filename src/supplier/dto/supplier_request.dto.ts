@@ -29,6 +29,7 @@ export class CreateSupplierDto {
 
   @IsString()
   @IsOptional()
+  @MinLength(10, { message: 'no_telepon must be at least 10 characters' })
   @IsNumberString(
     { no_symbols: true },
     { message: 'no_telepon must be a number' },
