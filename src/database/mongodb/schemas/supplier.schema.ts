@@ -22,6 +22,7 @@ export class Supplier {
 
   @Prop({
     type: String,
+    unique: true,
     default: null,
   })
   no_telepon: string;
