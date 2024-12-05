@@ -18,6 +18,7 @@ export class SupplierRepository {
   async findAll(
     supplierFilterQuery: FilterQuery<Supplier>,
     paginationQuery: any,
+    showedField: any,
   ) {
     // buat temporary object untuk isi filter sesuai syarat yang diberikan
     let filter: FilterQuery<Supplier> = { deleted_at: null };
@@ -41,7 +42,9 @@ export class SupplierRepository {
     // skip untuk mulai dari data ke berapa (mirip OFFSET pada SQL)
     const skip = (page - 1) * per_page;
 
-    return await this.SupplierModel.find(filter).skip(skip).limit(per_page);
+    return await this.SupplierModel.find(filter, showedField)
+      .skip(skip)
+      .limit(per_page);
   }
 
   // ini buat dapetin seluruh jumlah data berdasarkan syarat filter
@@ -95,5 +98,17 @@ export class SupplierRepository {
 
   async delete(supplierFilterQuery: FilterQuery<Supplier>) {
     return await this.SupplierModel.deleteOne(supplierFilterQuery);
+  }
+
+  // FUNC NON-GENERIC
+  async masterFindAll(
+    supplierFilterQuery: FilterQuery<Supplier>,
+    paginationQuery: any,
+  ) {
+    return await this.findAll(supplierFilterQuery, paginationQuery, {
+      id: 1,
+      nama: 1,
+      _id: 0,
+    });
   }
 }

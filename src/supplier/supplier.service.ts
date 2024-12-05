@@ -77,6 +77,7 @@ export class SupplierService {
         page: requestFilter.page,
         per_page: requestFilter.per_page,
       },
+      {},
     );
 
     // dapatkan total seluruh data berdasarkan hasil filter
@@ -217,6 +218,7 @@ export class SupplierService {
       throw new NotFoundException('Supplier not found');
     }
 
+    // buat response
     const res: SupplierDeleteResponse = {
       message: 'OK',
     };

@@ -77,6 +77,7 @@ export class CustomerService {
         page: requestFilter.page,
         per_page: requestFilter.per_page,
       },
+      {},
     );
 
     // dapatkan total seluruh data berdasarkan hasil filter
@@ -216,6 +217,7 @@ export class CustomerService {
       throw new NotFoundException('Customer not found');
     }
 
+    // buat response
     const res: CustomerDeleteResponse = {
       message: 'OK',
     };
