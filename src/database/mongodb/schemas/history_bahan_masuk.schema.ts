@@ -8,7 +8,10 @@ import {
 
 export type HistoryBahanMasukDocument = HistoryBahanMasuk & Document;
 
-@Schema({ timestamps: true, collection: 'history_bahan_masuk' })
+@Schema({
+  timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' },
+  collection: 'history_bahan_masuk',
+})
 export class HistoryBahanMasuk {
   @Prop({ index: true, unique: true, type: Number, auto: true })
   id: number;
@@ -28,11 +31,11 @@ export class HistoryBahanMasuk {
   })
   no_spb: string;
 
-  @Prop({ type: [HistoryBahanMasukDetailSchema], required: true })
-  detail: HistoryBahanMasukDetail[];
-
   @Prop({ type: Date, default: null })
   deleted_at?: Date;
+
+  created_at?: Date;
+  updated_at?: Date;
 }
 
 export const HistoryBahanMasukSchema =
