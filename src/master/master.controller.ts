@@ -13,6 +13,7 @@ import { CreateMasterDto } from './dto/create-master.dto';
 import { FindAllSupplierDto } from 'src/supplier/dto/supplier_request.dto';
 import { FindAllCustomerDto } from 'src/customer/dto/customer.dto';
 import { FindAllSatuanDto } from 'src/satuan/dto/satuan.dto';
+import { FindAllBahanDto } from 'src/bahan/dto/bahan.dto';
 
 @Controller('api/master')
 export class MasterController {
@@ -31,5 +32,10 @@ export class MasterController {
   @Get('satuan')
   findAllSatuan(@Query() requestFilter: FindAllSatuanDto) {
     return this.masterService.handleMasterSatuanFindAll(requestFilter);
+  }
+
+  @Get('bahan')
+  findAllBahan(@Query() requestFilter: FindAllBahanDto) {
+    return this.masterService.handleMasterBahanFindAll(requestFilter);
   }
 }

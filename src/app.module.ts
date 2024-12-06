@@ -10,6 +10,7 @@ import { CustomerModule } from './customer/customer.module';
 import { MasterModule } from './master/master.module';
 import { HistoryMasukModule } from './history-masuk/history-masuk.module';
 import { SatuanModule } from './satuan/satuan.module';
+import { BahanModule } from './bahan/bahan.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { SatuanModule } from './satuan/satuan.module';
     MasterModule,
     HistoryMasukModule,
     SatuanModule,
+    BahanModule,
   ],
   controllers: [AppController],
   providers: [AppService],

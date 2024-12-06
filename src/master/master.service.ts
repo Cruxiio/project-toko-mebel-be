@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { CreateMasterDto } from './dto/create-master.dto';
 import {
+  MasterBahanFindAllResponse,
+  MasterBahanFindAllResponseData,
   MasterCustomerFindAllResponse,
   MasterCustomerFindAllResponseData,
   MasterSatuanFindAllResponse,
@@ -14,6 +16,8 @@ import { FindAllSupplierDto } from 'src/supplier/dto/supplier_request.dto';
 import { FindAllCustomerDto } from 'src/customer/dto/customer.dto';
 import { SatuanRepository } from 'src/database/mongodb/repositories/satuan.repository';
 import { FindAllSatuanDto } from 'src/satuan/dto/satuan.dto';
+import { BahanRepository } from 'src/database/mongodb/repositories/bahan.repository';
+import { FindAllBahanDto } from 'src/bahan/dto/bahan.dto';
 
 @Injectable()
 export class MasterService {
@@ -21,6 +25,7 @@ export class MasterService {
     private readonly customerRepo: CustomerRepository,
     private readonly supplierRepo: SupplierRepository,
     private readonly satuanRepo: SatuanRepository,
+    private readonly bahanRepo: BahanRepository,
   ) {}
 
   async handleMasterSupplierFindAll(requestFilter: FindAllSupplierDto) {
@@ -127,6 +132,43 @@ export class MasterService {
       per_page: requestFilter.per_page,
       data: satuanData.map((satuan) => {
         const temp: MasterSatuanFindAllResponseData = {
+          id: satuan.id,
+          nama: satuan.nama,
+        };
+        return temp;
+      }),
+      total_page: total_page,
+    };
+
+    return res;
+  }
+
+  async handleMasterBahanFindAll(requestFilter: FindAllBahanDto) {
+    // ambil data customer
+    const bahanData = await this.bahanRepo.masterFindAll(
+      {
+        nama: requestFilter.search,
+      },
+      {
+        page: requestFilter.page,
+        per_page: requestFilter.per_page,
+      },
+    );
+
+    // hitung total data customer
+    let totalBahanData = await this.bahanRepo.countAll({
+      nama: requestFilter.search,
+    });
+
+    // hitung total page
+    const total_page = Math.ceil(totalBahanData / requestFilter.per_page);
+
+    // buat response
+    const res: MasterBahanFindAllResponse = {
+      page: requestFilter.page,
+      per_page: requestFilter.per_page,
+      data: bahanData.map((satuan) => {
+        const temp: MasterBahanFindAllResponseData = {
           id: satuan.id,
           nama: satuan.nama,
         };

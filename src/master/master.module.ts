@@ -6,6 +6,7 @@ import { MongoDBProvider } from 'src/database/mongodb/mongodb.providers';
 import { SupplierRepository } from 'src/database/mongodb/repositories/supplier.repository';
 import { CustomerRepository } from 'src/database/mongodb/repositories/customer.repository';
 import { SatuanRepository } from 'src/database/mongodb/repositories/satuan.repository';
+import { BahanRepository } from 'src/database/mongodb/repositories/bahan.repository';
 
 @Module({
   imports: [MongoDBModule, MongoDBProvider],
@@ -15,6 +16,7 @@ import { SatuanRepository } from 'src/database/mongodb/repositories/satuan.repos
     SupplierRepository,
     CustomerRepository,
     SatuanRepository,
+    BahanRepository,
   ],
   exports: [MasterService],
 })

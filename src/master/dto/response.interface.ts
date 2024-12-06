@@ -33,3 +33,15 @@ export interface MasterSatuanFindAllResponse {
   data: MasterSatuanFindAllResponseData[];
   total_page: number;
 }
+
+export interface MasterBahanFindAllResponseData {
+  id: number;
+  nama: string;
+}
+
+export interface MasterBahanFindAllResponse {
+  page: number;
+  per_page: number;
+  data: MasterBahanFindAllResponseData[];
+  total_page: number;
+}
