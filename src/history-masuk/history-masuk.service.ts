@@ -1,9 +1,16 @@
 import { Injectable } from '@nestjs/common';
-import { CreateHistoryMasukDto } from './dto/create-history-masuk.dto';
-import { UpdateHistoryMasukDto } from './dto/update-history-masuk.dto';
+import {
+  CreateHistoryMasukDto,
+  UpdateHistoryMasukDto,
+} from './dto/create-history-masuk.dto';
+import {} from './dto/response.interface';
+import { HistoryBahanMasukRepository } from 'src/database/mongodb/repositories/historyBahanMasuk.repository';
 
 @Injectable()
 export class HistoryMasukService {
+  constructor(
+    private readonly historyBahanMasukRepo: HistoryBahanMasukRepository,
+  ) {}
   create(createHistoryMasukDto: CreateHistoryMasukDto) {
     return 'This action adds a new historyMasuk';
   }

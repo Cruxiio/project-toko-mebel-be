@@ -14,7 +14,7 @@ import {
   SatuanFindAllResponse,
   SatuanFindAllResponseData,
   SatuanFindOneResponse,
-} from './dto/response.interface.dto';
+} from './dto/response.interface';
 
 @Injectable()
 export class SatuanService {

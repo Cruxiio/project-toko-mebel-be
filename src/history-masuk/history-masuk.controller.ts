@@ -1,7 +1,18 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { HistoryMasukService } from './history-masuk.service';
-import { CreateHistoryMasukDto } from './dto/create-history-masuk.dto';
-import { UpdateHistoryMasukDto } from './dto/update-history-masuk.dto';
+import {
+  CreateHistoryMasukDto,
+  UpdateHistoryMasukDto,
+} from './dto/create-history-masuk.dto';
+import {} from './dto/response.interface';
 
 @Controller('history-masuk')
 export class HistoryMasukController {
@@ -23,7 +34,10 @@ export class HistoryMasukController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateHistoryMasukDto: UpdateHistoryMasukDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updateHistoryMasukDto: UpdateHistoryMasukDto,
+  ) {
     return this.historyMasukService.update(+id, updateHistoryMasukDto);
   }
 
