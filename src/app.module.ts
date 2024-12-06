@@ -9,6 +9,7 @@ import { SupplierModule } from './supplier/supplier.module';
 import { CustomerModule } from './customer/customer.module';
 import { MasterModule } from './master/master.module';
 import { HistoryMasukModule } from './history-masuk/history-masuk.module';
+import { SatuanModule } from './satuan/satuan.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { HistoryMasukModule } from './history-masuk/history-masuk.module';
     CustomerModule,
     MasterModule,
     HistoryMasukModule,
+    SatuanModule,
   ],
   controllers: [AppController],
   providers: [AppService],

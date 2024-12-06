@@ -3,7 +3,10 @@ import { Document } from 'mongoose';
 
 export type SatuanDocument = Satuan & Document;
 
-@Schema({ timestamps: true, collection: 'satuan' })
+@Schema({
+  timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' },
+  collection: 'satuan',
+})
 export class Satuan {
   @Prop({ index: true, unique: true, type: Number, auto: true })
   id: number;
@@ -19,6 +22,9 @@ export class Satuan {
 
   @Prop({ type: Date, default: null })
   deleted_at?: Date;
+
+  created_at?: Date;
+  updated_at?: Date;
 }
 
 export const SatuanSchema = SchemaFactory.createForClass(Satuan);

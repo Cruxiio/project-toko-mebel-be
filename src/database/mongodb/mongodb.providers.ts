@@ -7,6 +7,7 @@ import {
   HistoryBahanMasuk,
   HistoryBahanMasukSchema,
 } from './schemas/history_bahan_masuk.schema';
+import { Satuan, SatuanSchema } from './schemas/satuan.schema';
 
 // kasih tau mongoose schema mana yang mau diimport
 export const MongoDBProvider = MongooseModule.forFeatureAsync([
@@ -50,6 +51,21 @@ export const MongoDBProvider = MongooseModule.forFeatureAsync([
       schema.plugin(AutoIncrement, {
         inc_field: 'id',
         id: 'customer_id_counter', //ini nama unik untuk counter id customer yang disimpan di collection counters
+      });
+      return schema;
+    },
+    inject: [getConnectionToken()],
+  },
+  {
+    name: Satuan.name,
+    useFactory: async (connection: Connection) => {
+      const schema = SatuanSchema;
+
+      const AutoIncrement = require('mongoose-sequence')(connection);
+
+      schema.plugin(AutoIncrement, {
+        inc_field: 'id',
+        id: 'satuan_id_counter', //ini nama unik untuk counter id customer yang disimpan di collection counters
       });
       return schema;
     },
