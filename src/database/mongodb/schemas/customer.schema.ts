@@ -14,20 +14,14 @@ export class Customer {
   @Prop({ required: true, type: String })
   nama: string;
 
-  @Prop({ type: String, minlength: 10, default: null })
-  no_rekening: string;
-
-  @Prop({ type: String, default: null })
-  nama_bank: string;
-
   @Prop({
+    required: true,
     type: String,
     unique: true,
-    default: null,
   })
   no_telepon: string;
 
-  @Prop({ type: String, default: null })
+  @Prop({ required: true, type: String })
   alamat: string;
 
   @Prop({ type: Date, default: null })
@@ -39,5 +33,12 @@ export class Customer {
 
 export const CustomerSchema = SchemaFactory.createForClass(Customer);
 
-// Membuat composite unique index untuk no_rekening dan nama_bank
-CustomerSchema.index({ no_rekening: 1, nama_bank: 1 }, { unique: true });
+// Tambahkan partial index
+// CustomerSchema.index(
+//   { no_telepon: 1 },
+//   {
+//     unique: true,
+//     // ini buat kasi tau kalau constraint unique hanya berlaku ketika data unya nilai dan nilai != null
+//     partialFilterExpression: { no_telepon: { $exists: true, $ne: null } },
+//   },
+// );

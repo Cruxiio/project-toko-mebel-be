@@ -21,31 +21,14 @@ export class CustomerService {
   constructor(private readonly customerRepo: CustomerRepository) {}
 
   async HandleCreateCustomer(createCustomerDto: CreateCustomerDto) {
-    //cek apakah no rekening sudah ada atau belum
+    // cek apakah no telepon sudah ada atau belum
     let ada = await this.customerRepo.findOne({
-      no_rekening: createCustomerDto.no_rekening,
-      nama_bank: createCustomerDto.nama_bank,
+      no_telepon: createCustomerDto.no_telepon,
       deleted_at: null,
     });
 
     if (ada) {
-      throw new BadRequestException(
-        'No rekening pada bank ' +
-          createCustomerDto.nama_bank +
-          ' sudah terdaftar',
-      );
-    }
-
-    // cek apakah no telepon sudah ada atau belum
-    if (createCustomerDto.no_telepon != null) {
-      ada = await this.customerRepo.findOne({
-        no_telepon: createCustomerDto.no_telepon,
-        deleted_at: null,
-      });
-
-      if (ada) {
-        throw new BadRequestException('No Telepon sudah terdaftar');
-      }
+      throw new BadRequestException('No Telepon sudah terdaftar');
     }
 
     // create new Customer
@@ -55,8 +38,6 @@ export class CustomerService {
     const res: CustomerFindOneResponse = {
       id: newCustomerData.id,
       nama: newCustomerData.nama,
-      no_rekening: newCustomerData.no_rekening,
-      nama_bank: newCustomerData.nama_bank,
       no_telepon: newCustomerData.no_telepon,
       alamat: newCustomerData.alamat,
       created_at: newCustomerData.created_at,
@@ -99,8 +80,6 @@ export class CustomerService {
         const formattedData: CustomerFindAllResponseData = {
           id: s.id,
           nama: s.nama,
-          no_rekening: s.no_rekening,
-          nama_bank: s.nama_bank,
           no_telepon: s.no_telepon,
           alamat: s.alamat,
           created_at: s.created_at,
@@ -133,8 +112,6 @@ export class CustomerService {
     const res: CustomerFindOneResponse = {
       id: customerData.id,
       nama: customerData.nama,
-      no_rekening: customerData.no_rekening,
-      nama_bank: customerData.nama_bank,
       no_telepon: customerData.no_telepon,
       alamat: customerData.alamat,
       created_at: customerData.created_at,
@@ -151,30 +128,14 @@ export class CustomerService {
       throw new BadRequestException('id must be a number');
     }
 
-    //cek apakah no rekening sudah ada atau belum
+    // cek apakah no telepon sudah ada atau belum
     let ada = await this.customerRepo.findOne({
-      no_rekening: updateCustomerDto.no_rekening,
-      nama_bank: updateCustomerDto.nama_bank,
+      no_telepon: updateCustomerDto.no_telepon,
+      deleted_at: null,
     });
 
     if (ada && ada.id !== id) {
-      throw new BadRequestException(
-        'No rekening pada bank ' +
-          updateCustomerDto.nama_bank +
-          ' sudah terdaftar',
-      );
-    }
-
-    // cek apakah no telepon sudah ada atau belum
-    if (updateCustomerDto.no_telepon != null) {
-      ada = await this.customerRepo.findOne({
-        no_telepon: updateCustomerDto.no_telepon,
-        deleted_at: null,
-      });
-
-      if (ada && ada.id !== id) {
-        throw new BadRequestException('No Telepon sudah terdaftar');
-      }
+      throw new BadRequestException('No Telepon sudah terdaftar');
     }
 
     // update data Customer
@@ -190,8 +151,6 @@ export class CustomerService {
     // buat response
     const res: CustomerFindOneResponse = {
       nama: updatedCustomerData.nama,
-      no_rekening: updatedCustomerData.no_rekening,
-      nama_bank: updatedCustomerData.nama_bank,
       no_telepon: updatedCustomerData.no_telepon,
       alamat: updatedCustomerData.alamat,
       created_at: updatedCustomerData.created_at,
