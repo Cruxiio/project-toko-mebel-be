@@ -16,10 +16,10 @@ export class HistoryBahanMasuk {
   @Prop({ index: true, unique: true, type: Number, auto: true })
   id: number;
 
-  @Prop({ required: true, type: String })
+  @Prop({ required: true, type: String, unique: true })
   kode_nota: string;
 
-  @Prop({ required: true, type: SchemaTypes.ObjectId, ref: 'supplier' })
+  @Prop({ required: true, type: SchemaTypes.ObjectId, ref: Supplier.name })
   id_supplier: Supplier;
 
   @Prop({ required: true, type: Date })

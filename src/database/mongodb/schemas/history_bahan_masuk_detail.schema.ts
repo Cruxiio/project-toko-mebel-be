@@ -18,20 +18,20 @@ export class HistoryBahanMasukDetail {
   @Prop({
     required: true,
     type: SchemaTypes.ObjectId,
-    ref: 'history_bahan_masuk',
+    ref: HistoryBahanMasuk.name,
   })
   id_history_bahan_masuk: HistoryBahanMasuk;
 
-  @Prop({ required: true, type: SchemaTypes.ObjectId, ref: 'bahan' })
+  @Prop({ required: true, type: SchemaTypes.ObjectId, ref: Bahan.name })
   id_bahan: Bahan;
 
-  @Prop({ required: true, type: SchemaTypes.ObjectId, ref: 'satuan' })
+  @Prop({ required: true, type: SchemaTypes.ObjectId, ref: Satuan.name })
   id_satuan: Satuan;
 
   @Prop({ required: true, type: Number })
   qty: number;
 
-  @Prop({ required: true, type: Number })
+  @Prop({ required: true, type: Number, min: 0 })
   qtyPakai: number;
 
   @Prop({ type: Date, default: null })

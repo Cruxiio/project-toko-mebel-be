@@ -103,4 +103,20 @@ export class BahanRepository {
       _id: 0,
     });
   }
+
+  /*
+    USED FOR:
+    - findAllStok in history-masuk.service.ts
+
+  */
+  async findAllWithoutPagination(
+    bahanFilterQuery: FilterQuery<Bahan>,
+    showedField: any,
+  ) {
+    let filter: FilterQuery<Bahan> = { deleted_at: null };
+
+    filter = { ...filter, ...bahanFilterQuery };
+
+    return await this.BahanModel.find(filter, showedField);
+  }
 }

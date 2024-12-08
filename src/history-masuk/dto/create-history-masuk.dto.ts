@@ -1,30 +1,27 @@
+import { BadRequestException } from '@nestjs/common';
 import { PartialType } from '@nestjs/mapped-types';
-import { Transform } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import {
   IsArray,
   IsDate,
   IsNotEmpty,
   IsNumber,
+  IsOptional,
   IsString,
-  Matches,
   Min,
   ValidateNested,
 } from 'class-validator';
 
 export class HistoryBahanMasukDetailDto {
-  @IsNumber()
-  @IsNotEmpty({ message: 'id_history_masuk is required' })
-  id_history_masuk: number;
-
-  @IsNumber()
+  @IsNumber({}, { message: 'id_bahan must be a number' })
   @IsNotEmpty({ message: 'id_bahan is required' })
   id_bahan: number;
 
-  @IsNumber()
+  @IsNumber({}, { message: 'id_satuan must be a number' })
   @IsNotEmpty({ message: 'id_satuan is required' })
   id_satuan: number;
 
-  @IsNumber()
+  @IsNumber({}, { message: 'qty must be a number' })
   @IsNotEmpty({ message: 'qty is required' })
   @Min(1, { message: 'qty must be greater than 0' })
   qty: number;
@@ -35,29 +32,103 @@ export class CreateHistoryMasukDto {
   @IsNotEmpty({ message: 'kode_nota is required' })
   kode_nota: string;
 
-  @IsNumber()
+  @IsNumber({}, { message: 'id_supplier must be a number' })
   @IsNotEmpty({ message: 'id_supplier is required' })
+  @Transform(({ value }) => Number(value))
   id_supplier: number;
 
-  @IsDate({ message: 'tgl_nota must be a date' })
-  @Matches(/^\d{4}-\d{2}-\d{2}$/, {
-    message: 'tgl_nota must be in YYYY-MM-DD format',
-  }) // validate tgL_nota format
   @IsNotEmpty({ message: 'tgl_nota is required' })
-  @Transform(({ value }) => new Date(value))
+  @IsDate({ message: 'tgl_nota must be a date' })
+  @Transform(({ value }) => {
+    // validate tgL_nota format
+    const regex = /^\d{4}-\d{2}-\d{2}$/; // Regex untuk format YYYY-MM-DD
+    if (!regex.test(value)) {
+      throw new BadRequestException('tgl_nota must be in YYYY-MM-DD format');
+    }
+
+    return new Date(value);
+  })
   tgl_nota: Date;
 
-  @IsNumber()
+  @IsString()
   @IsNotEmpty({ message: 'no_spb is required' })
-  no_spb: number;
+  no_spb: string;
 
   @IsArray({ message: 'detail must be an array' })
   @IsNotEmpty({ message: 'detail is required' })
   // Validasi setiap elemen array
   @ValidateNested({ each: true })
-  // Konversi setiap elemen array menjadi HistoryBahanMasukDetailDto sebelum divalidasi
-  @Transform(() => HistoryBahanMasukDetailDto)
+  // kasi tau object typenya dari tiap elemen di array
+  @Type(() => HistoryBahanMasukDetailDto)
   detail: HistoryBahanMasukDetailDto[];
 }
 
 export class UpdateHistoryMasukDto extends PartialType(CreateHistoryMasukDto) {}
+
+export class FindAllHistoryMasukDto {
+  @IsString()
+  @IsOptional()
+  search?: string = '';
+
+  @IsNumber({}, { message: 'id_supplier must be a number' })
+  @IsOptional()
+  //transform buat olah value field sebelum masuk ke validasi
+  @Transform(({ value }) => Number(value))
+  id_supplier?: number = null;
+
+  @IsOptional()
+  @IsDate({ message: 'tgl_nota must be a date' })
+  @Transform(({ value }) => {
+    // validate tgL_nota format
+    const regex = /^\d{4}-\d{2}-\d{2}$/; // Regex untuk format YYYY-MM-DD
+    if (!regex.test(value)) {
+      throw new BadRequestException('tgl_nota must be in YYYY-MM-DD format');
+    }
+
+    return new Date(value);
+  })
+  tgl_nota?: Date = null;
+
+  @IsNumber({}, { message: 'page must be a number' })
+  @IsOptional()
+  //transform buat olah value field sebelum masuk ke validasi
+  @Transform(({ value }) => Number(value))
+  page?: number = 1;
+
+  @IsNumber({}, { message: 'per_page must be a number' })
+  @IsOptional()
+  //transform buat olah value field sebelum masuk ke validasi
+  @Transform(({ value }) => Number(value))
+  per_page?: number = 10;
+}
+
+export class FindAllStokDto {
+  @IsString()
+  @IsOptional()
+  search?: string = '';
+
+  @IsOptional()
+  @IsDate({ message: 'tgl_nota must be a date' })
+  @Transform(({ value }) => {
+    // validate tgL_nota format
+    const regex = /^\d{4}-\d{2}-\d{2}$/; // Regex untuk format YYYY-MM-DD
+    if (!regex.test(value)) {
+      throw new BadRequestException('tgl_nota must be in YYYY-MM-DD format');
+    }
+
+    return new Date(value);
+  })
+  tgl_nota?: Date = null;
+
+  @IsNumber({}, { message: 'page must be a number' })
+  @IsOptional()
+  //transform buat olah value field sebelum masuk ke validasi
+  @Transform(({ value }) => Number(value))
+  page?: number = 1;
+
+  @IsNumber({}, { message: 'per_page must be a number' })
+  @IsOptional()
+  //transform buat olah value field sebelum masuk ke validasi
+  @Transform(({ value }) => Number(value))
+  per_page?: number = 10;
+}
