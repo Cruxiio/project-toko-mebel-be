@@ -120,6 +120,11 @@ export class FindAllStokDto {
   })
   tgl_nota?: Date = null;
 
+  @IsNumber({}, { message: 'id_supplier must be a number' })
+  @IsOptional()
+  @Transform(({ value }) => Number(value))
+  id_supplier?: number = 0;
+
   @IsNumber({}, { message: 'page must be a number' })
   @IsOptional()
   //transform buat olah value field sebelum masuk ke validasi

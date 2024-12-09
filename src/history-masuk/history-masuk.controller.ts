@@ -40,6 +40,11 @@ export class HistoryMasukController {
     return this.historyMasukService.HandleFindAllStok(query);
   }
 
+  @Get('stok/laporan')
+  getLaporan(@Query() query: FindAllStokDto) {
+    return this.historyMasukService.HandleLaporanStokBahanMasuk(query);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: number) {
     return this.historyMasukService.HandleFindOneHistoryBahanMasuk(id);

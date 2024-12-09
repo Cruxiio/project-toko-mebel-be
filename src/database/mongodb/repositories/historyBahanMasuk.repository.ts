@@ -284,6 +284,29 @@ export class HistoryBahanMasukRepository {
       };
     }
 
+    if (StokFilterQuery.id_supplier > 0) {
+      let supplierData = await this.supplierRepo.findOne({
+        id: StokFilterQuery.id_supplier,
+        deleted_at: null,
+      });
+
+      // cari seluruh history bahan masuk yang tgl nota = request tgl nota
+      let historyBahanMasukData = await this.historyBahanMasukModel.find(
+        {
+          deleted_at: null,
+          id_supplier: supplierData ? supplierData._id : null,
+        },
+        { _id: 1 },
+      );
+
+      filter = {
+        ...filter,
+        id_history_bahan_masuk: {
+          $in: historyBahanMasukData,
+        },
+      };
+    }
+
     // ini untuk paginationnya
     const { page, per_page } = paginationQuery;
     // skip untuk mulai dari data ke berapa (mirip OFFSET pada SQL)
@@ -294,6 +317,10 @@ export class HistoryBahanMasukRepository {
       .populate({
         path: 'id_history_bahan_masuk', // Populate data bahan
         select: showedField.field1, // Ambil hanya field id dari koleksi history_bahan_masuk
+        populate: {
+          path: 'id_supplier', // Populate data supplier
+          select: showedField.nestedField1,
+        },
       })
       .populate({
         path: 'id_bahan', // Populate data bahan
@@ -355,6 +382,18 @@ export class HistoryBahanMasukRepository {
         id_history_bahan_masuk: {
           $in: historyBahanMasukData,
         },
+      };
+    }
+
+    if (StokFilterQuery.id_supplier > 0) {
+      let supplierData = await this.supplierRepo.findOne({
+        id: StokFilterQuery.id_supplier,
+        deleted_at: null,
+      });
+
+      filter = {
+        ...filter,
+        id_supplier: supplierData ? supplierData._id : null,
       };
     }
 

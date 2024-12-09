@@ -38,6 +38,16 @@ export interface StokFindAllResponse {
   total_page: number;
 }
 
+export interface LaporanStokBahanMasukResponseData
+  extends StokFindAllResponseData {
+  nama_supplier: string;
+  no_spb: string;
+}
+
+export interface LaporanStokBahanMasukResponse {
+  data: LaporanStokBahanMasukResponseData[];
+}
+
 // HistoryBahanMasukDetailFindOneByIDResponse untuk tampung hasil find one by history bahan masuk ID
 export interface HistoryBahanMasukDetailFindOneByIDResponse
   extends HistoryBahanMasukFindOneResponse {
@@ -86,21 +96,3 @@ export interface HistoryBahanMasukFindAllResponse {
   data: HistoryBahanMasukFindAllResponseData[];
   total_page: number;
 }
-
-// export interface HistoryBahanMasukDetailFindAllResponseData {
-//   id: number;
-//   kode_nota: string;
-//   id_supplier: number;
-//   tgl_nota: Date;
-//   no_spb: string;
-//   created_at?: Date;
-//   updated_at?: Date | null;
-//   deleted_at?: Date | null;
-// }
-
-// export interface HistoryBahanMasukDetailFindAllResponse {
-//   page: number;
-//   per_page: number;
-//   data: HistoryBahanMasukDetailFindAllResponseData[];
-//   total_page: number;
-// }

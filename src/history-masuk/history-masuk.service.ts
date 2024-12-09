@@ -18,6 +18,8 @@ import {
   HistoryBahanMasukFindAllResponseData,
   HistoryBahanMasukFindOneResponse,
   HistoryMasukDtoDatabaseInput,
+  LaporanStokBahanMasukResponseData,
+  LaporanStokBahanMasukResponse,
 } from './dto/response.interface';
 import { HistoryBahanMasukRepository } from 'src/database/mongodb/repositories/historyBahanMasuk.repository';
 import { SupplierRepository } from 'src/database/mongodb/repositories/supplier.repository';
@@ -267,6 +269,7 @@ export class HistoryMasukService {
       {
             main: {}, --> ini buat showed field pada .find()
             field1: '' --> ini buat showed field pada select populate(join table) ke 1,
+            nestedField1: '', --> ini buat showed field pada (join table) id ref yang ada pada tabel ke 1, jika nested
             field2: '' --> ini buat showed field pada select populate(join table) ke 2,
             field3: '' --> ini buat showed field pada select populate(join table) ke 3,
       }
@@ -283,6 +286,7 @@ export class HistoryMasukService {
       {
         main: {},
         field1: 'id tgl_nota',
+        nestedField1: '',
         field2: 'id nama',
         field3: 'id nama',
       },
@@ -319,11 +323,65 @@ export class HistoryMasukService {
     return res;
   }
 
-  // update(id: number, updateHistoryMasukDto: UpdateHistoryMasukDto) {
-  //   return `This action updates a #${id} historyMasuk`;
-  // }
+  async HandleLaporanStokBahanMasuk(requestFilter: FindAllStokDto) {
+    /* NOTE: 
+      untuk showedField: any, data strukturnya:
+      {
+            main: {}, --> ini buat showed field pada .find()
+            field1: '' --> ini buat showed field pada select populate(join table) ke 1,
+            nestedField1: '', --> ini buat showed field pada (join table) id ref yang ada pada tabel ke 1, jika nested
+            field2: '' --> ini buat showed field pada select populate(join table) ke 2,
+            field3: '' --> ini buat showed field pada select populate(join table) ke 3,
+      }
+    */
+    const listStok = await this.historyBahanMasukRepo.findAllStok(
+      {
+        search: requestFilter.search,
+        tgl_nota: requestFilter.tgl_nota,
+        id_supplier: requestFilter.id_supplier,
+      },
+      {
+        page: requestFilter.page,
+        per_page: requestFilter.per_page,
+      },
+      {
+        main: {},
+        field1: 'id tgl_nota no_spb',
+        nestedField1: 'id nama',
+        field2: 'id nama',
+        field3: 'id nama',
+      },
+    );
 
-  // remove(id: number) {
-  //   return `This action removes a #${id} historyMasuk`;
-  // }
+    const totalListStok = await this.historyBahanMasukRepo.countAllStok({
+      search: requestFilter.search,
+      tgl_nota: requestFilter.tgl_nota,
+      id_supplier: requestFilter.id_supplier,
+    });
+
+    // hitung total page
+    const total_page: number = Math.ceil(
+      totalListStok / requestFilter.per_page,
+    );
+
+    const res: LaporanStokBahanMasukResponse = {
+      data: listStok.map((s) => {
+        const formattedData: LaporanStokBahanMasukResponseData = {
+          tgl_nota: s.id_history_bahan_masuk.tgl_nota,
+          id_bahan: s.id_bahan.id,
+          nama_bahan: s.id_bahan.nama,
+          qty: s.qty,
+          nama_satuan: s.id_satuan.nama,
+          nama_supplier: s.id_history_bahan_masuk.id_supplier.nama,
+          no_spb: s.id_history_bahan_masuk.no_spb,
+          created_at: s.created_at,
+          updated_at: s.updated_at,
+          deleted_at: s.deleted_at,
+        };
+        return formattedData;
+      }),
+    };
+
+    return res;
+  }
 }
