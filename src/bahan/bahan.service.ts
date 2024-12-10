@@ -21,6 +21,19 @@ export class BahanService {
   constructor(private readonly bahanRepo: BahanRepository) {}
 
   async HandleCreateBahan(createBahanDto: CreateBahanDto) {
+    // cek nama bahan sudah dipakai atau belum
+    const bahanData = await this.bahanRepo.findOne({
+      nama: {
+        $regex: `^${createBahanDto.nama}$`, // nama harus persis bukan like
+        $options: 'i', // i artinya case-insensitive
+      },
+      deleted_at: null,
+    });
+
+    if (bahanData) {
+      throw new BadRequestException('Nama bahan already exists');
+    }
+
     // create new satuan
     const newBahanData = await this.bahanRepo.create(createBahanDto);
 
@@ -109,6 +122,19 @@ export class BahanService {
     // cek apakah id adalah int atau bukan
     if (Number.isNaN(id)) {
       throw new BadRequestException('id must be a number');
+    }
+
+    // cek nama bahan sudah dipakai atau belum
+    const bahanData = await this.bahanRepo.findOne({
+      nama: {
+        $regex: `^${updateBahanDto.nama}$`, // nama harus persis bukan like
+        $options: 'i', // i artinya case-insensitive
+      },
+      deleted_at: null,
+    });
+
+    if (bahanData && bahanData.id != id) {
+      throw new BadRequestException('Nama bahan already exists');
     }
 
     // update data satuan
