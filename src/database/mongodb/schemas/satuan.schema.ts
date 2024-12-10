@@ -11,7 +11,7 @@ export class Satuan {
   @Prop({ index: true, unique: true, type: Number, auto: true })
   id: number;
 
-  @Prop({ required: true, type: String })
+  @Prop({ required: true, type: String, unique: true })
   nama: string;
 
   @Prop({ required: true, type: String })

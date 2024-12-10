@@ -21,6 +21,19 @@ export class SatuanService {
   constructor(private readonly satuanRepo: SatuanRepository) {}
 
   async HandleCreateSatuan(createSatuanDto: CreateSatuanDto) {
+    // cek nama satuan sudah dipakai atau belum
+    const satuanData = await this.satuanRepo.findOne({
+      nama: {
+        $regex: `^${createSatuanDto.nama}$`, // nama harus persis bukan like
+        $options: 'i', // i artinya case-insensitive
+      },
+      deleted_at: null,
+    });
+
+    if (satuanData) {
+      throw new BadRequestException('Nama satuan already exists');
+    }
+
     // create new satuan
     const newSatuanData = await this.satuanRepo.create(createSatuanDto);
 
@@ -115,6 +128,19 @@ export class SatuanService {
     // cek apakah id adalah int atau bukan
     if (Number.isNaN(id)) {
       throw new BadRequestException('id must be a number');
+    }
+
+    // cek nama satuan sudah dipakai atau belum
+    const satuanData = await this.satuanRepo.findOne({
+      nama: {
+        $regex: `^${updateSatuanDto.nama}$`, // nama harus persis bukan like
+        $options: 'i', // i artinya case-insensitive
+      },
+      deleted_at: null,
+    });
+
+    if (satuanData && satuanData.id != id) {
+      throw new BadRequestException('Nama satuan already exists');
     }
 
     // update data satuan

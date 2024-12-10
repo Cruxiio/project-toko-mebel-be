@@ -25,31 +25,31 @@ import { Roles } from 'src/auth/custom_decorator/role.decorator';
 export class SatuanController {
   constructor(private readonly satuanService: SatuanService) {}
 
-  @Roles('superadmin')
+  @Roles('superadmin', 'adminworkshop')
   @Post()
   create(@Body() createSatuanDto: CreateSatuanDto) {
     return this.satuanService.HandleCreateSatuan(createSatuanDto);
   }
 
-  @Roles('superadmin')
+  @Roles('superadmin', 'adminworkshop')
   @Get()
   findAll(@Query() query: FindAllSatuanDto) {
     return this.satuanService.HandleFindAllSatuan(query);
   }
 
-  @Roles('superadmin')
+  @Roles('superadmin', 'adminworkshop')
   @Get(':id')
   findOne(@Param('id') id: number) {
     return this.satuanService.HandleFindOneSatuan(id);
   }
 
-  @Roles('superadmin')
+  @Roles('superadmin', 'adminworkshop')
   @Put(':id')
   update(@Param('id') id: number, @Body() updateSatuanDto: UpdateSatuanDto) {
     return this.satuanService.HandleUpdateSatuan(id, updateSatuanDto);
   }
 
-  @Roles('superadmin')
+  @Roles('superadmin', 'adminworkshop')
   @Delete(':id')
   remove(@Param('id') id: number) {
     return this.satuanService.HandleDeleteSatuan(id);
