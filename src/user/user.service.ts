@@ -23,11 +23,13 @@ export class UserService {
       throw new BadRequestException('id must be a number');
     }
 
-    return await this.userRepository.findOne({ id });
+    return await this.userRepository.findOne({ id, deleted_at: null });
   }
 
   async handleFindAllUser() {
-    return await this.userRepository.findAll({});
+    let users = await this.userRepository.findAll({ deleted_at: null });
+    users = users.filter((u) => u.role != 'superadmin');
+    return users;
   }
 
   async handleCreateUser(createUserDto: CreateUserDto) {
