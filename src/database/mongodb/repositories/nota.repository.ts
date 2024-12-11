@@ -119,33 +119,20 @@ export class NotaRepository {
   }
 
   async update(
-    historyBahanMasukFilterQuery: FilterQuery<HistoryBahanMasuk>,
-    historyBahanMasukData: Partial<HistoryMasukDtoDatabaseInput>,
+    notaFilterQuery: FilterQuery<Nota>,
+    notaData: Partial<NotaDtoDatabaseInput>,
   ) {
     try {
-      // delete history bahan masuk yang lama
-      const oldHistoryBahanMasukData =
-        await this.historyBahanMasukModel.findOneAndUpdate(
-          historyBahanMasukFilterQuery,
-          { deleted_at: new Date() },
-          { new: true }, // option new: true supaya hasil find one merupakan data setelah diupdate
-        );
-
-      // delete history bahan masuk detail yang lama
-      await this.notaModel.updateMany(
-        {
-          id_history_bahan_masuk: oldHistoryBahanMasukData._id,
-        },
-        { deleted_at: new Date() },
+      const newNota = await this.notaModel.findOneAndUpdate(
+        notaFilterQuery,
+        notaData,
+        { new: true }, // option new: true supaya hasil find one merupakan data setelah diupdate
       );
 
-      // buat history bahan masuk dan history bahan masuk detail baru
-      // const newHistoryBahanMasuk = await this.create(historyBahanMasukData);
-
-      // return newHistoryBahanMasuk;
+      return newNota;
     } catch (error) {
-      console.error('Error update bahan masuk atau bahan masuk detail:', error);
-      throw new Error('Failed to update bahan masuk atau bahan masuk detail');
+      console.error('Error update nota atau nota detail:', error);
+      throw new Error('Failed to update nota atau nota detail');
     }
   }
 

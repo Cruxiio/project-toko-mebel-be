@@ -85,7 +85,7 @@ export class CreateNotaDto {
   detail: NotaDetailDto[];
 }
 
-export class UpdateNotaDto {}
+export class UpdateNotaDto extends CreateNotaDto {}
 
 export class FindAllNotaDto {
   @IsString()

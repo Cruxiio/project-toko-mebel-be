@@ -3,10 +3,10 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   Delete,
   Query,
+  Put,
 } from '@nestjs/common';
 import { NotaService } from './nota.service';
 import {
@@ -34,10 +34,10 @@ export class NotaController {
     return this.notaService.handleFindOneNota(id);
   }
 
-  // @Patch(':id')
-  // update(@Param('id') id: string, @Body() updateNotaDto: UpdateNotaDto) {
-  //   return this.notaService.update(+id, updateNotaDto);
-  // }
+  @Put(':id')
+  update(@Param('id') id: number, @Body() updateNotaDto: UpdateNotaDto) {
+    return this.notaService.handleUpdateNota(id, updateNotaDto);
+  }
 
   // @Delete(':id')
   // remove(@Param('id') id: string) {
