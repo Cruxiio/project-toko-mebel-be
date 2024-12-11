@@ -29,6 +29,11 @@ export class NotaController {
     return this.notaService.handleFindAllNota(query);
   }
 
+  @Get('kode-nota-pembelian/:id')
+  findOneByKodeNota(@Param('id') id: number) {
+    return this.notaService.handleFindOneNotaByHistoryBahanMasukID(id);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: number) {
     return this.notaService.handleFindOneNota(id);

@@ -374,4 +374,36 @@ export class NotaService {
 
     return res;
   }
+
+  async handleFindOneNotaByHistoryBahanMasukID(id: number) {
+    // cek apakah id adalah int atau bukan
+    if (Number.isNaN(id)) {
+      throw new BadRequestException('id must be a number');
+    }
+
+    let historyBahanMasukData = await this.historyBahanMasukRepo.findOne({
+      id,
+      deleted_at: null,
+    });
+
+    console.log(historyBahanMasukData);
+
+    if (!historyBahanMasukData) {
+      throw new NotFoundException('History bahan masuk not found');
+    }
+
+    // return;
+
+    // cek apakah kode nota sudah ada atau belum
+    let notaData = await this.notaRepo.findOne({
+      id_history_bahan_masuk: historyBahanMasukData._id,
+      deleted_at: null,
+    });
+
+    if (!notaData) {
+      throw new NotFoundException('Nota pembelian not found!');
+    }
+
+    return await this.handleFindOneNota(notaData.id);
+  }
 }
