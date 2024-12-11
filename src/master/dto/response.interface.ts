@@ -45,3 +45,15 @@ export interface MasterBahanFindAllResponse {
   data: MasterBahanFindAllResponseData[];
   total_page: number;
 }
+
+export interface MasterHistoryBahanMasukFindAllResponseData {
+  id: number;
+  kode_nota: string;
+}
+
+export interface MasterHistoryBahanMasukFindAllResponse {
+  page: number;
+  per_page: number;
+  data: MasterHistoryBahanMasukFindAllResponseData[];
+  total_page: number;
+}

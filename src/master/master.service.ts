@@ -5,6 +5,8 @@ import {
   MasterBahanFindAllResponseData,
   MasterCustomerFindAllResponse,
   MasterCustomerFindAllResponseData,
+  MasterHistoryBahanMasukFindAllResponse,
+  MasterHistoryBahanMasukFindAllResponseData,
   MasterSatuanFindAllResponse,
   MasterSatuanFindAllResponseData,
   MasterSupplierFindAllResponse,
@@ -18,6 +20,8 @@ import { SatuanRepository } from 'src/database/mongodb/repositories/satuan.repos
 import { FindAllSatuanDto } from 'src/satuan/dto/satuan.dto';
 import { BahanRepository } from 'src/database/mongodb/repositories/bahan.repository';
 import { FindAllBahanDto } from 'src/bahan/dto/bahan.dto';
+import { FindAllHistoryMasukDto } from 'src/history-masuk/dto/create-history-masuk.dto';
+import { HistoryBahanMasukRepository } from 'src/database/mongodb/repositories/historyBahanMasuk.repository';
 
 @Injectable()
 export class MasterService {
@@ -26,6 +30,7 @@ export class MasterService {
     private readonly supplierRepo: SupplierRepository,
     private readonly satuanRepo: SatuanRepository,
     private readonly bahanRepo: BahanRepository,
+    private readonly historyBahanMasukRepo: HistoryBahanMasukRepository,
   ) {}
 
   async handleMasterSupplierFindAll(requestFilter: FindAllSupplierDto) {
@@ -173,6 +178,49 @@ export class MasterService {
           nama: satuan.nama,
         };
         return temp;
+      }),
+      total_page: total_page,
+    };
+
+    return res;
+  }
+
+  async handleMasterHistoryBahanMasukFindAll(
+    requestFilter: FindAllHistoryMasukDto,
+  ) {
+    // find all HistoryBahanMasuk
+    const listDataHistoryBahanMasuk = await this.historyBahanMasukRepo.findAll(
+      {
+        kode_nota: requestFilter.search,
+      },
+      {
+        page: requestFilter.page,
+        per_page: requestFilter.per_page,
+      },
+      {},
+    );
+
+    // dapatkan total seluruh data berdasarkan hasil filter
+    const totalListDataHistoryBahanMasuk =
+      await this.historyBahanMasukRepo.countAll({
+        kode_nota: requestFilter.search,
+      });
+
+    // hitung total page
+    const total_page: number = Math.ceil(
+      totalListDataHistoryBahanMasuk / requestFilter.per_page,
+    );
+
+    // buat response
+    const res: MasterHistoryBahanMasukFindAllResponse = {
+      page: requestFilter.page,
+      per_page: requestFilter.per_page,
+      data: listDataHistoryBahanMasuk.map((s) => {
+        const formattedData: MasterHistoryBahanMasukFindAllResponseData = {
+          id: s.id,
+          kode_nota: s.kode_nota,
+        };
+        return formattedData;
       }),
       total_page: total_page,
     };

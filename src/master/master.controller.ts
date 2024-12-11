@@ -14,6 +14,7 @@ import { FindAllSupplierDto } from 'src/supplier/dto/supplier_request.dto';
 import { FindAllCustomerDto } from 'src/customer/dto/customer.dto';
 import { FindAllSatuanDto } from 'src/satuan/dto/satuan.dto';
 import { FindAllBahanDto } from 'src/bahan/dto/bahan.dto';
+import { FindAllHistoryMasukDto } from 'src/history-masuk/dto/create-history-masuk.dto';
 
 @Controller('api/master')
 export class MasterController {
@@ -37,5 +38,12 @@ export class MasterController {
   @Get('bahan')
   findAllBahan(@Query() requestFilter: FindAllBahanDto) {
     return this.masterService.handleMasterBahanFindAll(requestFilter);
+  }
+
+  @Get('history-bahan-masuk')
+  findAllHistoryBahanMasuk(@Query() requestFilter: FindAllHistoryMasukDto) {
+    return this.masterService.handleMasterHistoryBahanMasukFindAll(
+      requestFilter,
+    );
   }
 }
