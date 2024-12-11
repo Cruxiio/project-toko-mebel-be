@@ -238,7 +238,7 @@ export class HistoryMasukService {
     const detailData =
       await this.historyBahanMasukRepo.findAllDetailByHistoryBahanMasukID(
         { id, deleted_at: null },
-        {},
+        { main: {}, field1: 'id', nestedField1: '', field2: 'id', field3: '' },
       );
 
     // buat response

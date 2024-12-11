@@ -11,6 +11,7 @@ import { MasterModule } from './master/master.module';
 import { HistoryMasukModule } from './history-masuk/history-masuk.module';
 import { SatuanModule } from './satuan/satuan.module';
 import { BahanModule } from './bahan/bahan.module';
+import { NotaModule } from './nota/nota.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { BahanModule } from './bahan/bahan.module';
     HistoryMasukModule,
     SatuanModule,
     BahanModule,
+    NotaModule,
   ],
   controllers: [AppController],
   providers: [AppService],

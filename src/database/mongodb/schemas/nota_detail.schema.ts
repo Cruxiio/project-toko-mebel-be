@@ -5,15 +5,15 @@ import { Satuan } from './satuan.schema';
 
 export type NotaDetailDocument = NotaDetail & Document;
 
-@Schema({ timestamps: true, collection: 'nota_detail' })
+@Schema({
+  timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' },
+  collection: 'nota_detail',
+})
 export class NotaDetail {
-  @Prop({ index: true, unique: true, type: Number, auto: true })
-  id: number;
-
-  @Prop({ required: true, type: SchemaTypes.ObjectId, ref: 'bahan' })
+  @Prop({ required: true, type: SchemaTypes.ObjectId, ref: Bahan.name })
   id_bahan: Bahan;
 
-  @Prop({ required: true, type: SchemaTypes.ObjectId, ref: 'satuan' })
+  @Prop({ required: true, type: SchemaTypes.ObjectId, ref: Satuan.name })
   id_satuan: Satuan;
 
   @Prop({ required: true, type: Number })
@@ -30,6 +30,9 @@ export class NotaDetail {
 
   @Prop({ type: Date, default: null })
   deleted_at?: Date;
+
+  created_at?: Date;
+  updated_at?: Date;
 }
 
 export const NotaDetailSchema = SchemaFactory.createForClass(NotaDetail);

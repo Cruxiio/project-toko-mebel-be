@@ -5,7 +5,10 @@ import { NotaDetail, NotaDetailSchema } from './nota_detail.schema';
 
 export type NotaDocument = Nota & Document;
 
-@Schema({ timestamps: true, collection: 'nota' })
+@Schema({
+  timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' },
+  collection: 'nota',
+})
 export class Nota {
   @Prop({ index: true, unique: true, type: Number, auto: true })
   id: number;
@@ -13,12 +16,9 @@ export class Nota {
   @Prop({
     required: true,
     type: SchemaTypes.ObjectId,
-    ref: 'history_bahan_masuk',
+    ref: HistoryBahanMasuk.name,
   })
   id_history_bahan_masuk: HistoryBahanMasuk;
-
-  @Prop({ required: true, type: Date })
-  tgl_input_nota: Date;
 
   @Prop({ type: Number, default: 0 })
   total_pajak: number;
@@ -34,6 +34,9 @@ export class Nota {
 
   @Prop({ type: Date, default: null })
   deleted_at?: Date;
+
+  created_at?: Date;
+  updated_at?: Date;
 }
 
 export const NotaSchema = SchemaFactory.createForClass(Nota);

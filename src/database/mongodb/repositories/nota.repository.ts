@@ -1,6 +1,10 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectConnection, InjectModel } from '@nestjs/mongoose';
-import { Connection, FilterQuery, Model, Types } from 'mongoose';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { FilterQuery, Model, Types } from 'mongoose';
 import {
   HistoryBahanMasuk,
   HistoryBahanMasukDocument,
@@ -13,33 +17,35 @@ import {
   HistoryBahanMasukDetailDto,
 } from 'src/history-masuk/dto/create-history-masuk.dto';
 import {
+  HistoryBahanMasukDetailData,
   HistoryBahanMasukDetailDatabaseInput,
   HistoryMasukDtoDatabaseInput,
 } from 'src/history-masuk/dto/response.interface';
-import {
-  HistoryBahanMasukDetail,
-  HistoryBahanMasukDetailDocument,
-} from '../schemas/history_bahan_masuk_detail.schema';
+import { HistoryBahanMasukDetail } from '../schemas/history_bahan_masuk_detail.schema';
 import { SupplierRepository } from './supplier.repository';
+import { Nota, NotaDocument } from '../schemas/nota.schema';
+import { NotaDetailDto } from 'src/nota/dto/create-nota.dto';
+import {
+  NotaDetailDatabaseInput,
+  NotaDtoDatabaseInput,
+} from 'src/nota/dto/response.interface';
+import { NotaDetail, NotaDetailDocument } from '../schemas/nota_detail.schema';
 
 @Injectable()
-export class HistoryBahanMasukRepository {
+export class NotaRepository {
   constructor(
+    @InjectModel(Nota.name)
+    private readonly notaModel: Model<NotaDocument>,
     @InjectModel(HistoryBahanMasuk.name)
     private readonly historyBahanMasukModel: Model<HistoryBahanMasukDocument>,
-    @InjectModel(HistoryBahanMasukDetail.name)
-    private readonly historyBahanMasukModelDetail: Model<HistoryBahanMasukDetailDocument>,
     private readonly satuanRepo: SatuanRepository,
     private readonly bahanRepo: BahanRepository,
     private readonly supplierRepo: SupplierRepository,
-    @InjectConnection() private connection: Connection,
   ) {}
 
-  async findOne(historyBahanMasukFilterQuery: FilterQuery<HistoryBahanMasuk>) {
-    const HistoryBahanMasukData = await this.historyBahanMasukModel.findOne(
-      historyBahanMasukFilterQuery,
-    );
-    return HistoryBahanMasukData;
+  async findOne(notaFilterQuery: FilterQuery<Nota>) {
+    const notaData = await this.notaModel.findOne(notaFilterQuery);
+    return notaData;
   }
 
   async findAll(
@@ -136,40 +142,22 @@ export class HistoryBahanMasukRepository {
     return await this.historyBahanMasukModel.countDocuments(filter);
   }
 
-  async create(historyBahanMasukData: Partial<HistoryMasukDtoDatabaseInput>) {
+  async create(notaData: Partial<NotaDtoDatabaseInput>) {
     try {
       // buat history bahan masuk
-      const newHistoryBahanMasuk = new this.historyBahanMasukModel({
-        id_supplier: historyBahanMasukData.id_supplier,
-        kode_nota: historyBahanMasukData.kode_nota,
-        tgl_nota: historyBahanMasukData.tgl_nota,
-        no_spb: historyBahanMasukData.no_spb,
+      const newNota = new this.notaModel({
+        id_history_bahan_masuk: notaData.id_history_bahan_masuk,
+        total_pajak: notaData.total_pajak,
+        diskon_akhir: notaData.diskon_akhir,
+        total_harga: notaData.total_harga,
+        detail: notaData.detail,
       });
-      await newHistoryBahanMasuk.save();
+      await newNota.save();
 
-      // // buat history bahan masuk detail
-      for (let i = 0; i < historyBahanMasukData.detail.length; i++) {
-        const d = historyBahanMasukData.detail[i];
-
-        // buat history bahan masuk detail
-        const newHistoryBahanMasukDetail =
-          new this.historyBahanMasukModelDetail({
-            id_history_bahan_masuk: newHistoryBahanMasuk._id as Types.ObjectId,
-            id_bahan: d.id_bahan,
-            id_satuan: d.id_satuan,
-            qty: d.qty,
-            qtyPakai: d.qty,
-          });
-        await newHistoryBahanMasukDetail.save();
-      }
-
-      return newHistoryBahanMasuk;
+      return newNota;
     } catch (error) {
-      console.error(
-        'Error creating bahan masuk atau bahan masuk detail:',
-        error,
-      );
-      throw new Error('Failed to create bahan masuk atau bahan masuk detail');
+      console.error('Error creating nota atau nota detail:', error);
+      throw new Error('Failed to nota atau nota detail');
     }
   }
 
@@ -187,7 +175,7 @@ export class HistoryBahanMasukRepository {
         );
 
       // delete history bahan masuk detail yang lama
-      await this.historyBahanMasukModelDetail.updateMany(
+      await this.notaModel.updateMany(
         {
           id_history_bahan_masuk: oldHistoryBahanMasukData._id,
         },
@@ -195,9 +183,9 @@ export class HistoryBahanMasukRepository {
       );
 
       // buat history bahan masuk dan history bahan masuk detail baru
-      const newHistoryBahanMasuk = await this.create(historyBahanMasukData);
+      // const newHistoryBahanMasuk = await this.create(historyBahanMasukData);
 
-      return newHistoryBahanMasuk;
+      // return newHistoryBahanMasuk;
     } catch (error) {
       console.error('Error update bahan masuk atau bahan masuk detail:', error);
       throw new Error('Failed to update bahan masuk atau bahan masuk detail');
@@ -216,18 +204,15 @@ export class HistoryBahanMasukRepository {
     );
 
     // cari seluruh history bahan masuk detail berdasarkan id history bahan masuk
-    return await this.historyBahanMasukModelDetail
-      .find(
-        { id_history_bahan_masuk: historyBahanMasukData._id },
-        showedField.main,
-      )
+    return await this.notaModel
+      .find({ id_history_bahan_masuk: historyBahanMasukData._id }, showedField)
       .populate({
         path: 'id_bahan', // Populate data bahan
-        select: showedField.field1, // Ambil hanya field id dari koleksi Bahan
+        select: 'id', // Ambil hanya field id dari koleksi Bahan
       })
       .populate({
         path: 'id_satuan', // Populate data satuan
-        select: showedField.field2, // Ambil hanya field id dari koleksi Satuan
+        select: 'id', // Ambil hanya field id dari koleksi Satuan
       });
   }
 
@@ -315,7 +300,7 @@ export class HistoryBahanMasukRepository {
     // skip untuk mulai dari data ke berapa (mirip OFFSET pada SQL)
     const skip = (page - 1) * per_page;
 
-    return await this.historyBahanMasukModelDetail
+    return await this.notaModel
       .find(filter, showedField.main)
       .populate({
         path: 'id_history_bahan_masuk', // Populate data bahan
@@ -400,7 +385,7 @@ export class HistoryBahanMasukRepository {
       };
     }
 
-    return this.historyBahanMasukModelDetail.countDocuments(filter);
+    return this.notaModel.countDocuments(filter);
   }
 
   // async masterFindAll(
@@ -416,12 +401,13 @@ export class HistoryBahanMasukRepository {
 
   // validateDetailArray digunakan untuk validasi detail array, dan mengembalikannya dalam bentuk data yang siap dimasukkan ke database
   async validateDetailArray(
-    historyBahanMasukDetail: HistoryBahanMasukDetailDto[],
-  ): Promise<HistoryBahanMasukDetailDatabaseInput[]> {
-    let temp: HistoryBahanMasukDetailDatabaseInput[] = [];
+    notaDetail: NotaDetailDto[],
+    historyBahanMasukDetail: HistoryBahanMasukDetailData[],
+  ): Promise<NotaDetailDatabaseInput[]> {
+    let temp: NotaDetailDatabaseInput[] = [];
 
-    for (let i = 0; i < historyBahanMasukDetail.length; i++) {
-      const d = historyBahanMasukDetail[i];
+    for (let i = 0; i < notaDetail.length; i++) {
+      const d = notaDetail[i];
 
       //cek id_supplier valid
       let bahanData = await this.bahanRepo.findOne({
@@ -443,13 +429,38 @@ export class HistoryBahanMasukRepository {
         throw new NotFoundException('Satuan not found');
       }
 
-      const newHistroyBahanMasukDetail: HistoryBahanMasukDetailDatabaseInput = {
+      // cek apakah isi detail nota sesuai history bahan masuk detail
+      let ada = historyBahanMasukDetail.some(
+        (h) =>
+          h.id_bahan == d.id_bahan &&
+          h.id_satuan == d.id_satuan &&
+          h.qty == d.qty,
+      );
+
+      if (!ada) {
+        throw new BadRequestException(
+          'Detail nota tidak sesuai dengan detail history bahan masuk',
+        );
+      }
+
+      // hitung total harga
+      let subtotal = d.qty * d.harga_satuan;
+
+      // hitung jumlah diskon
+      let jumlahDiskon = Math.floor((d.diskon / 100) * subtotal);
+
+      subtotal = subtotal - jumlahDiskon;
+
+      const newNotaDetail: NotaDetailDatabaseInput = {
         id_bahan: bahanData._id as Types.ObjectId,
         id_satuan: satuanData._id as Types.ObjectId,
         qty: d.qty,
+        harga_satuan: d.harga_satuan,
+        diskon: d.diskon,
+        subtotal: subtotal,
       };
 
-      temp.push(newHistroyBahanMasukDetail);
+      temp.push(newNotaDetail);
     }
 
     return temp;
