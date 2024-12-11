@@ -13,6 +13,7 @@ import { SatuanRepository } from './satuan.repository';
 import { BahanRepository } from './bahan.repository';
 import {
   CreateHistoryMasukDto,
+  FindAllHistoryMasukDto,
   FindAllStokDto,
   HistoryBahanMasukDetailDto,
 } from 'src/history-masuk/dto/create-history-masuk.dto';
@@ -24,7 +25,7 @@ import {
 import { HistoryBahanMasukDetail } from '../schemas/history_bahan_masuk_detail.schema';
 import { SupplierRepository } from './supplier.repository';
 import { Nota, NotaDocument } from '../schemas/nota.schema';
-import { NotaDetailDto } from 'src/nota/dto/create-nota.dto';
+import { FindAllNotaDto, NotaDetailDto } from 'src/nota/dto/create-nota.dto';
 import {
   NotaDetailDatabaseInput,
   NotaDtoDatabaseInput,
@@ -48,6 +49,7 @@ export class NotaRepository {
     return notaData;
   }
 
+  // MASIH NDA NDE PAKE
   async findAll(
     historyBahanMasukFilterQuery: FilterQuery<HistoryBahanMasuk>,
     paginationQuery: any,
@@ -89,57 +91,12 @@ export class NotaRepository {
       };
     }
 
-    // ini untuk paginationnya
-    const { page, per_page } = paginationQuery;
-    // skip untuk mulai dari data ke berapa (mirip OFFSET pada SQL)
-    const skip = (page - 1) * per_page;
-
     return await this.historyBahanMasukModel
       .find(filter, showedField)
       .populate({
         path: 'id_supplier',
         select: 'id',
-      })
-      .skip(skip)
-      .limit(per_page);
-  }
-
-  // ini buat dapetin seluruh jumlah data berdasarkan syarat filter
-  async countAll(historyBahanMasukFilterQuery: FilterQuery<HistoryBahanMasuk>) {
-    // buat temporary object untuk isi filter sesuai syarat yang diberikan
-    let filter: FilterQuery<HistoryBahanMasuk> = { deleted_at: null };
-
-    if (historyBahanMasukFilterQuery.kode_nota != '') {
-      filter = {
-        ...filter,
-        kode_nota: historyBahanMasukFilterQuery.kode_nota,
-      };
-    }
-
-    if (historyBahanMasukFilterQuery.id_supplier != null) {
-      let supplierData = await this.findOne({
-        id: historyBahanMasukFilterQuery.id,
-        deleted_at: null,
       });
-
-      filter = {
-        ...filter,
-        id_supplier: supplierData ? supplierData._id : null,
-      };
-    }
-
-    if (historyBahanMasukFilterQuery.tgl_nota != null) {
-      // ubah ke format date
-      const tglNota = new Date(historyBahanMasukFilterQuery.tgl_nota);
-      // cek apakah valid atau tidak
-      const valid = isNaN(tglNota.getTime());
-      filter = {
-        ...filter,
-        tgl_nota: valid ? tglNota : null,
-      };
-    }
-
-    return await this.historyBahanMasukModel.countDocuments(filter);
   }
 
   async create(notaData: Partial<NotaDtoDatabaseInput>) {
@@ -194,104 +151,114 @@ export class NotaRepository {
 
   // FUNC NON-GENERIC
 
-  async findAllDetailByHistoryBahanMasukID(
-    historyBahanMasukFilterQuery: FilterQuery<HistoryBahanMasuk>,
-    showedField: any,
-  ) {
-    // cari data history bahan masuk
-    const historyBahanMasukData = await this.findOne(
-      historyBahanMasukFilterQuery,
-    );
-
+  async findOneNota(notaFilterQuery: FilterQuery<Nota>, showedField: any) {
     // cari seluruh history bahan masuk detail berdasarkan id history bahan masuk
     return await this.notaModel
-      .find({ id_history_bahan_masuk: historyBahanMasukData._id }, showedField)
+      .findOne(notaFilterQuery, showedField.main)
       .populate({
-        path: 'id_bahan', // Populate data bahan
-        select: 'id', // Ambil hanya field id dari koleksi Bahan
+        path: 'id_history_bahan_masuk', // Populate data bahan
+        select: showedField.field1, // Ambil hanya field id dari koleksi history_bahan_masuk
+        populate: {
+          path: 'id_supplier', // Populate data supplier
+          select: showedField.nestedField1, // Ambil hanya field id dari koleksi supplier
+        },
       })
       .populate({
-        path: 'id_satuan', // Populate data satuan
-        select: 'id', // Ambil hanya field id dari koleksi Satuan
+        path: 'detail.id_bahan', // Populate data bahan
+        select: showedField.field2, // Ambil hanya field id dari koleksi bahan
+      })
+      .populate({
+        path: 'detail.id_satuan', // Populate data satuan
+        select: showedField.field3, // Ambil hanya field id dari koleksi satuan
       });
   }
 
   // findAllHistoryBahanMasukDetail untuk tampilin stok sekarang berdasarkan tanggal nota/surat jalan
-  async findAllStok(
-    StokFilterQuery: FilterQuery<FindAllStokDto>,
+  async findAllNota(
+    notaFilterQuery: FilterQuery<FindAllNotaDto>,
     paginationQuery: any,
     showedField: any,
   ) {
-    let filter: FilterQuery<HistoryBahanMasukDetail> = {
+    let filter: FilterQuery<FindAllNotaDto> = {
       deleted_at: null,
-      qtyPakai: { $gt: 0 },
     };
 
-    if (StokFilterQuery.search != '') {
-      // cari seluruh nama bahan yang mengandung keyword search
-      let bahanData = await this.bahanRepo.findAllWithoutPagination(
-        {
-          nama: {
-            $regex: StokFilterQuery.search, // like isi regex
-            $options: 'i', // i artinya case-insensitive
-          },
-        },
-        { _id: 1 },
-      );
+    // digunakan untuk filter pada history bahan masuk
+    //BAD PRACTICE PAKE ANY JANGAN DITIRU
+    let tempFilter: any = {
+      deleted_at: null,
+    };
 
-      // tambahkan seluruh _id bahan yang namanya mengandung keyword search ke filter
-      filter = {
-        ...filter,
-        id_bahan: {
-          $in: bahanData,
+    if (notaFilterQuery.search != '') {
+      tempFilter = {
+        ...tempFilter,
+        kode_nota: {
+          $regex: notaFilterQuery.search, // like isi regex
+          $options: 'i', // i artinya case-insensitive
         },
       };
     }
 
-    if (StokFilterQuery.tgl_nota != null) {
+    if (notaFilterQuery.tgl_nota != null) {
       // ubah ke format date
-      const tglNota = new Date(StokFilterQuery.tgl_nota);
+      const tglNota = new Date(notaFilterQuery.tgl_nota);
       // cek apakah valid atau tidak
       const notValid = isNaN(tglNota.getTime());
 
-      // cari seluruh history bahan masuk yang tgl nota = request tgl nota
-      let historyBahanMasukData = await this.historyBahanMasukModel.find(
-        {
-          deleted_at: null,
-          tgl_nota: notValid ? null : tglNota,
-        },
-        { _id: 1 },
-      );
-
-      // tambahkan seluruh _id history bahan masuk yang sesuai dengan request tgl nota
-      filter = {
-        ...filter,
-        id_history_bahan_masuk: {
-          $in: historyBahanMasukData,
-        },
+      tempFilter = {
+        ...tempFilter,
+        tgl_nota: notValid ? null : tglNota,
       };
     }
 
-    if (StokFilterQuery.id_supplier > 0) {
+    if (notaFilterQuery.id_supplier > 0) {
+      // cari supplier _id
       let supplierData = await this.supplierRepo.findOne({
-        id: StokFilterQuery.id_supplier,
+        id: notaFilterQuery.id_supplier,
         deleted_at: null,
       });
 
-      // cari seluruh history bahan masuk yang tgl nota = request tgl nota
-      let historyBahanMasukData = await this.historyBahanMasukModel.find(
-        {
-          deleted_at: null,
-          id_supplier: supplierData ? supplierData._id : null,
-        },
-        { _id: 1 },
-      );
+      tempFilter = {
+        ...tempFilter,
+        id_supplier: supplierData ? supplierData._id : null,
+      };
+    }
+
+    // cari history bahan masuk yang sesuai dengan tempFilter
+    let historyBahanMasukData = await this.historyBahanMasukModel.find(
+      tempFilter,
+      { _id: 1 },
+    );
+
+    // tambahkan seluruh _id history bahan masuk yang sesuai dengan tempFilter
+    filter = {
+      ...filter,
+      id_history_bahan_masuk: {
+        $in: historyBahanMasukData,
+      },
+    };
+
+    if (notaFilterQuery.tgl_input != null) {
+      // ubah ke format date
+      const tglInput = new Date(notaFilterQuery.tgl_input);
+      // cek apakah valid atau tidak
+      const notValid = isNaN(tglInput.getTime());
+
+      let startDate = null;
+      let endDate = null;
+      if (!notValid) {
+        startDate = new Date(tglInput.setHours(0, 0, 0, 0));
+        endDate = new Date(tglInput.setHours(23, 59, 59, 999));
+      }
 
       filter = {
         ...filter,
-        id_history_bahan_masuk: {
-          $in: historyBahanMasukData,
-        },
+        created_at: notValid
+          ? null
+          : {
+              $gte: startDate,
+              $lte: endDate,
+            },
       };
     }
 
@@ -310,78 +277,88 @@ export class NotaRepository {
           select: showedField.nestedField1,
         },
       })
-      .populate({
-        path: 'id_bahan', // Populate data bahan
-        select: showedField.field2, // Ambil hanya field id dari koleksi Bahan
-      })
-      .populate({
-        path: 'id_satuan', // Populate data satuan
-        select: showedField.field3, // Ambil hanya field id dari koleksi Satuan
-      })
       .skip(skip)
       .limit(per_page);
   }
 
-  async countAllStok(StokFilterQuery: FilterQuery<FindAllStokDto>) {
-    let filter: FilterQuery<HistoryBahanMasukDetail> = {
+  async countAllNota(notaFilterQuery: FilterQuery<FindAllNotaDto>) {
+    let filter: FilterQuery<FindAllNotaDto> = {
       deleted_at: null,
-      qtyPakai: { $gt: 0 },
     };
 
-    if (StokFilterQuery.search != '') {
-      // cari seluruh nama bahan yang mengandung keyword search
-      let bahanData = await this.bahanRepo.findAllWithoutPagination(
-        {
-          nama: {
-            $regex: StokFilterQuery.search, // like isi regex
-            $options: 'i', // i artinya case-insensitive
-          },
-        },
-        { _id: 1 },
-      );
+    // digunakan untuk filter pada history bahan masuk
+    //BAD PRACTICE PAKE ANY JANGAN DITIRU
+    let tempFilter: any = {
+      deleted_at: null,
+    };
 
-      // tambahkan seluruh _id bahan yang namanya mengandung keyword search ke filter
-      filter = {
-        ...filter,
-        id_bahan: {
-          $in: bahanData,
-        },
+    if (notaFilterQuery.search != '') {
+      tempFilter = {
+        ...tempFilter,
+        kode_nota: notaFilterQuery.search,
       };
     }
 
-    if (StokFilterQuery.tgl_nota != null) {
+    if (notaFilterQuery.tgl_nota != null) {
       // ubah ke format date
-      const tglNota = new Date(StokFilterQuery.tgl_nota);
+      const tglNota = new Date(notaFilterQuery.tgl_nota);
       // cek apakah valid atau tidak
       const notValid = isNaN(tglNota.getTime());
 
-      // cari seluruh history bahan masuk yang tgl nota = request tgl nota
-      let historyBahanMasukData = await this.historyBahanMasukModel.find(
-        {
-          deleted_at: null,
-          tgl_nota: notValid ? null : tglNota,
-        },
-        { _id: 1 },
-      );
-
-      // tambahkan seluruh _id history bahan masuk yang sesuai dengan request tgl nota
-      filter = {
-        ...filter,
-        id_history_bahan_masuk: {
-          $in: historyBahanMasukData,
-        },
+      tempFilter = {
+        ...tempFilter,
+        tgl_nota: notValid ? null : tglNota,
       };
     }
 
-    if (StokFilterQuery.id_supplier > 0) {
+    if (notaFilterQuery.id_supplier > 0) {
+      // cari supplier _id
       let supplierData = await this.supplierRepo.findOne({
-        id: StokFilterQuery.id_supplier,
+        id: notaFilterQuery.id_supplier,
         deleted_at: null,
       });
 
-      filter = {
-        ...filter,
+      tempFilter = {
+        ...tempFilter,
         id_supplier: supplierData ? supplierData._id : null,
+      };
+    }
+
+    // cari history bahan masuk yang sesuai dengan tempFilter
+    let historyBahanMasukData = await this.historyBahanMasukModel.find(
+      tempFilter,
+      { _id: 1 },
+    );
+
+    // tambahkan seluruh _id history bahan masuk yang sesuai dengan tempFilter
+    filter = {
+      ...filter,
+      id_history_bahan_masuk: {
+        $in: historyBahanMasukData,
+      },
+    };
+
+    if (notaFilterQuery.tgl_input != null) {
+      // ubah ke format date
+      const tglInput = new Date(notaFilterQuery.tgl_input);
+      // cek apakah valid atau tidak
+      const notValid = isNaN(tglInput.getTime());
+
+      let startDate = null;
+      let endDate = null;
+      if (!notValid) {
+        startDate = new Date(tglInput.setHours(0, 0, 0, 0));
+        endDate = new Date(tglInput.setHours(23, 59, 59, 999));
+      }
+
+      filter = {
+        ...tempFilter,
+        created_at: notValid
+          ? null
+          : {
+              $gte: startDate,
+              $lte: endDate,
+            },
       };
     }
 

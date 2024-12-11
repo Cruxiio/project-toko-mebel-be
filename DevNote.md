@@ -6,3 +6,5 @@
 - [Ragu] kode_nota apakah dikasi pengecekan unique karena formatnya aneh2 dan kemungkinan bisa kembar (?) (sudah dikasi tapi tanyakan pasti unique atau nda)
 
 - Jangan Lupa tambahin ke Supplier dto semua field harus diisi (done di bagian update)
+
+- tambah deleted_at is null pada findAll func di semua repo (cek terutama yang filter e ada $in e)

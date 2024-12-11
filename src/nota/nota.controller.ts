@@ -6,9 +6,14 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { NotaService } from './nota.service';
-import { CreateNotaDto, UpdateNotaDto } from './dto/create-nota.dto';
+import {
+  CreateNotaDto,
+  FindAllNotaDto,
+  UpdateNotaDto,
+} from './dto/create-nota.dto';
 
 @Controller('api/nota')
 export class NotaController {
@@ -19,14 +24,14 @@ export class NotaController {
     return this.notaService.handleCreateNota(createNotaDto);
   }
 
-  // @Get()
-  // findAll() {
-  //   return this.notaService.findAll();
-  // }
+  @Get()
+  findAll(@Query() query: FindAllNotaDto) {
+    return this.notaService.handleFindAllNota(query);
+  }
 
   @Get(':id')
   findOne(@Param('id') id: number) {
-    return this.notaService.findOne(id);
+    return this.notaService.handleFindOneNota(id);
   }
 
   // @Patch(':id')

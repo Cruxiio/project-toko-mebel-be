@@ -41,7 +41,10 @@ export class HistoryMasukService {
   ) {
     // cek apakah kode nota sudah ada atau belum
     let ada = await this.historyBahanMasukRepo.findOne({
-      kode_nota: createHistoryBahanMasukDto.kode_nota,
+      kode_nota: {
+        $regex: `^${createHistoryBahanMasukDto.kode_nota}$`, // nama harus persis bukan like
+        $options: 'i', // i artinya case-insensitive
+      },
       deleted_at: null,
     });
 

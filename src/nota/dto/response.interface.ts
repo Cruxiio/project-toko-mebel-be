@@ -1,6 +1,17 @@
+import exp from 'constants';
 import { Types } from 'mongoose';
 
-// NotaFindOneResponse digunakan untuk response create update dan find one
+export interface NotaDetailArrayData {
+  id_bahan: number;
+  id_satuan: number;
+  qty: number;
+  harga_satuan: number;
+  diskon: number;
+  subtotal: number;
+}
+
+// NotaFindOneResponse digunakan untuk response create dan find all
+// NOTE: karena isinya bakal mirip sama FindAllNotaResponseData jadi pakai ini aja
 export interface NotaFindOneResponse {
   id?: number;
   kode_nota: string;
@@ -12,6 +23,18 @@ export interface NotaFindOneResponse {
   created_at?: Date;
   updated_at?: Date | null;
   deleted_at?: Date | null;
+}
+
+export interface NotaFindAllResponse {
+  page: number;
+  per_page: number;
+  data: NotaFindOneResponse[];
+  total_page: number;
+}
+
+//
+export interface NotaFindOneFullDataResponse extends NotaFindOneResponse {
+  detail: NotaDetailArrayData[];
 }
 
 export interface NotaDetailDatabaseInput {

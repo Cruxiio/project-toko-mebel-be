@@ -86,3 +86,52 @@ export class CreateNotaDto {
 }
 
 export class UpdateNotaDto {}
+
+export class FindAllNotaDto {
+  @IsString()
+  @IsOptional()
+  search?: string = '';
+
+  @IsOptional()
+  @IsDate({ message: 'tgl_nota must be a date' })
+  @Transform(({ value }) => {
+    // validate tgL_nota format
+    const regex = /^\d{4}-\d{2}-\d{2}$/; // Regex untuk format YYYY-MM-DD
+    if (!regex.test(value)) {
+      throw new BadRequestException('tgl_nota must be in YYYY-MM-DD format');
+    }
+
+    return new Date(value);
+  })
+  tgl_nota?: Date = null;
+
+  @IsOptional()
+  @IsDate({ message: 'tgl_input must be a date' })
+  @Transform(({ value }) => {
+    // validate tgL_nota format
+    const regex = /^\d{4}-\d{2}-\d{2}$/; // Regex untuk format YYYY-MM-DD
+    if (!regex.test(value)) {
+      throw new BadRequestException('tgl_input must be in YYYY-MM-DD format');
+    }
+
+    return new Date(value);
+  })
+  tgl_input?: Date = null;
+
+  @IsNumber({}, { message: 'id_supplier must be a number' })
+  @IsOptional()
+  @Transform(({ value }) => Number(value))
+  id_supplier?: number = 0;
+
+  @IsNumber({}, { message: 'page must be a number' })
+  @IsOptional()
+  //transform buat olah value field sebelum masuk ke validasi
+  @Transform(({ value }) => Number(value))
+  page?: number = 1;
+
+  @IsNumber({}, { message: 'per_page must be a number' })
+  @IsOptional()
+  //transform buat olah value field sebelum masuk ke validasi
+  @Transform(({ value }) => Number(value))
+  per_page?: number = 10;
+}

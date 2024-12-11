@@ -3,12 +3,19 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { CreateNotaDto, UpdateNotaDto } from './dto/create-nota.dto';
+import {
+  CreateNotaDto,
+  FindAllNotaDto,
+  UpdateNotaDto,
+} from './dto/create-nota.dto';
 import { NotaRepository } from 'src/database/mongodb/repositories/nota.repository';
 import { SupplierRepository } from 'src/database/mongodb/repositories/supplier.repository';
 import { HistoryBahanMasukRepository } from 'src/database/mongodb/repositories/historyBahanMasuk.repository';
 import {
+  NotaDetailArrayData,
   NotaDtoDatabaseInput,
+  NotaFindAllResponse,
+  NotaFindOneFullDataResponse,
   NotaFindOneResponse,
 } from './dto/response.interface';
 import { Types } from 'mongoose';
@@ -127,17 +134,125 @@ export class NotaService {
     return res;
   }
 
-  findAll() {
-    return `This action returns all nota`;
+  async handleFindAllNota(requestFilter: FindAllNotaDto) {
+    /* NOTE: 
+      untuk showedField: any, data strukturnya:
+      {
+            main: {}, --> ini buat showed field pada .find()
+            field1: '' --> ini buat showed field pada select populate(join table) ke 1,
+            nestedField1: '', --> ini buat showed field pada (join table) id ref yang ada pada tabel ke 1, jika nested
+            field2: '' --> ini buat showed field pada select populate(join table) ke 2,
+            field3: '' --> ini buat showed field pada select populate(join table) ke 3,
+      }
+    */
+    const listNota = await this.notaRepo.findAllNota(
+      {
+        search: requestFilter.search,
+        tgl_nota: requestFilter.tgl_nota,
+        tgl_input: requestFilter.tgl_input,
+        id_supplier: requestFilter.id_supplier,
+      },
+      {
+        page: requestFilter.page,
+        per_page: requestFilter.per_page,
+      },
+      {
+        main: {},
+        field1: 'id tgl_nota kode_nota',
+        nestedField1: 'id',
+      },
+    );
+
+    const totalListNota = await this.notaRepo.countAllNota({
+      search: requestFilter.search,
+      tgl_nota: requestFilter.tgl_nota,
+      tgl_input: requestFilter.tgl_input,
+      id_supplier: requestFilter.id_supplier,
+    });
+
+    // hitung total page
+    const total_page: number = Math.ceil(
+      totalListNota / requestFilter.per_page,
+    );
+
+    const res: NotaFindAllResponse = {
+      page: requestFilter.page,
+      per_page: requestFilter.per_page,
+      data: listNota.map((n) => {
+        const formattedData: NotaFindOneResponse = {
+          id: n.id,
+          kode_nota: n.id_history_bahan_masuk.kode_nota,
+          tgl_nota: n.id_history_bahan_masuk.tgl_nota,
+          id_supplier: n.id_history_bahan_masuk.id_supplier.id,
+          total_pajak: n.total_pajak,
+          diskon_akhir: n.diskon_akhir,
+          total_harga: n.total_harga,
+          created_at: n.created_at,
+          updated_at: n.updated_at,
+          deleted_at: n.deleted_at,
+        };
+        return formattedData;
+      }),
+      total_page: total_page,
+    };
+
+    return res;
   }
 
-  async findOne(id: number) {}
+  async handleFindOneNota(id: number) {
+    // cek apakah id adalah int atau bukan
+    if (Number.isNaN(id)) {
+      throw new BadRequestException('id must be a number');
+    }
 
-  update(id: number, updateNotaDto: UpdateNotaDto) {
+    // find nota by id
+    let notaData = await this.notaRepo.findOneNota(
+      {
+        id: id,
+        deleted_at: null,
+      },
+      {
+        main: {},
+        field1: 'id',
+        nestedField1: 'id',
+        field2: 'id',
+        field3: 'id',
+      },
+    );
+
+    if (!notaData) {
+      throw new NotFoundException('Nota not found');
+    }
+
+    const res: NotaFindOneFullDataResponse = {
+      id: notaData.id,
+      kode_nota: notaData.id_history_bahan_masuk.kode_nota,
+      id_supplier: notaData.id_history_bahan_masuk.id_supplier.id,
+      tgl_nota: notaData.id_history_bahan_masuk.tgl_nota,
+      total_pajak: notaData.total_pajak,
+      diskon_akhir: notaData.diskon_akhir,
+      total_harga: notaData.total_harga,
+      detail: notaData.detail.map((d) => {
+        const temp: NotaDetailArrayData = {
+          id_bahan: d.id_bahan.id,
+          id_satuan: d.id_satuan.id,
+          qty: d.qty,
+          harga_satuan: d.harga_satuan,
+          diskon: d.diskon,
+          subtotal: d.subtotal,
+        };
+
+        return temp;
+      }),
+      created_at: notaData.created_at,
+      updated_at: notaData.updated_at,
+      deleted_at: notaData.deleted_at,
+    };
+
+    return res;
+  }
+
+  async handleUpdateNota(id: number, updateNotaDto: UpdateNotaDto) {
     return `This action updates a #${id} nota`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} nota`;
   }
 }
