@@ -386,13 +386,9 @@ export class NotaService {
       deleted_at: null,
     });
 
-    console.log(historyBahanMasukData);
-
     if (!historyBahanMasukData) {
       throw new NotFoundException('History bahan masuk not found');
     }
-
-    // return;
 
     // cek apakah kode nota sudah ada atau belum
     let notaData = await this.notaRepo.findOne({
