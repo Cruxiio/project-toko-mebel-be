@@ -16,7 +16,7 @@ export class HistoryBahanMasuk {
   @Prop({ index: true, unique: true, type: Number, auto: true })
   id: number;
 
-  @Prop({ required: true, type: String, unique: true })
+  @Prop({ required: true, type: String })
   kode_nota: string;
 
   @Prop({ required: true, type: SchemaTypes.ObjectId, ref: Supplier.name })
@@ -40,3 +40,13 @@ export class HistoryBahanMasuk {
 
 export const HistoryBahanMasukSchema =
   SchemaFactory.createForClass(HistoryBahanMasuk);
+
+// Buat partial index
+HistoryBahanMasukSchema.index(
+  { kode_nota: 1 },
+  {
+    unique: true,
+    // ini buat kasi tau kalau constraint unique pada kode_nota hanya berlaku ketika deleted_at: null
+    partialFilterExpression: { deleted_at: null },
+  },
+);

@@ -32,7 +32,6 @@ export class HistoryBahanMasukRepository {
     private readonly satuanRepo: SatuanRepository,
     private readonly bahanRepo: BahanRepository,
     private readonly supplierRepo: SupplierRepository,
-    @InjectConnection() private connection: Connection,
   ) {}
 
   async findOne(historyBahanMasukFilterQuery: FilterQuery<HistoryBahanMasuk>) {

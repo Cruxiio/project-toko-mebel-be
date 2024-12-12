@@ -26,13 +26,14 @@ import { SupplierRepository } from 'src/database/mongodb/repositories/supplier.r
 import { SatuanRepository } from 'src/database/mongodb/repositories/satuan.repository';
 import { BahanRepository } from 'src/database/mongodb/repositories/bahan.repository';
 import { Types } from 'mongoose';
+import { NotaRepository } from 'src/database/mongodb/repositories/nota.repository';
 
 @Injectable()
 export class HistoryMasukService {
   constructor(
     private readonly historyBahanMasukRepo: HistoryBahanMasukRepository,
     private readonly supplierRepo: SupplierRepository,
-    private readonly satuanRepo: SatuanRepository,
+    private readonly notaRepo: NotaRepository,
     private readonly bahanRepo: BahanRepository,
   ) {}
 
@@ -105,14 +106,41 @@ export class HistoryMasukService {
       throw new BadRequestException('id must be a number');
     }
 
+    // cek apakah id valid atau tidak
+    let isIDValid = await this.historyBahanMasukRepo.findOne({
+      id,
+      deleted_at: null,
+    });
+
+    if (!isIDValid) {
+      throw new NotFoundException('History bahan masuk not found');
+    }
+
+    /*
+    NOTE: 
+    mending query find one 2 kali 
+    daripada validasi id dari param :id dilakukan di findOneAndUpdate
+    */
     // cek apakah kode nota sudah ada atau belum
     let ada = await this.historyBahanMasukRepo.findOne({
       kode_nota: updateHistoryBahanMasukDto.kode_nota,
       deleted_at: null,
     });
 
-    if (ada) {
+    if (ada && ada.id != id) {
       throw new BadRequestException('kode_nota sudah terdaftar');
+    }
+
+    // cek apakah kode_nota di history bahan masuk yang diupdate sudah digunakan di tabel nota atau tidak
+    let notaData = await this.notaRepo.findOne({
+      id_history_bahan_masuk: ada._id,
+      deleted_at: null,
+    });
+
+    if (notaData) {
+      throw new BadRequestException(
+        'nota sudah dibuat, sehingga history bahan masuk tidak bisa diubah',
+      );
     }
 
     //cek id_supplier valid
