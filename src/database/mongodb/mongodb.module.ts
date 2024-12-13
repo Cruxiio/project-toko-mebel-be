@@ -8,6 +8,7 @@ import { BahanRepository } from './repositories/bahan.repository';
 import { SatuanRepository } from './repositories/satuan.repository';
 import { NotaRepository } from './repositories/nota.repository';
 import { HistoryBahanMasukRepository } from './repositories/historyBahanMasuk.repository';
+import { ProyekRepository } from './repositories/proyek.repository';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { HistoryBahanMasukRepository } from './repositories/historyBahanMasuk.re
     SatuanRepository,
     HistoryBahanMasukRepository,
     NotaRepository,
+    ProyekRepository,
   ],
   exports: [
     UserRepository,
@@ -31,6 +33,7 @@ import { HistoryBahanMasukRepository } from './repositories/historyBahanMasuk.re
     SatuanRepository,
     HistoryBahanMasukRepository,
     NotaRepository,
+    ProyekRepository,
   ], // Ekspor agar dapat digunakan di fitur lain
 })
 export class MongoDBModule {}

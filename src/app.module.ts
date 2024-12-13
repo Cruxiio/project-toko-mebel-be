@@ -12,6 +12,7 @@ import { HistoryMasukModule } from './history-masuk/history-masuk.module';
 import { SatuanModule } from './satuan/satuan.module';
 import { BahanModule } from './bahan/bahan.module';
 import { NotaModule } from './nota/nota.module';
+import { ProyekModule } from './proyek/proyek.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { NotaModule } from './nota/nota.module';
     SatuanModule,
     BahanModule,
     NotaModule,
+    ProyekModule,
   ],
   controllers: [AppController],
   providers: [AppService],

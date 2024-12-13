@@ -156,6 +156,7 @@ export class SupplierService {
     let ada = await this.SupplierRepo.findOne({
       no_rekening: updateSupplierDto.no_rekening,
       nama_bank: updateSupplierDto.nama_bank,
+      deleted_at: null,
     });
 
     if (ada && ada.id !== id) {
