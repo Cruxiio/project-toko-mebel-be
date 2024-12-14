@@ -5,7 +5,10 @@ import { Team } from './team.schema';
 
 export type KaryawanTeamDocument = KaryawanTeam & Document;
 
-@Schema({ timestamps: true, collection: 'karyawan_team' })
+@Schema({
+  timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' },
+  collection: 'karyawan_team',
+})
 export class KaryawanTeam {
   @Prop({ index: true, unique: true, type: Number, auto: true })
   id: number;
@@ -16,15 +19,11 @@ export class KaryawanTeam {
   @Prop({ required: true, type: SchemaTypes.ObjectId, ref: 'team' })
   id_team: Team;
 
-  @Prop({
-    required: true,
-    type: String,
-    enum: ['ketua', 'member'],
-  })
-  role: string;
-
   @Prop({ type: Date, default: null })
   deleted_at?: Date;
+
+  created_at?: Date;
+  updated_at?: Date;
 }
 
 export const KaryawanTeamSchema = SchemaFactory.createForClass(KaryawanTeam);

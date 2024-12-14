@@ -3,7 +3,10 @@ import { Document } from 'mongoose';
 
 export type TeamDocument = Team & Document;
 
-@Schema({ timestamps: true, collection: 'team' })
+@Schema({
+  timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' },
+  collection: 'team',
+})
 export class Team {
   @Prop({ index: true, unique: true, type: Number, auto: true })
   id: number;
@@ -13,6 +16,9 @@ export class Team {
 
   @Prop({ type: Date, default: null })
   deleted_at?: Date;
+
+  created_at?: Date;
+  updated_at?: Date;
 }
 
 export const TeamSchema = SchemaFactory.createForClass(Team);

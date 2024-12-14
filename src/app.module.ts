@@ -13,6 +13,7 @@ import { SatuanModule } from './satuan/satuan.module';
 import { BahanModule } from './bahan/bahan.module';
 import { NotaModule } from './nota/nota.module';
 import { ProyekModule } from './proyek/proyek.module';
+import { KaryawanModule } from './karyawan/karyawan.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { ProyekModule } from './proyek/proyek.module';
     BahanModule,
     NotaModule,
     ProyekModule,
+    KaryawanModule,
   ],
   controllers: [AppController],
   providers: [AppService],
