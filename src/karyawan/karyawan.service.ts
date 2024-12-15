@@ -52,6 +52,7 @@ export class KaryawanService {
     const listDataKaryawan = await this.karyawanRepo.findAll(
       {
         nama: requestFilter.search,
+        role: requestFilter.role,
       },
       {
         page: requestFilter.page,

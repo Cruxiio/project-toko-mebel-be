@@ -57,3 +57,15 @@ export interface MasterHistoryBahanMasukFindAllResponse {
   data: MasterHistoryBahanMasukFindAllResponseData[];
   total_page: number;
 }
+
+export interface MasterKaryawanFindAllResponseData {
+  id: number;
+  nama: string;
+}
+
+export interface MasterKaryawanFindAllResponse {
+  page: number;
+  per_page: number;
+  data: MasterKaryawanFindAllResponseData[];
+  total_page: number;
+}

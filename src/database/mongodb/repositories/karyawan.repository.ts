@@ -33,6 +33,13 @@ export class KaryawanRepository {
       };
     }
 
+    if (karyawanFilterQuery.role != '') {
+      filter = {
+        ...filter,
+        role: karyawanFilterQuery.role,
+      };
+    }
+
     // ini untuk paginationnya
     const { page, per_page } = paginationQuery;
     // skip untuk mulai dari data ke berapa (mirip OFFSET pada SQL)

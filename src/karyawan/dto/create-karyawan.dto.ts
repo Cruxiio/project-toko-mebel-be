@@ -5,6 +5,7 @@ import {
   IsNumber,
   IsOptional,
   IsString,
+  ValidateIf,
 } from 'class-validator';
 
 export class CreateKaryawanDto {
@@ -26,6 +27,14 @@ export class FindAllKaryawanDto {
   @IsString()
   @IsOptional()
   search?: string = '';
+
+  @ValidateIf((o) => o.role !== '') // Validasi hanya dilakukan ketika role != ''
+  @IsString()
+  @IsIn(['ketua', 'member'], {
+    message: 'Role harus salah satu dari role yang disediakan',
+  })
+  @IsOptional()
+  role?: string = '';
 
   @IsNumber({}, { message: 'page must be a number' })
   @IsOptional()

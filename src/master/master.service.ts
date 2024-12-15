@@ -7,6 +7,8 @@ import {
   MasterCustomerFindAllResponseData,
   MasterHistoryBahanMasukFindAllResponse,
   MasterHistoryBahanMasukFindAllResponseData,
+  MasterKaryawanFindAllResponse,
+  MasterKaryawanFindAllResponseData,
   MasterSatuanFindAllResponse,
   MasterSatuanFindAllResponseData,
   MasterSupplierFindAllResponse,
@@ -22,6 +24,8 @@ import { BahanRepository } from 'src/database/mongodb/repositories/bahan.reposit
 import { FindAllBahanDto } from 'src/bahan/dto/bahan.dto';
 import { FindAllHistoryMasukDto } from 'src/history-masuk/dto/create-history-masuk.dto';
 import { HistoryBahanMasukRepository } from 'src/database/mongodb/repositories/historyBahanMasuk.repository';
+import { FindAllKaryawanDto } from 'src/karyawan/dto/create-karyawan.dto';
+import { KaryawanRepository } from 'src/database/mongodb/repositories/karyawan.repository';
 
 @Injectable()
 export class MasterService {
@@ -31,6 +35,7 @@ export class MasterService {
     private readonly satuanRepo: SatuanRepository,
     private readonly bahanRepo: BahanRepository,
     private readonly historyBahanMasukRepo: HistoryBahanMasukRepository,
+    private readonly karyawanRepo: KaryawanRepository,
   ) {}
 
   async handleMasterSupplierFindAll(requestFilter: FindAllSupplierDto) {
@@ -221,6 +226,44 @@ export class MasterService {
           kode_nota: s.kode_nota,
         };
         return formattedData;
+      }),
+      total_page: total_page,
+    };
+
+    return res;
+  }
+
+  async handleMasterKaryawanFindAll(requestFilter: FindAllKaryawanDto) {
+    // ambil data customer
+    const listKaryawanData = await this.karyawanRepo.masterFindAll(
+      {
+        nama: requestFilter.search,
+        role: requestFilter.role,
+      },
+      {
+        page: requestFilter.page,
+        per_page: requestFilter.per_page,
+      },
+    );
+
+    // hitung total data customer
+    let totalKaryawanData = await this.karyawanRepo.countAll({
+      nama: requestFilter.search,
+    });
+
+    // hitung total page
+    const total_page = Math.ceil(totalKaryawanData / requestFilter.per_page);
+
+    // buat response
+    const res: MasterKaryawanFindAllResponse = {
+      page: requestFilter.page,
+      per_page: requestFilter.per_page,
+      data: listKaryawanData.map((karyawan) => {
+        const temp: MasterKaryawanFindAllResponseData = {
+          id: karyawan.id,
+          nama: karyawan.nama,
+        };
+        return temp;
       }),
       total_page: total_page,
     };
