@@ -2,7 +2,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, SchemaTypes } from 'mongoose';
 import { Proyek } from './proyek.schema';
 import { Produk } from './produk.schema';
-import { KaryawanTeam } from './karyawan_team.schema';
+import { Team } from './team.schema';
 
 export type ProyekProdukDocument = ProyekProduk & Document;
 
@@ -20,8 +20,8 @@ export class ProyekProduk {
   @Prop({ required: true, type: SchemaTypes.ObjectId, ref: Produk.name })
   id_produk: Produk;
 
-  @Prop({ required: true, type: SchemaTypes.ObjectId, ref: KaryawanTeam.name })
-  id_karyawan_team: KaryawanTeam;
+  @Prop({ required: true, type: SchemaTypes.ObjectId, ref: Team.name })
+  id_team: Team;
 
   @Prop({ required: true, type: Number, min: 1 })
   qty: number;
