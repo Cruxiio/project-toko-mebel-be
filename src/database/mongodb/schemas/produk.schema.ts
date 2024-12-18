@@ -4,7 +4,10 @@ import { ProdukDetail, ProdukDetailSchema } from './produk_detail.schema';
 
 export type ProdukDocument = Produk & Document;
 
-@Schema({ timestamps: true, collection: 'produk' })
+@Schema({
+  timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' },
+  collection: 'produk',
+})
 export class Produk {
   @Prop({ index: true, unique: true, type: Number, auto: true })
   id: number;
@@ -17,6 +20,9 @@ export class Produk {
 
   @Prop({ type: Date, default: null })
   deleted_at?: Date;
+
+  created_at?: Date;
+  updated_at?: Date;
 }
 
 export const ProdukSchema = SchemaFactory.createForClass(Produk);

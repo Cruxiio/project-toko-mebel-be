@@ -14,6 +14,7 @@ import { BahanModule } from './bahan/bahan.module';
 import { NotaModule } from './nota/nota.module';
 import { ProyekModule } from './proyek/proyek.module';
 import { KaryawanModule } from './karyawan/karyawan.module';
+import { ProdukModule } from './produk/produk.module';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { KaryawanModule } from './karyawan/karyawan.module';
     NotaModule,
     ProyekModule,
     KaryawanModule,
+    ProdukModule,
   ],
   controllers: [AppController],
   providers: [AppService],

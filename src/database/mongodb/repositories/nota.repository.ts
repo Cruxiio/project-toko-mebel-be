@@ -11,18 +11,7 @@ import {
 } from '../schemas/history_bahan_masuk.schema';
 import { SatuanRepository } from './satuan.repository';
 import { BahanRepository } from './bahan.repository';
-import {
-  CreateHistoryMasukDto,
-  FindAllHistoryMasukDto,
-  FindAllStokDto,
-  HistoryBahanMasukDetailDto,
-} from 'src/history-masuk/dto/create-history-masuk.dto';
-import {
-  HistoryBahanMasukDetailData,
-  HistoryBahanMasukDetailDatabaseInput,
-  HistoryMasukDtoDatabaseInput,
-} from 'src/history-masuk/dto/response.interface';
-import { HistoryBahanMasukDetail } from '../schemas/history_bahan_masuk_detail.schema';
+import { HistoryBahanMasukDetailData } from 'src/history-masuk/dto/response.interface';
 import { SupplierRepository } from './supplier.repository';
 import { Nota, NotaDocument } from '../schemas/nota.schema';
 import { FindAllNotaDto, NotaDetailDto } from 'src/nota/dto/create-nota.dto';
@@ -30,7 +19,6 @@ import {
   NotaDetailDatabaseInput,
   NotaDtoDatabaseInput,
 } from 'src/nota/dto/response.interface';
-import { NotaDetail, NotaDetailDocument } from '../schemas/nota_detail.schema';
 
 @Injectable()
 export class NotaRepository {

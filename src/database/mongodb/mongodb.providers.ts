@@ -16,6 +16,7 @@ import {
 import { Nota, NotaSchema } from './schemas/nota.schema';
 import { Proyek, ProyekSchema } from './schemas/proyek.schema';
 import { Karyawan, KaryawanSchema } from './schemas/karyawan.schema';
+import { Produk, ProdukSchema } from './schemas/produk.schema';
 
 // kasih tau mongoose schema mana yang mau diimport
 export const MongoDBProvider = MongooseModule.forFeatureAsync([
@@ -164,6 +165,21 @@ export const MongoDBProvider = MongooseModule.forFeatureAsync([
       schema.plugin(AutoIncrement, {
         inc_field: 'id',
         id: 'karyawan_id_counter', //ini nama unik untuk counter id karyawan yang disimpan di collection counters
+      });
+      return schema;
+    },
+    inject: [getConnectionToken()],
+  },
+  {
+    name: Produk.name,
+    useFactory: async (connection: Connection) => {
+      const schema = ProdukSchema;
+
+      const AutoIncrement = require('mongoose-sequence')(connection);
+
+      schema.plugin(AutoIncrement, {
+        inc_field: 'id',
+        id: 'produk_id_counter', //ini nama unik untuk counter id produk yang disimpan di collection counters
       });
       return schema;
     },

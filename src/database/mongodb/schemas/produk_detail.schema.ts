@@ -5,25 +5,31 @@ import { Satuan } from './satuan.schema';
 
 export type ProdukDetailDocument = ProdukDetail & Document;
 
-@Schema({ timestamps: true, collection: 'produk_detail' })
+@Schema({
+  timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' },
+  collection: 'produk_detail',
+})
 export class ProdukDetail {
   @Prop({ index: true, unique: true, type: Number, auto: true })
   id: number;
 
-  @Prop({ required: true, type: SchemaTypes.ObjectId, ref: 'bahan' })
+  @Prop({ required: true, type: SchemaTypes.ObjectId, ref: Bahan.name })
   id_bahan: Bahan;
 
-  @Prop({ required: true, type: SchemaTypes.ObjectId, ref: 'satuan' })
+  @Prop({ required: true, type: SchemaTypes.ObjectId, ref: Satuan.name })
   id_satuan: Satuan;
 
   @Prop({ required: true, type: Number })
   qty: number;
 
-  @Prop({ type: String })
+  @Prop({ type: String, default: null })
   keterangan: string;
 
   @Prop({ type: Date, default: null })
   deleted_at?: Date;
+
+  created_at?: Date;
+  updated_at?: Date;
 }
 
 export const ProdukDetailSchema = SchemaFactory.createForClass(ProdukDetail);
