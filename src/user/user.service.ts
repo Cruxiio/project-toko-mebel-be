@@ -5,13 +5,19 @@ import {
 } from '@nestjs/common';
 import {
   CreateUserDto,
+  FindAllUserDto,
   UpdatePasswordDto,
   UpdateUserDto,
 } from './dto/create-user.dto';
 // import { UserRepository } from './user.repository';
 import { compare, hash } from 'bcryptjs';
 import { UserRepository } from 'src/database/mongodb/repositories/user.repository';
-import { UserDeleteResponse } from './dto/response.interface';
+import {
+  UserDeleteResponse,
+  UserFindAllResponse,
+  UserFindAllResponseData,
+  UserFindOneResponse,
+} from './dto/response.interface';
 
 @Injectable()
 export class UserService {
@@ -23,13 +29,62 @@ export class UserService {
       throw new BadRequestException('id must be a number');
     }
 
-    return await this.userRepository.findOne({ id, deleted_at: null });
+    let userData = await this.userRepository.findOne({ id, deleted_at: null });
+
+    const res: UserFindOneResponse = {
+      id: userData.id,
+      nama: userData.nama,
+      username: userData.username,
+      role: userData.role,
+      email: userData.email,
+      created_at: userData.created_at,
+      updated_at: userData.updated_at,
+      deleted_at: userData.deleted_at,
+    };
+    return res;
   }
 
-  async handleFindAllUser() {
-    let users = await this.userRepository.findAll({ deleted_at: null });
-    users = users.filter((u) => u.role != 'superadmin');
-    return users;
+  async handleFindAllUser(requestFilter: FindAllUserDto) {
+    let listUser = await this.userRepository.findAllPagination(
+      { nama: requestFilter.search },
+      { page: requestFilter.page, per_page: requestFilter.per_page },
+      {},
+    );
+
+    // filter supaya akun super admin tidak ditampilkan
+    // listUser = listUser.filter((u) => u.role != 'superadmin');
+
+    // dapatkan total seluruh data berdasarkan hasil filter
+    const totalListDataUser = await this.userRepository.countAllPagination({
+      nama: requestFilter.search,
+    });
+
+    // hitung total page
+    const total_page: number = Math.ceil(
+      totalListDataUser / requestFilter.per_page,
+    );
+
+    // buat response
+    const res: UserFindAllResponse = {
+      page: requestFilter.page,
+      per_page: requestFilter.per_page,
+      data: listUser.map((s) => {
+        const formattedData: UserFindAllResponseData = {
+          id: s.id,
+          nama: s.nama,
+          username: s.username,
+          role: s.role,
+          email: s.email,
+          created_at: s.created_at,
+          updated_at: s.updated_at,
+          deleted_at: s.deleted_at,
+        };
+        return formattedData;
+      }),
+      total_page: total_page,
+    };
+
+    return res;
   }
 
   async handleCreateUser(createUserDto: CreateUserDto) {
@@ -53,10 +108,23 @@ export class UserService {
       throw new BadRequestException('Email already exists');
     }
 
-    return await this.userRepository.create({
+    let newUser = await this.userRepository.create({
       ...createUserDto,
       password: await hash(createUserDto.password, 10),
     });
+
+    const res: UserFindOneResponse = {
+      id: newUser.id,
+      nama: newUser.nama,
+      username: newUser.username,
+      role: newUser.role,
+      email: newUser.email,
+      created_at: newUser.created_at,
+      updated_at: newUser.updated_at,
+      deleted_at: newUser.deleted_at,
+    };
+
+    return res;
   }
 
   async handleUpdateUser(id: number, updateUserDto: UpdateUserDto) {
@@ -74,7 +142,17 @@ export class UserService {
       throw new NotFoundException('User not found');
     }
 
-    return updatedUser;
+    const res: UserFindOneResponse = {
+      nama: updatedUser.nama,
+      username: updatedUser.username,
+      role: updatedUser.role,
+      email: updatedUser.email,
+      created_at: updatedUser.created_at,
+      updated_at: updatedUser.updated_at,
+      deleted_at: updatedUser.deleted_at,
+    };
+
+    return res;
   }
 
   async handleResetUserCollectionAutoInc() {
@@ -131,7 +209,10 @@ export class UserService {
     }
 
     // minta data user berdasarkan id
-    const currUser = await this.handleFindOneUser(id);
+    const currUser = await this.userRepository.findOne({
+      id,
+      deleted_at: null,
+    });
 
     if (updatePasswordDto.old_password != '') {
       // cek apakah password lama benar

@@ -71,4 +71,74 @@ export class UserRepository {
     const user = await this.userModel.findOne(userField);
     return user ? true : false;
   }
+
+  async findAllPagination(
+    userFilterQuery: FilterQuery<User>,
+    paginationQuery: any,
+    showedField: any,
+  ) {
+    // buat temporary object untuk isi filter sesuai syarat yang diberikan
+    let filter: FilterQuery<User> = {
+      deleted_at: null,
+      role: { $ne: 'superadmin' },
+    };
+
+    if (userFilterQuery.nama != '') {
+      filter = {
+        ...filter,
+        $or: [
+          {
+            nama: {
+              $regex: userFilterQuery.nama, // like isi regex
+              $options: 'i', // i artinya case-insensitive
+            },
+          },
+          {
+            username: {
+              $regex: userFilterQuery.nama, // like isi regex
+              $options: 'i', // i artinya case-insensitive
+            },
+          },
+        ],
+      };
+    }
+
+    // ini untuk paginationnya
+    const { page, per_page } = paginationQuery;
+    // skip untuk mulai dari data ke berapa (mirip OFFSET pada SQL)
+    const skip = (page - 1) * per_page;
+
+    return await this.userModel
+      .find(filter, showedField)
+      .skip(skip)
+      .limit(per_page);
+  }
+
+  // ini buat dapetin seluruh jumlah data berdasarkan syarat filter
+  async countAllPagination(userFilterQuery: FilterQuery<User>) {
+    // buat temporary object untuk isi filter sesuai syarat yang diberikan
+    let filter: FilterQuery<User> = { deleted_at: null };
+
+    if (userFilterQuery.nama != '') {
+      filter = {
+        ...filter,
+        $or: [
+          {
+            nama: {
+              $regex: userFilterQuery.nama, // like isi regex
+              $options: 'i', // i artinya case-insensitive
+            },
+          },
+          {
+            username: {
+              $regex: userFilterQuery.nama, // like isi regex
+              $options: 'i', // i artinya case-insensitive
+            },
+          },
+        ],
+      };
+    }
+
+    return await this.userModel.countDocuments(filter);
+  }
 }

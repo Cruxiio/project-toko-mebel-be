@@ -1,7 +1,9 @@
 import { PartialType } from '@nestjs/mapped-types';
+import { Transform } from 'class-transformer';
 import {
   IsIn,
   IsNotEmpty,
+  IsNumber,
   IsOptional,
   IsString,
   Matches,
@@ -104,4 +106,22 @@ export class UpdatePasswordDto extends AdminUpdateUserPasswordDto {
   //   },
   // )
   // new_password: string;
+}
+
+export class FindAllUserDto {
+  @IsString()
+  @IsOptional()
+  search?: string = '';
+
+  @IsNumber({}, { message: 'page must be a number' })
+  @IsOptional()
+  //transform buat olah value field sebelum masuk ke validasi
+  @Transform(({ value }) => Number(value))
+  page?: number = 1;
+
+  @IsNumber()
+  @IsOptional()
+  //transform buat olah value field sebelum masuk ke validasi
+  @Transform(({ value }) => Number(value))
+  per_page?: number = 10;
 }

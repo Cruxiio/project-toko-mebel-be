@@ -9,11 +9,13 @@ import {
   Request,
   Put,
   BadRequestException,
+  Query,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import {
   AdminUpdateUserPasswordDto,
   CreateUserDto,
+  FindAllUserDto,
   UpdatePasswordDto,
   UpdateUserDto,
 } from './dto/create-user.dto';
@@ -74,10 +76,8 @@ export class UserController {
   // manage user for superadmin
   @Roles('superadmin')
   @Get()
-  async findAll(@Request() req: any) {
-    // console.log(req.user);
-
-    return this.userService.handleFindAllUser();
+  async findAll(@Query() userFilter: FindAllUserDto) {
+    return this.userService.handleFindAllUser(userFilter);
   }
 
   @Roles('superadmin')
