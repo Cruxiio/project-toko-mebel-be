@@ -40,10 +40,17 @@ export class ProdukService {
     }
 
     // cek id_produk valid atau tidak
-    let produkData = await this.produkRepo.findOne({
-      id,
-      deleted_at: null,
-    });
+    let produkData = await this.produkRepo.findOneProduk(
+      {
+        id,
+        deleted_at: null,
+      },
+      {
+        main: {},
+        field1: 'id nama',
+        field2: 'id nama',
+      },
+    );
 
     if (!produkData) {
       throw new NotFoundException('Produk not found');
@@ -65,10 +72,20 @@ export class ProdukService {
       produkInputDB,
     );
 
-    // buat response, pakai ProdukFindAllResponse karena tidak perlu detail
-    const res: ProdukFindAllResponse = {
-      id: updatedProduk.id,
-      nama: updatedProduk.nama,
+    // buat response
+    const res: ProdukFindOneResponse = {
+      nama: produkData.nama,
+      detail: produkData.detail.map((item) => ({
+        id_bahan: item.id_bahan.id,
+        nama_bahan: item.id_bahan.nama,
+        id_satuan: item.id_satuan.id,
+        nama_satuan: item.id_satuan.nama,
+        qty: item.qty,
+        keterangan: item.keterangan,
+      })),
+      created_at: produkData.created_at,
+      updated_at: produkData.updated_at,
+      deleted_at: produkData.deleted_at,
     };
 
     return res;
@@ -88,8 +105,8 @@ export class ProdukService {
       },
       {
         main: {},
-        field1: 'id',
-        field2: 'id',
+        field1: 'id nama',
+        field2: 'id nama',
       },
     );
 
@@ -103,7 +120,9 @@ export class ProdukService {
       nama: produkData.nama,
       detail: produkData.detail.map((item) => ({
         id_bahan: item.id_bahan.id,
+        nama_bahan: item.id_bahan.nama,
         id_satuan: item.id_satuan.id,
+        nama_satuan: item.id_satuan.nama,
         qty: item.qty,
         keterangan: item.keterangan,
       })),

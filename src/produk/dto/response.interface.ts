@@ -4,7 +4,11 @@ import { Types } from 'mongoose';
 export interface ProdukDetailArrayData {
   id_bahan: number;
 
+  nama_bahan: string;
+
   id_satuan: number;
+
+  nama_satuan: string;
 
   qty: number;
 
