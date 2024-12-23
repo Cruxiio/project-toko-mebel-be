@@ -1,0 +1,239 @@
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import {
+  ProyekProduk,
+  ProyekProdukDocument,
+} from '../schemas/proyek_produk.schema';
+import { FilterQuery, Model } from 'mongoose';
+import { ProyekProdukDtoDatabaseInput } from 'src/proyek/dto/response.interface';
+import path from 'path';
+import { FindAllProyekProdukDto } from 'src/proyek/dto/create-proyek.dto';
+import { ProdukRepository } from './produk.repository';
+import { ProyekRepository } from './proyek.repository';
+import { TeamRepository } from './team.repository';
+import { KaryawanRepository } from './karyawan.repository';
+
+@Injectable()
+export class ProyekProdukRepository {
+  constructor(
+    @InjectModel(ProyekProduk.name)
+    private readonly proyekProdukModel: Model<ProyekProdukDocument>,
+    private readonly produkRepo: ProdukRepository,
+    private readonly proyekRepo: ProyekRepository,
+    private readonly teamRepo: TeamRepository,
+    private readonly karyawanRepo: KaryawanRepository,
+  ) {}
+
+  // GENERIC FUNCTION
+
+  async create(createProyekProdukDto: ProyekProdukDtoDatabaseInput) {
+    const proyekProduk = new this.proyekProdukModel(createProyekProdukDto);
+    return await proyekProduk.save();
+  }
+
+  async update(
+    ProyekProdukFilterQuery: FilterQuery<ProyekProduk>,
+    proyekProdukData: ProyekProdukDtoDatabaseInput,
+  ) {
+    try {
+      const updatedProyekProduk = await this.proyekProdukModel.findOneAndUpdate(
+        ProyekProdukFilterQuery,
+        proyekProdukData,
+        { new: true }, // option new: true supaya hasil find one merupakan data setelah diupdate
+      );
+      return updatedProyekProduk;
+    } catch (error) {
+      console.error('Error update data produk:', error);
+      throw new Error('Failed to update produk');
+    }
+  }
+
+  async findOne(
+    proyekProdukFilterQuery: FilterQuery<ProyekProduk>,
+    showedField: any,
+  ) {
+    return await this.proyekProdukModel
+      .findOne(proyekProdukFilterQuery, showedField.main)
+      .populate({
+        path: 'id_proyek',
+        select: showedField.field1,
+      })
+      .populate({
+        path: 'id_produk',
+        select: showedField.field2,
+      })
+      .populate({
+        path: 'id_team',
+        select: showedField.field3,
+        populate: {
+          path: 'anggota',
+          select: showedField.nestedField3,
+        },
+      });
+  }
+
+  async findAll(
+    proyekProdukFilterQuery: FilterQuery<ProyekProduk>,
+    showedField: any,
+  ) {
+    let filter: FilterQuery<ProyekProduk> = { deleted_at: null };
+
+    filter = { ...filter, ...proyekProdukFilterQuery };
+
+    return await this.proyekProdukModel
+      .find(filter, showedField.main)
+      .populate({
+        path: 'id_proyek',
+        select: showedField.field1,
+      })
+      .populate({
+        path: 'id_produk',
+        select: showedField.field2,
+      })
+      .populate({
+        path: 'id_team',
+        select: showedField.field3,
+        populate: {
+          path: 'anggota',
+          select: showedField.nestedField3,
+        },
+      });
+  }
+
+  // NON-GENERIC FUNCTION
+
+  async findAllPagination(
+    proyekProdukFilterQuery: FilterQuery<FindAllProyekProdukDto>,
+    paginationQuery: any,
+    showedField: any,
+  ) {
+    let filter: FilterQuery<ProyekProduk> = { deleted_at: null };
+
+    if (proyekProdukFilterQuery.id_proyek > 0) {
+      // cari id proyek
+      const proyekData = await this.proyekRepo.findOne(
+        { id: proyekProdukFilterQuery.id_proyek },
+        { main: { _id: 1 } },
+      );
+
+      if (!proyekData) {
+        throw new NotFoundException('Proyek not found');
+      }
+
+      // tambahkan id_proyek ke filter
+      filter = { ...filter, id_proyek: proyekData._id };
+    }
+
+    if (proyekProdukFilterQuery.id_produk > 0) {
+      // cari produk
+      const produkData = await this.produkRepo.findOne({
+        id: proyekProdukFilterQuery.id_produk,
+      });
+
+      if (!produkData) {
+        throw new NotFoundException('Produk not found');
+      }
+
+      // tambahkan id_produk ke filter
+      filter = { ...filter, id_produk: produkData._id };
+    }
+
+    if (proyekProdukFilterQuery.id_karyawan > 0) {
+      // cari karyawan untuk dapatkan _id nya
+      const karyawanData = await this.karyawanRepo.findOne({
+        id: proyekProdukFilterQuery.id_karyawan,
+        deleted_at: null,
+      });
+
+      if (!karyawanData) {
+        throw new NotFoundException('Karyawan not found');
+      }
+
+      // cari team
+      const teamData: any = await this.teamRepo.findAll(
+        { anggota: karyawanData._id },
+        { main: {}, field1: 'id nama' },
+      );
+
+      if (!teamData) {
+        throw new NotFoundException('Team not found');
+      }
+
+      // tambahkan id_team ke filter
+      filter = {
+        ...filter,
+        id_team: {
+          $in: teamData,
+        },
+      };
+    }
+
+    // filter berdasarkan tipe proyek
+    if (proyekProdukFilterQuery.tipe !== '') {
+      filter = { ...filter, tipe: proyekProdukFilterQuery.tipe };
+    }
+
+    // ini untuk paginationnya
+    const { page, per_page } = paginationQuery;
+    // skip untuk mulai dari data ke berapa (mirip OFFSET pada SQL)
+    const skip = (page - 1) * per_page;
+
+    return await this.proyekProdukModel
+      .find(filter, showedField.main)
+      .populate({
+        path: 'id_proyek',
+        select: showedField.field1,
+      })
+      .populate({
+        path: 'id_produk',
+        select: showedField.field2,
+      })
+      .populate({
+        path: 'id_team',
+        select: showedField.field3,
+        populate: {
+          path: 'anggota',
+          select: showedField.nestedField3,
+        },
+      })
+      .skip(skip)
+      .limit(per_page);
+  }
+
+  async countAllPagination(
+    proyekProdukFilterQuery: FilterQuery<FindAllProyekProdukDto>,
+  ) {
+    let filter: FilterQuery<ProyekProduk> = { deleted_at: null };
+
+    if (proyekProdukFilterQuery.id_proyek > 0) {
+      // cari id proyek
+      const proyekData = await this.proyekRepo.findOne(
+        { id: proyekProdukFilterQuery.id_proyek },
+        { main: { _id: 1 } },
+      );
+
+      if (!proyekData) {
+        throw new NotFoundException('Proyek not found');
+      }
+
+      // tambahkan id_proyek ke filter
+      filter = { ...filter, id_proyek: proyekData };
+    }
+
+    if (proyekProdukFilterQuery.id_produk > 0) {
+      // cari produk
+      const produkData = await this.produkRepo.findOne({
+        id: proyekProdukFilterQuery.id_produk,
+      });
+
+      if (!produkData) {
+        throw new NotFoundException('Produk not found');
+      }
+
+      // tambahkan id_produk ke filter
+      filter = { ...filter, id_produk: produkData._id };
+    }
+
+    return await this.proyekProdukModel.countDocuments(filter);
+  }
+}

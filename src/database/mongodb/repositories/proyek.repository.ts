@@ -24,7 +24,29 @@ export class ProyekRepository {
     return proyekData;
   }
 
-  async findAll(
+  async findAll(proyekFilterQuery: FilterQuery<Proyek>, showedField: any) {
+    let filter: FilterQuery<Proyek> = { deleted_at: null };
+
+    if (proyekFilterQuery.nama != '') {
+      filter = {
+        ...filter,
+        nama: {
+          $regex: proyekFilterQuery.nama, // like isi regex
+          $options: 'i', // i artinya case-insensitive
+        },
+      };
+    }
+
+    const proyekData = await this.proyekModel
+      .find(filter, showedField.main)
+      .populate({
+        path: 'id_customer',
+        select: showedField.field1,
+      });
+    return proyekData;
+  }
+
+  async findAllPagination(
     proyekFilterQuery: FilterQuery<Proyek>,
     paginationQuery: any,
     showedField: any,

@@ -1,13 +1,19 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { FilterQuery, Model } from 'mongoose';
+import { FilterQuery, Model, Types } from 'mongoose';
 import { Team, TeamDocument } from '../schemas/team.schema';
+import { KaryawanRepository } from './karyawan.repository';
 
 @Injectable()
 export class TeamRepository {
   constructor(
     @InjectModel(Team.name)
     private readonly teamModel: Model<TeamDocument>,
+    private readonly karyawanRepo: KaryawanRepository,
   ) {}
 
   async findOne(teamFilterQuery: FilterQuery<Team>) {
@@ -15,51 +21,17 @@ export class TeamRepository {
     return teamData;
   }
 
-  async findAll(
-    teamFilterQuery: FilterQuery<Team>,
-    paginationQuery: any,
-    showedField: any,
-  ) {
+  async findAll(teamFilterQuery: FilterQuery<Team>, showedField: any) {
     // buat temporary object untuk isi filter sesuai syarat yang diberikan
     let filter: FilterQuery<Team> = { deleted_at: null };
 
-    if (teamFilterQuery.nama != '') {
-      filter = {
-        ...filter,
-        nama: {
-          $regex: teamFilterQuery.nama, // like isi regex
-          $options: 'i', // i artinya case-insensitive
-        },
-      };
-    }
+    // gabungkan filter yang diberikan dengan filter yang ada
+    filter = { ...filter, ...teamFilterQuery };
 
-    // ini untuk paginationnya
-    const { page, per_page } = paginationQuery;
-    // skip untuk mulai dari data ke berapa (mirip OFFSET pada SQL)
-    const skip = (page - 1) * per_page;
-
-    return await this.teamModel
-      .find(filter, showedField)
-      .skip(skip)
-      .limit(per_page);
-  }
-
-  // ini buat dapetin seluruh jumlah data berdasarkan syarat filter
-  async countAll(teamFilterQuery: FilterQuery<Team>) {
-    // buat temporary object untuk isi filter sesuai syarat yang diberikan
-    let filter: FilterQuery<Team> = { deleted_at: null };
-
-    if (teamFilterQuery.nama != '') {
-      filter = {
-        ...filter,
-        nama: {
-          $regex: teamFilterQuery.nama, // like isi regex
-          $options: 'i', // i artinya case-insensitive
-        },
-      };
-    }
-
-    return await this.teamModel.countDocuments(filter);
+    return await this.teamModel.find(filter, showedField.main).populate({
+      path: 'anggota',
+      select: showedField.field1,
+    });
   }
 
   async create(teamData: Partial<Team>) {
@@ -91,6 +63,7 @@ export class TeamRepository {
   }
 
   // FUNC NON-GENERIC
+
   // async masterFindAll(
   //   karyawanFilterQuery: FilterQuery<Team>,
   //   paginationQuery: any,
@@ -101,4 +74,46 @@ export class TeamRepository {
   //     _id: 0,
   //   });
   // }
+
+  async findAllAnggota(teamFilterQuery: FilterQuery<Team>, showedField: any) {
+    const teamData = await this.teamModel
+      .findOne(teamFilterQuery, showedField.main)
+      .populate({
+        path: 'anggota',
+        select: showedField.field1,
+      });
+    return teamData;
+  }
+
+  async validateKaryawanIDs(
+    arrayKaryawanID: number[],
+  ): Promise<Types.ObjectId[]> {
+    let result: Types.ObjectId[] = [];
+
+    for (let i = 0; i < arrayKaryawanID.length; i++) {
+      const k = arrayKaryawanID[i];
+
+      // cek apakah karyawan ada
+      const karyawanData = await this.karyawanRepo.findOne({
+        id: k,
+        deleted_at: null,
+      });
+
+      if (!karyawanData) {
+        throw new NotFoundException('Karyawan not found');
+      }
+
+      // cek role karyawan pertama apakah ketua atau tidak
+      if (karyawanData.role != 'ketua' && i == 0) {
+        throw new BadRequestException(
+          'Karyawan yang bertanggung jawab harus memiliki role ketua',
+        );
+      }
+
+      // tambahkan ke result jika valid
+      result.push(karyawanData._id as Types.ObjectId);
+    }
+
+    return result;
+  }
 }

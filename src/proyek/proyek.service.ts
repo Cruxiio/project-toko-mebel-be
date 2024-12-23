@@ -5,8 +5,11 @@ import {
 } from '@nestjs/common';
 import {
   CreateProyekDto,
+  CreateProyekProdukDto,
   FindAllProyekDto,
+  FindAllProyekProdukDto,
   UpdateProyekDto,
+  UpdateProyekProdukDto,
 } from './dto/create-proyek.dto';
 import { ProyekRepository } from 'src/database/mongodb/repositories/proyek.repository';
 import { CustomerRepository } from 'src/database/mongodb/repositories/customer.repository';
@@ -16,13 +19,24 @@ import {
   ProyekDtoDatabaseInput,
   ProyekFindAllResponse,
   ProyekFindOneResponse,
+  ProyekProdukDtoDatabaseInput,
+  ProyekProdukFindAllResponse,
+  ProyekProdukFindAllResponseData,
+  TeamDtoDatabaseInput,
 } from './dto/response.interface';
+import { TeamRepository } from 'src/database/mongodb/repositories/team.repository';
+import { CreateProdukDto } from 'src/produk/dto/create-produk.dto';
+import { ProdukRepository } from 'src/database/mongodb/repositories/produk.repository';
+import { ProyekProdukRepository } from 'src/database/mongodb/repositories/proyek_produk.repository';
 
 @Injectable()
 export class ProyekService {
   constructor(
     private readonly proyekRepo: ProyekRepository,
     private readonly customerRepo: CustomerRepository,
+    private readonly teamRepo: TeamRepository,
+    private readonly produkRepo: ProdukRepository,
+    private readonly proyekProdukRepo: ProyekProdukRepository,
   ) {}
   async handleCreateProyek(createProyekDto: CreateProyekDto) {
     // validasi id customer
@@ -71,7 +85,7 @@ export class ProyekService {
 
   async handleFindAllProyek(requestFilter: FindAllProyekDto) {
     // find all satuan
-    const listDataProyek = await this.proyekRepo.findAll(
+    const listDataProyek = await this.proyekRepo.findAllPagination(
       {
         nama: requestFilter.search,
         id_customer: requestFilter.id_customer,
@@ -252,8 +266,369 @@ export class ProyekService {
       throw new NotFoundException('Proyek not found');
     }
 
+    // delete proyek
     const deletedProyekData = await this.proyekRepo.update(
       { id, deleted_at: null },
+      { deleted_at: new Date() },
+    );
+
+    // find all proyek produk by id proyek
+    const listProyekProdukData = await this.proyekProdukRepo.findAll(
+      {
+        id_proyek: proyekData._id,
+      },
+      {
+        main: {},
+        field1: '',
+        field2: '',
+        field3: '',
+        nestedField3: '',
+      },
+    );
+
+    for (let i = 0; i < listProyekProdukData.length; i++) {
+      const proyekProdukData = listProyekProdukData[i];
+
+      // delete proyek produk
+      const deletedProyekProdukData = await this.proyekProdukRepo.update(
+        { id: proyekProdukData.id, deleted_at: null },
+        { deleted_at: new Date() },
+      );
+
+      // delete semua bahan yang ada pada produk di proyek produk
+      const deletedProdukData = await this.produkRepo.update(
+        { _id: proyekProdukData.id_produk, deleted_at: null },
+        { deleted_at: new Date() },
+      );
+    }
+
+    const res: ProyekDeleteResponse = {
+      message: 'OK',
+    };
+
+    return res;
+  }
+
+  async handleCreateProyekProduk(createProyekProdukDto: CreateProyekProdukDto) {
+    //validasi id proyek
+    const proyekData = await this.proyekRepo.findOne(
+      {
+        id: createProyekProdukDto.id_proyek,
+        deleted_at: null,
+      },
+      {
+        main: {},
+        field1: 'id nama',
+      },
+    );
+
+    if (!proyekData) {
+      throw new NotFoundException('Proyek not found');
+    }
+
+    //validasi id karyawan
+    const teamData = await this.teamRepo.validateKaryawanIDs([
+      createProyekProdukDto.id_penanggung_jawab,
+      createProyekProdukDto.id_karyawan1,
+      createProyekProdukDto.id_karyawan2,
+    ]);
+
+    // buat team
+    const newTeamData = await this.teamRepo.create({
+      anggota: teamData,
+    });
+
+    // ambil data anggota team
+    // harus pake any supaya bisa baca field hasil populate karyawan
+    // kenapa nda bisa baca properti nama karena field hasil popuplate tidak dikenali oleh validasi type typescript padahal datanya ada
+    const anggotaTeamData: any = await this.teamRepo.findAllAnggota(
+      {
+        _id: newTeamData._id,
+        deleted_at: null,
+      },
+      {
+        main: {},
+        field1: 'id nama role',
+      },
+    );
+
+    // buat produk
+    const newProdukData = await this.produkRepo.create({
+      nama: createProyekProdukDto.nama_produk,
+      detail: [],
+    });
+
+    // buat proyek produk
+    const proyekProdukInputData: ProyekProdukDtoDatabaseInput = {
+      id_proyek: proyekData._id as Types.ObjectId,
+      id_produk: newProdukData._id as Types.ObjectId,
+      id_team: newTeamData._id as Types.ObjectId,
+      qty: createProyekProdukDto.qty,
+      tipe: createProyekProdukDto.tipe,
+    };
+
+    // buat proyek produk
+    const newProyekProdukData = await this.proyekProdukRepo.create(
+      proyekProdukInputData,
+    );
+
+    const res: ProyekProdukFindAllResponseData = {
+      id_proyek: proyekData.id,
+      nama_proyek: proyekData.nama,
+      id_produk: newProdukData.id,
+      nama_produk: newProdukData.nama,
+      id_team: newTeamData.id,
+      nama_penanggung_jawab: anggotaTeamData.anggota[0].nama,
+      nama_karyawan1: anggotaTeamData.anggota[1].nama,
+      nama_karyawan2: anggotaTeamData.anggota[2].nama,
+      qty: newProyekProdukData.qty,
+      tipe: newProyekProdukData.tipe,
+      created_at: newProyekProdukData.created_at,
+      updated_at: newProyekProdukData.updated_at,
+      deleted_at: newProyekProdukData.deleted_at,
+    };
+
+    return res;
+  }
+
+  async handleUpdateProyekProduk(
+    id: number,
+    id_proyek_produk: number,
+    updateProyekProdukDto: UpdateProyekProdukDto,
+  ) {
+    // cek apakah id proyek adalah int atau bukan
+    if (Number.isNaN(id)) {
+      throw new BadRequestException('id proyek must be a number');
+    }
+
+    // cek apakah id proyek produk adalah int atau bukan
+    if (Number.isNaN(id_proyek_produk)) {
+      throw new BadRequestException('id proyek produk must be a number');
+    }
+
+    // find proyek produk by id
+    // harus pake any supaya bisa baca field hasil populate produk
+    const proyekProdukData = await this.proyekProdukRepo.findOne(
+      {
+        id: id_proyek_produk,
+        deleted_at: null,
+      },
+      {
+        main: {},
+        field1: 'id nama',
+        field2: 'id nama',
+        field3: 'id',
+        nestedField3: 'id nama role',
+      },
+    );
+
+    if (!proyekProdukData) {
+      throw new NotFoundException('Proyek Produk not found');
+    }
+
+    //validasi id proyek
+    const proyekData = await this.proyekRepo.findOne(
+      {
+        id: id,
+        deleted_at: null,
+      },
+      {
+        main: {},
+        field1: 'id nama',
+      },
+    );
+
+    if (!proyekData) {
+      throw new NotFoundException('Proyek not found');
+    }
+
+    // update nama produk
+    const updatedProdukData = await this.produkRepo.update(
+      { _id: proyekProdukData.id_produk, deleted_at: null },
+      { nama: updateProyekProdukDto.nama_produk },
+    );
+
+    //validasi id karyawan
+    const teamData = await this.teamRepo.validateKaryawanIDs([
+      updateProyekProdukDto.id_penanggung_jawab,
+      updateProyekProdukDto.id_karyawan1,
+      updateProyekProdukDto.id_karyawan2,
+    ]);
+
+    // update anggota team
+    const updatedTeamData = await this.teamRepo.update(
+      { id: proyekProdukData.id_team.id, deleted_at: null },
+      {
+        anggota: teamData,
+      },
+    );
+
+    // ambil data anggota team
+    // harus pake any supaya bisa baca field hasil populate karyawan
+    // kenapa nda bisa baca properti nama karena field hasil popuplate tidak dikenali oleh validasi type typescript padahal datanya ada
+    const anggotaTeamData: any = await this.teamRepo.findAllAnggota(
+      {
+        _id: updatedTeamData._id,
+        deleted_at: null,
+      },
+      {
+        main: {},
+        field1: 'id nama role',
+      },
+    );
+
+    // update proyek produk
+    const proyekProdukInputData: ProyekProdukDtoDatabaseInput = {
+      id_proyek: proyekData._id as Types.ObjectId,
+      id_team: updatedTeamData._id as Types.ObjectId,
+      qty: updateProyekProdukDto.qty,
+      tipe: updateProyekProdukDto.tipe,
+    };
+
+    // update proyek produk
+    const updatedProyekProdukData = await this.proyekProdukRepo.update(
+      { id: proyekProdukData.id, deleted_at: null },
+      proyekProdukInputData,
+    );
+
+    const res: ProyekProdukFindAllResponseData = {
+      id: proyekProdukData.id,
+      id_proyek: proyekData.id,
+      nama_proyek: proyekData.nama,
+      id_produk: proyekProdukData.id_produk.id,
+      nama_produk: proyekProdukData.id_produk.nama,
+      id_team: updatedTeamData.id,
+      nama_penanggung_jawab: anggotaTeamData.anggota[0].nama,
+      nama_karyawan1: anggotaTeamData.anggota[1].nama,
+      nama_karyawan2: anggotaTeamData.anggota[2].nama,
+      qty: updatedProyekProdukData.qty,
+      tipe: updatedProyekProdukData.tipe,
+      created_at: updatedProyekProdukData.created_at,
+      updated_at: updatedProyekProdukData.updated_at,
+      deleted_at: updatedProyekProdukData.deleted_at,
+    };
+
+    return res;
+  }
+
+  // async handleFindOneProyekProduk(id: number) {
+  //   // cek apakah id adalah int atau bukan
+  //   if (Number.isNaN(id)) {
+  //     throw new BadRequestException('id must be a number');
+  //   }
+
+  //   // find proyek produk by id
+  //   const proyekProdukData = await this.proyekProdukRepo.findOne(
+  //     {
+  //       id,
+  //       deleted_at: null,
+  //     },
+  //     {
+  //       main: {},
+  //       field1: 'id nama',
+  //       field2: 'id nama',
+  //       field3: 'id',
+  //       nestedField3: 'id nama role',
+  //     },
+  //   );
+  // }
+
+  async handleFindAllProyekProduk(requestFilter: FindAllProyekProdukDto) {
+    // find all proyek produk
+    const listDataProyekProduk: any =
+      await this.proyekProdukRepo.findAllPagination(
+        {
+          id_proyek: requestFilter.id_proyek,
+          id_produk: requestFilter.id_produk,
+          id_karyawan: requestFilter.id_karyawan,
+          tipe: requestFilter.tipe,
+        },
+        {
+          page: requestFilter.page,
+          per_page: requestFilter.per_page,
+        },
+        {
+          main: {},
+          field1: 'id nama',
+          field2: 'id nama',
+          field3: 'id',
+          nestedField3: 'id nama role',
+        },
+      );
+
+    // dapatkan total seluruh data berdasarkan hasil filter
+    const totalListDataProyekProduk =
+      await this.proyekProdukRepo.countAllPagination({
+        id_proyek: requestFilter.id_proyek,
+        id_produk: requestFilter.id_produk,
+        id_karyawan: requestFilter.id_karyawan,
+        tipe: requestFilter.tipe,
+      });
+
+    // hitung total page
+    const total_page: number = Math.ceil(
+      totalListDataProyekProduk / requestFilter.per_page,
+    );
+
+    // buat response
+    const res: ProyekProdukFindAllResponse = {
+      page: requestFilter.page,
+      per_page: requestFilter.per_page,
+      data: listDataProyekProduk.map((s) => {
+        const formattedData: ProyekProdukFindAllResponseData = {
+          id: s.id,
+          id_proyek: s.id_proyek.id,
+          nama_proyek: s.id_proyek.nama,
+          id_produk: s.id_produk.id,
+          nama_produk: s.id_produk.nama,
+          id_team: s.id_team.id,
+          nama_penanggung_jawab: s.id_team.anggota[0].nama,
+          nama_karyawan1: s.id_team.anggota[1].nama,
+          nama_karyawan2: s.id_team.anggota[2].nama,
+          qty: s.qty,
+          tipe: s.tipe,
+          created_at: s.created_at,
+          updated_at: s.updated_at,
+          deleted_at: s.deleted_at,
+        };
+        return formattedData;
+      }),
+      total_page: total_page,
+    };
+    return res;
+  }
+
+  async handleDeleteProyekProduk(id: number) {
+    // cek apakah id adalah int atau bukan
+    if (Number.isNaN(id)) {
+      throw new BadRequestException('id must be a number');
+    }
+
+    // find proyek produk by id
+    const proyekProdukData = await this.proyekProdukRepo.findOne(
+      {
+        id,
+        deleted_at: null,
+      },
+      {
+        main: {},
+        field1: 'id nama',
+      },
+    );
+
+    if (!proyekProdukData) {
+      throw new NotFoundException('Proyek Produk not found');
+    }
+
+    // delete proyek produk
+    const deletedProyekProdukData = await this.proyekProdukRepo.update(
+      { id, deleted_at: null },
+      { deleted_at: new Date() },
+    );
+
+    // delete semua bahan yang ada pada produk di proyek produk
+    const deletedProdukData = await this.produkRepo.update(
+      { _id: proyekProdukData.id_produk, deleted_at: null },
       { deleted_at: new Date() },
     );
 

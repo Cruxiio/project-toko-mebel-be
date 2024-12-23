@@ -34,3 +34,44 @@ export interface ProyekFindAllResponse {
 export interface ProyekDeleteResponse {
   message: string;
 }
+
+// buat interface proyek produk
+// digunakan untuk input create dan update serta delete
+export interface TeamDtoDatabaseInput {
+  anggota?: Types.ObjectId[];
+  deleted_at?: Date | null;
+}
+
+export interface ProyekProdukDtoDatabaseInput {
+  id_proyek?: Types.ObjectId;
+  id_produk?: Types.ObjectId;
+  id_team?: Types.ObjectId;
+  qty?: number;
+  tipe?: string;
+  deleted_at?: Date | null;
+}
+
+// dipake buat response create update find all
+export interface ProyekProdukFindAllResponseData {
+  id?: number; // dipake buat update makanya optional
+  id_proyek: number;
+  nama_proyek: string;
+  id_produk: number;
+  nama_produk: string;
+  id_team: number;
+  nama_penanggung_jawab: string;
+  nama_karyawan1: string;
+  nama_karyawan2: string;
+  qty: number;
+  tipe: string;
+  created_at?: Date;
+  updated_at?: Date | null;
+  deleted_at?: Date | null;
+}
+
+export interface ProyekProdukFindAllResponse {
+  page: number;
+  per_page: number;
+  data: ProyekProdukFindAllResponseData[];
+  total_page: number;
+}

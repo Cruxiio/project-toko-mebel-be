@@ -10,9 +10,6 @@ export type ProdukDetailDocument = ProdukDetail & Document;
   collection: 'produk_detail',
 })
 export class ProdukDetail {
-  @Prop({ index: true, unique: true, type: Number, auto: true })
-  id: number;
-
   @Prop({ required: true, type: SchemaTypes.ObjectId, ref: Bahan.name })
   id_bahan: Bahan;
 

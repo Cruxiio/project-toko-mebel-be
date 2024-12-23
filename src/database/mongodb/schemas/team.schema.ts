@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, SchemaTypes } from 'mongoose';
+import { Document, SchemaTypes, Types } from 'mongoose';
 import { Karyawan } from './karyawan.schema';
 
 export type TeamDocument = Team & Document;
@@ -12,16 +12,13 @@ export class Team {
   @Prop({ index: true, unique: true, type: Number, auto: true })
   id: number;
 
-  @Prop({ required: true, type: String })
-  nama: string;
-
   // Array of Karyawan ObjectId
   @Prop({
     type: [{ type: SchemaTypes.ObjectId, ref: Karyawan.name }],
     default: [],
   })
   // Can hold populated objects or raw ObjectId strings
-  anggota: Array<Karyawan | string>;
+  anggota: (Types.ObjectId | Karyawan)[];
 
   @Prop({ type: Date, default: null })
   deleted_at?: Date;
