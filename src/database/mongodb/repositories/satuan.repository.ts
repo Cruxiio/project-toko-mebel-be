@@ -15,7 +15,26 @@ export class SatuanRepository {
     return satuanData;
   }
 
-  async findAll(
+  async findAll(satuanFilterQuery: FilterQuery<Satuan>, showedField: any) {
+    // buat temporary object untuk isi filter sesuai syarat yang diberikan
+    let filter: FilterQuery<Satuan> = { deleted_at: null };
+
+    if (satuanFilterQuery.nama && satuanFilterQuery.nama != '') {
+      filter = {
+        ...filter,
+        nama: {
+          $regex: satuanFilterQuery.nama, // like isi regex
+          $options: 'i', // i artinya case-insensitive
+        },
+      };
+    }
+
+    filter = { ...filter, ...satuanFilterQuery };
+
+    return await this.SatuanModel.find(filter, showedField);
+  }
+
+  async findAllPagination(
     satuanFilterQuery: FilterQuery<Satuan>,
     paginationQuery: any,
     showedField: any,
@@ -97,7 +116,7 @@ export class SatuanRepository {
     satuanFilterQuery: FilterQuery<Satuan>,
     paginationQuery: any,
   ) {
-    return await this.findAll(satuanFilterQuery, paginationQuery, {
+    return await this.findAllPagination(satuanFilterQuery, paginationQuery, {
       id: 1,
       nama: 1,
       _id: 0,

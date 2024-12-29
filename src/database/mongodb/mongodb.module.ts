@@ -13,11 +13,13 @@ import { KaryawanRepository } from './repositories/karyawan.repository';
 import { ProdukRepository } from './repositories/produk.repository';
 import { TeamRepository } from './repositories/team.repository';
 import { ProyekProdukRepository } from './repositories/proyek_produk.repository';
+import { HelperModule } from 'src/helper/helper.module';
 
 @Module({
   imports: [
     MongooseModule.forRoot('mongodb://localhost/db_mebel'),
     MongoDBProvider,
+    HelperModule,
   ], // Koneksi MongoDB
   providers: [
     UserRepository,

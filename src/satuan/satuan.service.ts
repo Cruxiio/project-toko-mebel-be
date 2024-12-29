@@ -52,7 +52,7 @@ export class SatuanService {
 
   async HandleFindAllSatuan(requestFilter: FindAllSatuanDto) {
     // find all satuan
-    const listDataSatuan = await this.satuanRepo.findAll(
+    const listDataSatuan = await this.satuanRepo.findAllPagination(
       {
         nama: requestFilter.search,
       },

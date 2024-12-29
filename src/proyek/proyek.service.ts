@@ -562,7 +562,7 @@ export class ProyekService {
       id_proyek: proyekData.id,
       nama_proyek: proyekData.nama,
       id_produk: proyekProdukData.id_produk.id,
-      nama_produk: proyekProdukData.id_produk.nama,
+      nama_produk: updatedProdukData.nama,
       id_team: updatedTeamData.id,
       nama_penanggung_jawab: anggotaTeamData.anggota[0].nama,
       nama_karyawan1: anggotaTeamData.anggota[1].nama,

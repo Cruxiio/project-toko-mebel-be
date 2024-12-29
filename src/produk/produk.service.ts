@@ -66,6 +66,7 @@ export class ProdukService {
       detail: detailProdukInputDB,
     };
 
+    // update produk
     const updatedProduk = await this.produkRepo.update(
       { id, deleted_at: null },
       produkInputDB,
@@ -74,7 +75,7 @@ export class ProdukService {
     // buat response
     const res: ProdukFindOneResponse = {
       nama: produkData.nama,
-      detail: produkData.detail.map((item) => ({
+      detail: updatedProduk.detail.map((item) => ({
         id_bahan: item.id_bahan.id,
         nama_bahan: item.id_bahan.nama,
         id_satuan: item.id_satuan.id,
@@ -82,9 +83,9 @@ export class ProdukService {
         qty: item.qty,
         keterangan: item.keterangan,
       })),
-      created_at: produkData.created_at,
-      updated_at: produkData.updated_at,
-      deleted_at: produkData.deleted_at,
+      created_at: updatedProduk.created_at,
+      updated_at: updatedProduk.updated_at,
+      deleted_at: updatedProduk.deleted_at,
     };
 
     return res;

@@ -27,6 +27,7 @@ import {
   DetailProdukDto,
   FindAllProdukDto,
 } from 'src/produk/dto/create-produk.dto';
+import { HelperService } from 'src/helper/helper.service';
 
 @Injectable()
 export class ProdukRepository {
@@ -37,6 +38,7 @@ export class ProdukRepository {
     // private readonly historyBahanMasukModel: Model<HistoryBahanMasukDocument>,
     private readonly satuanRepo: SatuanRepository,
     private readonly bahanRepo: BahanRepository,
+    private readonly helperService: HelperService,
   ) {}
 
   async findOne(produkFilterQuery: FilterQuery<Produk>) {
@@ -82,11 +84,20 @@ export class ProdukRepository {
     produkData: Partial<ProdukDtoDatabaseInput>,
   ) {
     try {
-      const newProduk = await this.produkModel.findOneAndUpdate(
-        produkFilterQuery,
-        produkData,
-        { new: true }, // option new: true supaya hasil find one merupakan data setelah diupdate
-      );
+      const newProduk = await this.produkModel
+        .findOneAndUpdate(
+          produkFilterQuery,
+          produkData,
+          { new: true }, // option new: true supaya hasil find one merupakan data setelah diupdate
+        )
+        .populate({
+          path: 'detail.id_bahan', // Populate data bahan
+          select: 'id nama', // Ambil hanya field id dari koleksi bahan
+        })
+        .populate({
+          path: 'detail.id_satuan', // Populate data satuan
+          select: 'id nama', // Ambil hanya field id dari koleksi satuan
+        });
 
       return newProduk;
     } catch (error) {
@@ -180,39 +191,73 @@ export class ProdukRepository {
   ): Promise<ProdukDetailDatabaseInput[]> {
     let temp: ProdukDetailDatabaseInput[] = [];
 
+    // simpan seluruh id bahan dalam bentuk array
+    let bahanIds = produkDetail.map((d) => d.id_bahan);
+
+    // cek apakah seluruh id bahan unique
+    let isBahanIdsUnique = this.helperService.cekUnique(bahanIds);
+
+    if (!isBahanIdsUnique) {
+      throw new BadRequestException('Seluruh bahan yang dipilih harus unique');
+    }
+
+    // cek apakah id bahan exist
+    let listBahanData = await this.bahanRepo.findAllWithoutPagination(
+      {
+        id: { $in: bahanIds },
+      },
+      {
+        id: 1,
+        _id: 1,
+      },
+    );
+
+    if (listBahanData.length != bahanIds.length) {
+      throw new NotFoundException('Bahan not found');
+    }
+
+    // simpan seluruh id satuan dalam bentuk array
+    let satuanIds = produkDetail.map((d) => d.id_satuan);
+
+    // dari seluruh id satuan, buang duplikatnya pake Set
+    // kemudian diubah kembali ke array
+    let uniqueSatuanIds = [...new Set(satuanIds)];
+
+    // cek apakah id satuan exist
+    let listSatuanData = await this.satuanRepo.findAll(
+      {
+        id: { $in: uniqueSatuanIds },
+        // nama: '',
+      },
+      {
+        id: 1,
+        _id: 1,
+      },
+    );
+
+    if (listSatuanData.length != uniqueSatuanIds.length) {
+      throw new NotFoundException('Satuan not found');
+    }
+
+    // buat mapping id satuan supaya bisa diformatting ke ProdukDetailDatabaseInput
+    let satuanMap: Map<number, Types.ObjectId> = new Map();
+    listSatuanData.forEach((s) => {
+      satuanMap.set(s.id, s._id as Types.ObjectId);
+    });
+
+    // format ke ProdukDetailDatabaseInput
     for (let i = 0; i < produkDetail.length; i++) {
       const d = produkDetail[i];
 
-      //cek id_bahan valid
-      let bahanData = await this.bahanRepo.findOne({
-        id: d.id_bahan,
-        deleted_at: null,
-      });
-
-      if (!bahanData) {
-        throw new NotFoundException('Bahan not found');
-      }
-
-      //cek id_satuan valid
-      let satuanData = await this.satuanRepo.findOne({
-        id: d.id_satuan,
-        deleted_at: null,
-      });
-
-      if (!satuanData) {
-        throw new NotFoundException('Satuan not found');
-      }
-
       const newNotaDetail: ProdukDetailDatabaseInput = {
-        id_bahan: bahanData._id as Types.ObjectId,
-        id_satuan: satuanData._id as Types.ObjectId,
+        id_bahan: listBahanData[i]._id as Types.ObjectId,
+        id_satuan: satuanMap.get(d.id_satuan) as Types.ObjectId,
         qty: d.qty,
         keterangan: d.keterangan,
       };
 
       temp.push(newNotaDetail);
     }
-
     return temp;
   }
 }
