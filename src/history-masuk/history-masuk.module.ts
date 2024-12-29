@@ -8,6 +8,8 @@ import { SupplierRepository } from 'src/database/mongodb/repositories/supplier.r
 import { SatuanRepository } from 'src/database/mongodb/repositories/satuan.repository';
 import { BahanRepository } from 'src/database/mongodb/repositories/bahan.repository';
 import { NotaRepository } from 'src/database/mongodb/repositories/nota.repository';
+import { ProyekRepository } from 'src/database/mongodb/repositories/proyek.repository';
+import { ProyekProdukRepository } from 'src/database/mongodb/repositories/proyek_produk.repository';
 
 @Module({
   imports: [MongoDBModule, MongoDBProvider],
@@ -19,6 +21,8 @@ import { NotaRepository } from 'src/database/mongodb/repositories/nota.repositor
     SatuanRepository,
     BahanRepository,
     NotaRepository,
+    ProyekRepository,
+    ProyekProdukRepository,
   ],
   exports: [HistoryMasukService],
 })

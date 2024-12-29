@@ -9,7 +9,7 @@ import {
   Query,
 } from '@nestjs/common';
 import { MasterService } from './master.service';
-import { CreateMasterDto } from './dto/create-master.dto';
+import { CreateMasterDto, MasterFindAllStokDto } from './dto/create-master.dto';
 import { FindAllSupplierDto } from 'src/supplier/dto/supplier_request.dto';
 import { FindAllCustomerDto } from 'src/customer/dto/customer.dto';
 import { FindAllSatuanDto } from 'src/satuan/dto/satuan.dto';
@@ -61,7 +61,7 @@ export class MasterController {
   }
 
   @Get('stok')
-  findAllStok(@Query() requestFilter: FindAllStokDto) {
+  findAllStok(@Query() requestFilter: MasterFindAllStokDto) {
     return this.masterService.handleMasterStokFindAll(requestFilter);
   }
 

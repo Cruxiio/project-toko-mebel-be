@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { CreateMasterDto } from './dto/create-master.dto';
+import { CreateMasterDto, MasterFindAllStokDto } from './dto/create-master.dto';
 import {
   MasterBahanFindAllResponse,
   MasterBahanFindAllResponseData,
@@ -290,11 +290,12 @@ export class MasterService {
     return res;
   }
 
-  async handleMasterStokFindAll(requestFilter: FindAllStokDto) {
+  async handleMasterStokFindAll(requestFilter: MasterFindAllStokDto) {
     // ambil data stok bahan
     const listStokBahan = await this.historyBahanMasukRepo.masterFindAllStok(
       {
         search: requestFilter.search,
+        id_proyek_produk: requestFilter.id_proyek_produk,
       },
       {
         main: {},

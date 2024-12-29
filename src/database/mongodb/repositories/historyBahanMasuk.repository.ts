@@ -21,6 +21,9 @@ import {
   HistoryBahanMasukDetailDocument,
 } from '../schemas/history_bahan_masuk_detail.schema';
 import { SupplierRepository } from './supplier.repository';
+import { MasterFindAllStokDto } from 'src/master/dto/create-master.dto';
+import { ProyekProdukRepository } from './proyek_produk.repository';
+import { ProdukRepository } from './produk.repository';
 
 @Injectable()
 export class HistoryBahanMasukRepository {
@@ -32,6 +35,8 @@ export class HistoryBahanMasukRepository {
     private readonly satuanRepo: SatuanRepository,
     private readonly bahanRepo: BahanRepository,
     private readonly supplierRepo: SupplierRepository,
+    private readonly proyekProdukRepo: ProyekProdukRepository,
+    private readonly produkRepo: ProdukRepository,
   ) {}
 
   async findOne(historyBahanMasukFilterQuery: FilterQuery<HistoryBahanMasuk>) {
@@ -403,7 +408,7 @@ export class HistoryBahanMasukRepository {
   }
 
   async masterFindAllStok(
-    stokFilterQuery: FilterQuery<FindAllStokDto>,
+    stokFilterQuery: FilterQuery<MasterFindAllStokDto>,
     showedField: any,
   ) {
     let filter: FilterQuery<HistoryBahanMasukDetail> = {
@@ -411,26 +416,69 @@ export class HistoryBahanMasukRepository {
       qtyPakai: { $gt: 0 },
     };
 
-    if (stokFilterQuery.search != '') {
-      // cari seluruh nama bahan yang mengandung keyword search
-      let bahanData = await this.bahanRepo.findAllWithoutPagination(
+    let filterBahan: any = {};
+
+    if (stokFilterQuery.id_proyek_produk > 0) {
+      // cari produk id dari proyek produk
+      let proyekProdukData = await this.proyekProdukRepo.findOne(
         {
-          nama: {
-            $regex: stokFilterQuery.search, // like isi regex
-            $options: 'i', // i artinya case-insensitive
-          },
+          id: stokFilterQuery.id_proyek_produk,
+          deleted_at: null,
         },
-        { _id: 1 },
+        {
+          main: {},
+          field1: 'id nama',
+          field2: 'id nama',
+          field3: 'id',
+          nestedField3: '',
+        },
       );
 
-      // tambahkan seluruh _id bahan yang namanya mengandung keyword search ke filter
-      filter = {
-        ...filter,
-        id_bahan: {
-          $in: bahanData,
+      // cari detail bahan dari produk
+      let produkData = await this.produkRepo.findOneProduk(
+        {
+          id: proyekProdukData ? proyekProdukData.id_produk.id : null,
+          deleted_at: null,
+        },
+        {
+          main: {},
+          field1: 'id nama',
+          field2: 'id nama',
+        },
+      );
+
+      // ambil seluruh id bahan dari detail produk
+      let detailBahanIds = produkData
+        ? produkData.detail.map((item) => item.id_bahan.id)
+        : [];
+
+      // tambahkan seluruh id bahan dari detail produk ke filterBahan
+      filterBahan = { ...filterBahan, id: { $in: detailBahanIds } };
+    }
+
+    if (stokFilterQuery.search != '') {
+      // tambahkan keyword ke filterBahan
+      filterBahan = {
+        ...filterBahan,
+        nama: {
+          $regex: stokFilterQuery.search, // like isi regex
+          $options: 'i', // i artinya case-insensitive
         },
       };
     }
+
+    // cari seluruh nama bahan yang mengandung keyword search
+    let bahanData = await this.bahanRepo.findAllWithoutPagination(filterBahan, {
+      _id: 1,
+    });
+
+    // tambahkan _id bahan hasil filterBahan ke filter
+    filter = {
+      ...filter,
+      id_bahan: {
+        $in: bahanData,
+      },
+    };
 
     return await this.historyBahanMasukModelDetail
       .find(filter, showedField.main)
