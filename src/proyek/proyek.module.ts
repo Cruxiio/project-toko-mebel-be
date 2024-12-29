@@ -8,9 +8,10 @@ import { CustomerRepository } from 'src/database/mongodb/repositories/customer.r
 import { TeamRepository } from 'src/database/mongodb/repositories/team.repository';
 import { ProyekProdukRepository } from 'src/database/mongodb/repositories/proyek_produk.repository';
 import { ProdukRepository } from 'src/database/mongodb/repositories/produk.repository';
+import { HelperModule } from 'src/helper/helper.module';
 
 @Module({
-  imports: [MongoDBModule, MongoDBProvider],
+  imports: [MongoDBModule, MongoDBProvider, HelperModule],
   controllers: [ProyekController],
   providers: [
     ProyekService,

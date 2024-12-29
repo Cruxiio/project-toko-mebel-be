@@ -28,6 +28,7 @@ import { TeamRepository } from 'src/database/mongodb/repositories/team.repositor
 import { CreateProdukDto } from 'src/produk/dto/create-produk.dto';
 import { ProdukRepository } from 'src/database/mongodb/repositories/produk.repository';
 import { ProyekProdukRepository } from 'src/database/mongodb/repositories/proyek_produk.repository';
+import { HelperService } from 'src/helper/helper.service';
 
 @Injectable()
 export class ProyekService {
@@ -37,6 +38,7 @@ export class ProyekService {
     private readonly teamRepo: TeamRepository,
     private readonly produkRepo: ProdukRepository,
     private readonly proyekProdukRepo: ProyekProdukRepository,
+    private readonly helperService: HelperService,
   ) {}
   async handleCreateProyek(createProyekDto: CreateProyekDto) {
     // validasi id customer
@@ -54,6 +56,25 @@ export class ProyekService {
       throw new BadRequestException(
         'Deadline date must be greater than start date',
       );
+    }
+
+    // cek nama proyek sudah dipakai atau belum
+    const proyekData = await this.proyekRepo.findOne(
+      {
+        nama: {
+          $regex: `^${createProyekDto.nama}$`, // nama harus persis bukan like
+          $options: 'i', // i artinya case-insensitive
+        },
+        deleted_at: null,
+      },
+      {
+        main: {},
+        field1: 'id nama',
+      },
+    );
+
+    if (proyekData) {
+      throw new BadRequestException('Nama proyek already exists');
     }
 
     // buat proyek input database interface
@@ -198,6 +219,25 @@ export class ProyekService {
       throw new NotFoundException('Proyek not found');
     }
 
+    // cek nama proyek sudah dipakai atau belum
+    const ada = await this.proyekRepo.findOne(
+      {
+        nama: {
+          $regex: `^${updateProyekDto.nama}$`, // nama harus persis bukan like
+          $options: 'i', // i artinya case-insensitive
+        },
+        deleted_at: null,
+      },
+      {
+        main: {},
+        field1: 'id nama',
+      },
+    );
+
+    if (ada && id != ada.id) {
+      throw new BadRequestException('Nama proyek already exists');
+    }
+
     // validasi id customer
     const customerData = await this.customerRepo.findOne({
       id: updateProyekDto.id_customer,
@@ -326,6 +366,19 @@ export class ProyekService {
       throw new NotFoundException('Proyek not found');
     }
 
+    // cek apakah team id sudah unique semua atau tidak
+    const isKaryawanUnique = this.helperService.cekUnique([
+      createProyekProdukDto.id_penanggung_jawab,
+      createProyekProdukDto.id_karyawan1,
+      createProyekProdukDto.id_karyawan2,
+    ]);
+
+    if (!isKaryawanUnique) {
+      throw new BadRequestException(
+        'Seluruh karyawan yang dipilih harus unique',
+      );
+    }
+
     //validasi id karyawan
     const teamData = await this.teamRepo.validateKaryawanIDs([
       createProyekProdukDto.id_penanggung_jawab,
@@ -447,6 +500,19 @@ export class ProyekService {
       { _id: proyekProdukData.id_produk, deleted_at: null },
       { nama: updateProyekProdukDto.nama_produk },
     );
+
+    // cek apakah team id sudah unique semua atau tidak
+    const isKaryawanUnique = this.helperService.cekUnique([
+      updateProyekProdukDto.id_penanggung_jawab,
+      updateProyekProdukDto.id_karyawan1,
+      updateProyekProdukDto.id_karyawan2,
+    ]);
+
+    if (!isKaryawanUnique) {
+      throw new BadRequestException(
+        'Seluruh karyawan yang dipilih harus unique',
+      );
+    }
 
     //validasi id karyawan
     const teamData = await this.teamRepo.validateKaryawanIDs([
