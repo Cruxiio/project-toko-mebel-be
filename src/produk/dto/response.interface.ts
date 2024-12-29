@@ -12,6 +12,8 @@ export interface ProdukDetailArrayData {
 
   qty: number;
 
+  qtyPakai: number;
+
   keterangan: string;
 }
 
@@ -37,6 +39,8 @@ export interface ProdukDetailDatabaseInput {
   id_satuan: Types.ObjectId;
 
   qty: number;
+
+  qtyPakai: number;
 
   keterangan: string;
 }

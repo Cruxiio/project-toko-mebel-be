@@ -19,6 +19,9 @@ export class ProdukDetail {
   @Prop({ required: true, type: Number })
   qty: number;
 
+  @Prop({ required: true, type: Number })
+  qtyPakai: number;
+
   @Prop({ type: String, default: null })
   keterangan: string;
 

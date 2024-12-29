@@ -27,6 +27,12 @@ export class DetailProdukDto {
   @Transform(({ value }) => Number(value))
   qty: number;
 
+  @IsNumber({}, { message: 'qty must be a number' })
+  @IsOptional()
+  @Min(0, { message: 'qtyPakai must positive' })
+  @Transform(({ value }) => Number(value))
+  qtyPakai?: number = 0;
+
   @IsString()
   @IsOptional()
   keterangan: string = null;

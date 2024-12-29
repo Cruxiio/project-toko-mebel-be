@@ -253,6 +253,7 @@ export class ProdukRepository {
         id_bahan: listBahanData[i]._id as Types.ObjectId,
         id_satuan: satuanMap.get(d.id_satuan) as Types.ObjectId,
         qty: d.qty,
+        qtyPakai: d.qtyPakai == 0 ? d.qty : d.qtyPakai,
         keterangan: d.keterangan,
       };
 
