@@ -39,10 +39,6 @@ export class CreateProdukDto {
 }
 
 export class UpdateProdukDto {
-  @IsString()
-  @IsNotEmpty({ message: 'nama is required' })
-  nama: string;
-
   @IsArray({ message: 'detail must be an array' })
   @IsNotEmpty({ message: 'detail is required' })
   // Validasi setiap elemen array

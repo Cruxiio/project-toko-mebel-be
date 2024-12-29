@@ -63,7 +63,6 @@ export class ProdukService {
 
     // buat database input untuk produk
     let produkInputDB: ProdukDtoDatabaseInput = {
-      nama: updateProdukDto.nama,
       detail: detailProdukInputDB,
     };
 
