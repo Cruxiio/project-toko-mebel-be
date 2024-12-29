@@ -216,6 +216,12 @@ export class ProdukRepository {
       throw new NotFoundException('Bahan not found');
     }
 
+    // buat mapping id bahan supaya bisa diformatting ke ProdukDetailDatabaseInput
+    let bahanMap: Map<number, Types.ObjectId> = new Map();
+    listBahanData.forEach((s) => {
+      bahanMap.set(s.id, s._id as Types.ObjectId);
+    });
+
     // simpan seluruh id satuan dalam bentuk array
     let satuanIds = produkDetail.map((d) => d.id_satuan);
 
@@ -250,7 +256,7 @@ export class ProdukRepository {
       const d = produkDetail[i];
 
       const newNotaDetail: ProdukDetailDatabaseInput = {
-        id_bahan: listBahanData[i]._id as Types.ObjectId,
+        id_bahan: bahanMap.get(d.id_bahan) as Types.ObjectId,
         id_satuan: satuanMap.get(d.id_satuan) as Types.ObjectId,
         qty: d.qty,
         qtyPakai: d.qtyPakai == 0 ? d.qty : d.qtyPakai,
