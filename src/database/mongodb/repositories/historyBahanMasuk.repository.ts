@@ -203,7 +203,7 @@ export class HistoryBahanMasukRepository {
     }
   }
 
-  // FUNC NON-GENERIC
+  // =============== FUNC NON-GENERIC ===============
 
   async findAllDetailByHistoryBahanMasukID(
     historyBahanMasukFilterQuery: FilterQuery<HistoryBahanMasuk>,
@@ -402,16 +402,55 @@ export class HistoryBahanMasukRepository {
     return this.historyBahanMasukModelDetail.countDocuments(filter);
   }
 
-  // async masterFindAll(
-  //   customerFilterQuery: FilterQuery<HistoryBahanMasuk>,
-  //   paginationQuery: any,
-  // ) {
-  //   return await this.findAll(customerFilterQuery, paginationQuery, {
-  //     id: 1,
-  //     nama: 1,
-  //     _id: 0,
-  //   });
-  // }
+  async masterFindAllStok(
+    stokFilterQuery: FilterQuery<FindAllStokDto>,
+    showedField: any,
+  ) {
+    let filter: FilterQuery<HistoryBahanMasukDetail> = {
+      deleted_at: null,
+      qtyPakai: { $gt: 0 },
+    };
+
+    if (stokFilterQuery.search != '') {
+      // cari seluruh nama bahan yang mengandung keyword search
+      let bahanData = await this.bahanRepo.findAllWithoutPagination(
+        {
+          nama: {
+            $regex: stokFilterQuery.search, // like isi regex
+            $options: 'i', // i artinya case-insensitive
+          },
+        },
+        { _id: 1 },
+      );
+
+      // tambahkan seluruh _id bahan yang namanya mengandung keyword search ke filter
+      filter = {
+        ...filter,
+        id_bahan: {
+          $in: bahanData,
+        },
+      };
+    }
+
+    return await this.historyBahanMasukModelDetail
+      .find(filter, showedField.main)
+      .populate({
+        path: 'id_history_bahan_masuk', // Populate data bahan
+        select: showedField.field1, // Ambil hanya field id dari koleksi history_bahan_masuk
+        populate: {
+          path: 'id_supplier', // Populate data supplier
+          select: showedField.nestedField1,
+        },
+      })
+      .populate({
+        path: 'id_bahan', // Populate data bahan
+        select: showedField.field2, // Ambil hanya field id dari koleksi Bahan
+      })
+      .populate({
+        path: 'id_satuan', // Populate data satuan
+        select: showedField.field3, // Ambil hanya field id dari koleksi Satuan
+      });
+  }
 
   // validateDetailArray digunakan untuk validasi detail array, dan mengembalikannya dalam bentuk data yang siap dimasukkan ke database
   async validateDetailArray(

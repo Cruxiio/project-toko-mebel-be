@@ -69,3 +69,13 @@ export interface MasterKaryawanFindAllResponse {
   data: MasterKaryawanFindAllResponseData[];
   total_page: number;
 }
+
+export interface MasterStokFindAllResponseData {
+  id: number;
+  nama: string;
+  tgl_stok: Date;
+}
+
+export interface MasterStokFindAllResponse {
+  data: MasterStokFindAllResponseData[];
+}

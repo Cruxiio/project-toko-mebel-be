@@ -11,6 +11,8 @@ import {
   MasterKaryawanFindAllResponseData,
   MasterSatuanFindAllResponse,
   MasterSatuanFindAllResponseData,
+  MasterStokFindAllResponse,
+  MasterStokFindAllResponseData,
   MasterSupplierFindAllResponse,
   MasterSupplierFindAllResponseData,
 } from './dto/response.interface';
@@ -22,7 +24,10 @@ import { SatuanRepository } from 'src/database/mongodb/repositories/satuan.repos
 import { FindAllSatuanDto } from 'src/satuan/dto/satuan.dto';
 import { BahanRepository } from 'src/database/mongodb/repositories/bahan.repository';
 import { FindAllBahanDto } from 'src/bahan/dto/bahan.dto';
-import { FindAllHistoryMasukDto } from 'src/history-masuk/dto/create-history-masuk.dto';
+import {
+  FindAllHistoryMasukDto,
+  FindAllStokDto,
+} from 'src/history-masuk/dto/create-history-masuk.dto';
 import { HistoryBahanMasukRepository } from 'src/database/mongodb/repositories/historyBahanMasuk.repository';
 import { FindAllKaryawanDto } from 'src/karyawan/dto/create-karyawan.dto';
 import { KaryawanRepository } from 'src/database/mongodb/repositories/karyawan.repository';
@@ -266,6 +271,36 @@ export class MasterService {
         return temp;
       }),
       total_page: total_page,
+    };
+
+    return res;
+  }
+
+  async handleMasterStokFindAll(requestFilter: FindAllStokDto) {
+    // ambil data stok bahan
+    const listStokBahan = await this.historyBahanMasukRepo.masterFindAllStok(
+      {
+        search: requestFilter.search,
+      },
+      {
+        main: {},
+        field1: 'id tgl_nota',
+        nestedField1: '',
+        field2: 'id nama',
+        field3: 'id nama',
+      },
+    );
+
+    // buat response
+    const res: MasterStokFindAllResponse = {
+      data: listStokBahan.map((stok) => {
+        const temp: MasterStokFindAllResponseData = {
+          id: stok.id,
+          nama: stok.id_bahan.nama,
+          tgl_stok: stok.id_history_bahan_masuk.tgl_nota,
+        };
+        return temp;
+      }),
     };
 
     return res;
