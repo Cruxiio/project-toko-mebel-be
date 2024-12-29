@@ -9,9 +9,13 @@ import { SatuanRepository } from 'src/database/mongodb/repositories/satuan.repos
 import { BahanRepository } from 'src/database/mongodb/repositories/bahan.repository';
 import { HistoryBahanMasukRepository } from 'src/database/mongodb/repositories/historyBahanMasuk.repository';
 import { KaryawanRepository } from 'src/database/mongodb/repositories/karyawan.repository';
+import { ProyekRepository } from 'src/database/mongodb/repositories/proyek.repository';
+import { ProyekProdukRepository } from 'src/database/mongodb/repositories/proyek_produk.repository';
+import { ProdukRepository } from 'src/database/mongodb/repositories/produk.repository';
+import { HelperModule } from 'src/helper/helper.module';
 
 @Module({
-  imports: [MongoDBModule, MongoDBProvider],
+  imports: [MongoDBModule, MongoDBProvider, HelperModule],
   controllers: [MasterController],
   providers: [
     MasterService,
@@ -21,6 +25,9 @@ import { KaryawanRepository } from 'src/database/mongodb/repositories/karyawan.r
     BahanRepository,
     HistoryBahanMasukRepository,
     KaryawanRepository,
+    ProyekRepository,
+    ProyekProdukRepository,
+    ProdukRepository,
   ],
   exports: [MasterService],
 })

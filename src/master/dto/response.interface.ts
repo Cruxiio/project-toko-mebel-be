@@ -79,3 +79,22 @@ export interface MasterStokFindAllResponseData {
 export interface MasterStokFindAllResponse {
   data: MasterStokFindAllResponseData[];
 }
+
+export interface MasterProyekFindAllResponseData {
+  id: number;
+  nama: string;
+}
+
+export interface MasterProyekFindAllResponse {
+  data: MasterProyekFindAllResponseData[];
+}
+
+export interface MasterProyekProdukFindAllResponseData {
+  id: number;
+  nama: string;
+  tipe: string;
+}
+
+export interface MasterProyekProdukFindAllResponse {
+  data: MasterProyekProdukFindAllResponseData[];
+}

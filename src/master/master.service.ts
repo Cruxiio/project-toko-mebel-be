@@ -9,6 +9,10 @@ import {
   MasterHistoryBahanMasukFindAllResponseData,
   MasterKaryawanFindAllResponse,
   MasterKaryawanFindAllResponseData,
+  MasterProyekFindAllResponse,
+  MasterProyekFindAllResponseData,
+  MasterProyekProdukFindAllResponse,
+  MasterProyekProdukFindAllResponseData,
   MasterSatuanFindAllResponse,
   MasterSatuanFindAllResponseData,
   MasterStokFindAllResponse,
@@ -31,6 +35,13 @@ import {
 import { HistoryBahanMasukRepository } from 'src/database/mongodb/repositories/historyBahanMasuk.repository';
 import { FindAllKaryawanDto } from 'src/karyawan/dto/create-karyawan.dto';
 import { KaryawanRepository } from 'src/database/mongodb/repositories/karyawan.repository';
+import {
+  FindAllProyekDto,
+  FindAllProyekProdukDto,
+} from 'src/proyek/dto/create-proyek.dto';
+import { ProyekRepository } from 'src/database/mongodb/repositories/proyek.repository';
+import { ProyekProdukRepository } from 'src/database/mongodb/repositories/proyek_produk.repository';
+import { ProdukRepository } from 'src/database/mongodb/repositories/produk.repository';
 
 @Injectable()
 export class MasterService {
@@ -41,6 +52,9 @@ export class MasterService {
     private readonly bahanRepo: BahanRepository,
     private readonly historyBahanMasukRepo: HistoryBahanMasukRepository,
     private readonly karyawanRepo: KaryawanRepository,
+    private readonly proyekRepo: ProyekRepository,
+    private readonly proyekProdukRepo: ProyekProdukRepository,
+    private readonly produkRepo: ProdukRepository,
   ) {}
 
   async handleMasterSupplierFindAll(requestFilter: FindAllSupplierDto) {
@@ -298,6 +312,62 @@ export class MasterService {
           id: stok.id,
           nama: stok.id_bahan.nama,
           tgl_stok: stok.id_history_bahan_masuk.tgl_nota,
+        };
+        return temp;
+      }),
+    };
+
+    return res;
+  }
+
+  async handleMasterProyekFindAll(requestFilter: FindAllProyekDto) {
+    // ambil data stok bahan
+    const listProyek = await this.proyekRepo.findAll(
+      {
+        nama: requestFilter.search,
+      },
+      {
+        main: {},
+        field1: 'id nama',
+      },
+    );
+
+    // buat response
+    const res: MasterProyekFindAllResponse = {
+      data: listProyek.map((proyek) => {
+        const temp: MasterProyekFindAllResponseData = {
+          id: proyek.id,
+          nama: proyek.nama,
+        };
+        return temp;
+      }),
+    };
+
+    return res;
+  }
+
+  async handleMasterProyekProdukFindAll(requestFilter: FindAllProyekProdukDto) {
+    // ambil data stok bahan
+    const listProyekProduk = await this.proyekProdukRepo.masterFindAll(
+      {
+        id_proyek: requestFilter.id_proyek,
+      },
+      {
+        main: {},
+        field1: 'id nama',
+        field2: 'id nama',
+        field3: '',
+        nestedField3: '',
+      },
+    );
+
+    // buat response
+    const res: MasterProyekProdukFindAllResponse = {
+      data: listProyekProduk.map((proyek) => {
+        const temp: MasterProyekProdukFindAllResponseData = {
+          id: proyek.id,
+          nama: proyek.id_produk.nama,
+          tipe: proyek.tipe,
         };
         return temp;
       }),

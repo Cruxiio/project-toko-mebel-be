@@ -19,6 +19,10 @@ import {
   FindAllStokDto,
 } from 'src/history-masuk/dto/create-history-masuk.dto';
 import { FindAllKaryawanDto } from 'src/karyawan/dto/create-karyawan.dto';
+import {
+  FindAllProyekDto,
+  FindAllProyekProdukDto,
+} from 'src/proyek/dto/create-proyek.dto';
 
 @Controller('api/master')
 export class MasterController {
@@ -59,5 +63,15 @@ export class MasterController {
   @Get('stok')
   findAllStok(@Query() requestFilter: FindAllStokDto) {
     return this.masterService.handleMasterStokFindAll(requestFilter);
+  }
+
+  @Get('proyek')
+  findAllProyek(@Query() requestFilter: FindAllProyekDto) {
+    return this.masterService.handleMasterProyekFindAll(requestFilter);
+  }
+
+  @Get('proyek-produk')
+  findAllProyekProduk(@Query() requestFilter: FindAllProyekProdukDto) {
+    return this.masterService.handleMasterProyekProdukFindAll(requestFilter);
   }
 }

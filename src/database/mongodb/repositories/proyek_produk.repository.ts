@@ -236,4 +236,48 @@ export class ProyekProdukRepository {
 
     return await this.proyekProdukModel.countDocuments(filter);
   }
+
+  async masterFindAll(
+    proyekProdukFilterQuery: FilterQuery<FindAllProyekProdukDto>,
+    showedField: any,
+  ) {
+    let filter: FilterQuery<ProyekProduk> = { deleted_at: null };
+
+    if (
+      proyekProdukFilterQuery.id_proyek &&
+      proyekProdukFilterQuery.id_proyek > 0
+    ) {
+      // cari id proyek
+      const proyekData = await this.proyekRepo.findOne(
+        { id: proyekProdukFilterQuery.id_proyek },
+        { main: { _id: 1 } },
+      );
+
+      if (!proyekData) {
+        throw new NotFoundException('Proyek not found');
+      }
+
+      // tambahkan id_proyek ke filter
+      filter = { ...filter, id_proyek: proyekData._id };
+    }
+
+    return await this.proyekProdukModel
+      .find(filter, showedField.main)
+      .populate({
+        path: 'id_proyek',
+        select: showedField.field1,
+      })
+      .populate({
+        path: 'id_produk',
+        select: showedField.field2,
+      })
+      .populate({
+        path: 'id_team',
+        select: showedField.field3,
+        populate: {
+          path: 'anggota',
+          select: showedField.nestedField3,
+        },
+      });
+  }
 }
