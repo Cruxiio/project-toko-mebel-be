@@ -28,10 +28,7 @@ export interface MasterSatuanFindAllResponseData {
 }
 
 export interface MasterSatuanFindAllResponse {
-  page: number;
-  per_page: number;
   data: MasterSatuanFindAllResponseData[];
-  total_page: number;
 }
 
 export interface MasterBahanFindAllResponseData {

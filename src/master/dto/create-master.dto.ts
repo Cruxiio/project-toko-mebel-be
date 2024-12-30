@@ -1,8 +1,6 @@
 import { Transform } from 'class-transformer';
 import { IsNumber, IsOptional, IsString } from 'class-validator';
 
-export class CreateMasterDto {}
-
 export class MasterFindAllStokDto {
   @IsString()
   @IsOptional()
@@ -13,3 +11,5 @@ export class MasterFindAllStokDto {
   @Transform(({ value }) => Number(value))
   id_proyek_produk?: number = 0;
 }
+
+export class MasterFindAllSatuanDto extends MasterFindAllStokDto {}

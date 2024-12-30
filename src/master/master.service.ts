@@ -1,5 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { CreateMasterDto, MasterFindAllStokDto } from './dto/create-master.dto';
+import {
+  MasterFindAllSatuanDto,
+  MasterFindAllStokDto,
+} from './dto/create-master.dto';
 import {
   MasterBahanFindAllResponse,
   MasterBahanFindAllResponseData,
@@ -135,30 +138,20 @@ export class MasterService {
     return res;
   }
 
-  async handleMasterSatuanFindAll(requestFilter: FindAllSatuanDto) {
+  async handleMasterSatuanFindAll(requestFilter: MasterFindAllSatuanDto) {
     // ambil data customer
-    const satuanData = await this.satuanRepo.masterFindAll(
+    const satuanData = await this.proyekProdukRepo.masterFindAllSatuan(
       {
-        nama: requestFilter.search,
+        search: requestFilter.search,
+        id_proyek_produk: requestFilter.id_proyek_produk,
       },
       {
-        page: requestFilter.page,
-        per_page: requestFilter.per_page,
+        main: {},
       },
     );
 
-    // hitung total data customer
-    let totalSatuanData = await this.satuanRepo.countAll({
-      nama: requestFilter.search,
-    });
-
-    // hitung total page
-    const total_page = Math.ceil(totalSatuanData / requestFilter.per_page);
-
     // buat response
     const res: MasterSatuanFindAllResponse = {
-      page: requestFilter.page,
-      per_page: requestFilter.per_page,
       data: satuanData.map((satuan) => {
         const temp: MasterSatuanFindAllResponseData = {
           id: satuan.id,
@@ -166,7 +159,6 @@ export class MasterService {
         };
         return temp;
       }),
-      total_page: total_page,
     };
 
     return res;

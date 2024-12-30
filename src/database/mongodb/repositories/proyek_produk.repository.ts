@@ -6,18 +6,25 @@ import {
 } from '../schemas/proyek_produk.schema';
 import { FilterQuery, Model } from 'mongoose';
 import { ProyekProdukDtoDatabaseInput } from 'src/proyek/dto/response.interface';
-import path from 'path';
 import { FindAllProyekProdukDto } from 'src/proyek/dto/create-proyek.dto';
 import { ProdukRepository } from './produk.repository';
 import { ProyekRepository } from './proyek.repository';
 import { TeamRepository } from './team.repository';
 import { KaryawanRepository } from './karyawan.repository';
+import {
+  MasterFindAllSatuanDto,
+  MasterFindAllStokDto,
+} from 'src/master/dto/create-master.dto';
+import { Satuan, SatuanDocument } from '../schemas/satuan.schema';
+import { HistoryBahanMasukDetail } from '../schemas/history_bahan_masuk_detail.schema';
 
 @Injectable()
 export class ProyekProdukRepository {
   constructor(
     @InjectModel(ProyekProduk.name)
     private readonly proyekProdukModel: Model<ProyekProdukDocument>,
+    @InjectModel(Satuan.name)
+    private readonly SatuanModel: Model<SatuanDocument>,
     private readonly produkRepo: ProdukRepository,
     private readonly proyekRepo: ProyekRepository,
     private readonly teamRepo: TeamRepository,
@@ -279,5 +286,67 @@ export class ProyekProdukRepository {
           select: showedField.nestedField3,
         },
       });
+  }
+
+  // yang pake id proyek produk dipindah ke sini supaya nda import loop
+  async masterFindAllSatuan(
+    satuanFilterQuery: FilterQuery<MasterFindAllSatuanDto>,
+    showedField: any,
+  ) {
+    // buat temporary object untuk isi filter sesuai syarat yang diberikan
+    let filter: FilterQuery<Satuan> = { deleted_at: null };
+
+    if (
+      satuanFilterQuery.id_proyek_produk &&
+      satuanFilterQuery.id_proyek_produk > 0
+    ) {
+      // cari produk id dari proyek produk
+      let proyekProdukData = await this.findOne(
+        {
+          id: satuanFilterQuery.id_proyek_produk,
+          deleted_at: null,
+        },
+        {
+          main: {},
+          field1: 'id nama',
+          field2: 'id nama',
+          field3: 'id',
+          nestedField3: '',
+        },
+      );
+
+      // cari detail bahan dari produk
+      let produkData = await this.produkRepo.findOneProduk(
+        {
+          id: proyekProdukData ? proyekProdukData.id_produk.id : null,
+          deleted_at: null,
+        },
+        {
+          main: {},
+          field1: 'id nama',
+          field2: 'id nama',
+        },
+      );
+
+      // ambil seluruh id satuan dari detail produk
+      let detailSatuanIds = produkData
+        ? produkData.detail.map((item) => item.id_satuan.id)
+        : [];
+
+      // tambahkan seluruh id satuan dari detail produk ke filterBahan
+      filter = { ...filter, id: { $in: detailSatuanIds } };
+    }
+
+    if (satuanFilterQuery.search && satuanFilterQuery.search != '') {
+      filter = {
+        ...filter,
+        nama: {
+          $regex: satuanFilterQuery.search, // like isi regex
+          $options: 'i', // i artinya case-insensitive
+        },
+      };
+    }
+
+    return await this.SatuanModel.find(filter, showedField.main);
   }
 }

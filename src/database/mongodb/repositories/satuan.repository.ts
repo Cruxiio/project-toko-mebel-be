@@ -112,14 +112,10 @@ export class SatuanRepository {
   }
 
   // FUNC NON-GENERIC
-  async masterFindAll(
-    satuanFilterQuery: FilterQuery<Satuan>,
-    paginationQuery: any,
-  ) {
-    return await this.findAllPagination(satuanFilterQuery, paginationQuery, {
-      id: 1,
-      nama: 1,
-      _id: 0,
-    });
-  }
+
+  /* NOTE:
+  ----------------------------------------------------------------------------------
+  Master find all satuan function dipindah ke proyek_produk.repository.ts supaya nda import loop 
+  ----------------------------------------------------------------------------------
+  */
 }
