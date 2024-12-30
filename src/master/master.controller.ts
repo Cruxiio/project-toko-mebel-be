@@ -10,6 +10,7 @@ import {
 } from '@nestjs/common';
 import { MasterService } from './master.service';
 import {
+  MasterFindAllKaryawanDto,
   MasterFindAllSatuanDto,
   MasterFindAllStokDto,
 } from './dto/create-master.dto';
@@ -59,7 +60,7 @@ export class MasterController {
   }
 
   @Get('karyawan')
-  findAllKaryawanMasuk(@Query() requestFilter: FindAllKaryawanDto) {
+  findAllKaryawanMasuk(@Query() requestFilter: MasterFindAllKaryawanDto) {
     return this.masterService.handleMasterKaryawanFindAll(requestFilter);
   }
 

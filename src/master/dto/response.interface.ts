@@ -61,10 +61,7 @@ export interface MasterKaryawanFindAllResponseData {
 }
 
 export interface MasterKaryawanFindAllResponse {
-  page: number;
-  per_page: number;
   data: MasterKaryawanFindAllResponseData[];
-  total_page: number;
 }
 
 export interface MasterStokFindAllResponseData {

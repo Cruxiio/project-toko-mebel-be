@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import {
+  MasterFindAllKaryawanDto,
   MasterFindAllSatuanDto,
   MasterFindAllStokDto,
 } from './dto/create-master.dto';
@@ -244,31 +245,21 @@ export class MasterService {
     return res;
   }
 
-  async handleMasterKaryawanFindAll(requestFilter: FindAllKaryawanDto) {
-    // ambil data customer
-    const listKaryawanData = await this.karyawanRepo.masterFindAll(
+  async handleMasterKaryawanFindAll(requestFilter: MasterFindAllKaryawanDto) {
+    // ambil data karyawan
+    const listKaryawanData = await this.proyekProdukRepo.masterFindAllKaryawan(
       {
-        nama: requestFilter.search,
+        search: requestFilter.search,
+        id_proyek_produk: requestFilter.id_proyek_produk,
         role: requestFilter.role,
       },
       {
-        page: requestFilter.page,
-        per_page: requestFilter.per_page,
+        main: {},
       },
     );
 
-    // hitung total data customer
-    let totalKaryawanData = await this.karyawanRepo.countAll({
-      nama: requestFilter.search,
-    });
-
-    // hitung total page
-    const total_page = Math.ceil(totalKaryawanData / requestFilter.per_page);
-
     // buat response
     const res: MasterKaryawanFindAllResponse = {
-      page: requestFilter.page,
-      per_page: requestFilter.per_page,
       data: listKaryawanData.map((karyawan) => {
         const temp: MasterKaryawanFindAllResponseData = {
           id: karyawan.id,
@@ -276,7 +267,6 @@ export class MasterService {
         };
         return temp;
       }),
-      total_page: total_page,
     };
 
     return res;
@@ -314,7 +304,7 @@ export class MasterService {
   }
 
   async handleMasterProyekFindAll(requestFilter: FindAllProyekDto) {
-    // ambil data stok bahan
+    // ambil data proyek
     const listProyek = await this.proyekRepo.findAll(
       {
         nama: requestFilter.search,
@@ -340,7 +330,7 @@ export class MasterService {
   }
 
   async handleMasterProyekProdukFindAll(requestFilter: FindAllProyekProdukDto) {
-    // ambil data stok bahan
+    // ambil data proyek produk
     const listProyekProduk = await this.proyekProdukRepo.masterFindAll(
       {
         id_proyek: requestFilter.id_proyek,

@@ -101,14 +101,10 @@ export class KaryawanRepository {
   }
 
   // FUNC NON-GENERIC
-  async masterFindAll(
-    karyawanFilterQuery: FilterQuery<Karyawan>,
-    paginationQuery: any,
-  ) {
-    return await this.findAll(karyawanFilterQuery, paginationQuery, {
-      id: 1,
-      nama: 1,
-      _id: 0,
-    });
-  }
+
+  /* NOTE:
+  ----------------------------------------------------------------------------------
+  Master find all satuan function dipindah ke proyek_produk.repository.ts supaya nda import loop 
+  ----------------------------------------------------------------------------------
+  */
 }

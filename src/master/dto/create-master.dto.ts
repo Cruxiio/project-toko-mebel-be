@@ -1,5 +1,11 @@
 import { Transform } from 'class-transformer';
-import { IsNumber, IsOptional, IsString } from 'class-validator';
+import {
+  IsIn,
+  IsNumber,
+  IsOptional,
+  IsString,
+  ValidateIf,
+} from 'class-validator';
 
 export class MasterFindAllStokDto {
   @IsString()
@@ -13,3 +19,13 @@ export class MasterFindAllStokDto {
 }
 
 export class MasterFindAllSatuanDto extends MasterFindAllStokDto {}
+
+export class MasterFindAllKaryawanDto extends MasterFindAllStokDto {
+  @ValidateIf((o) => o.role !== '') // Validasi hanya dilakukan ketika role != ''
+  @IsString()
+  @IsIn(['ketua', 'member'], {
+    message: 'Role harus salah satu dari role yang disediakan',
+  })
+  @IsOptional()
+  role?: string = '';
+}

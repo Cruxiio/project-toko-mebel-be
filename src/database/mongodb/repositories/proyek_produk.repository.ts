@@ -12,11 +12,13 @@ import { ProyekRepository } from './proyek.repository';
 import { TeamRepository } from './team.repository';
 import { KaryawanRepository } from './karyawan.repository';
 import {
+  MasterFindAllKaryawanDto,
   MasterFindAllSatuanDto,
   MasterFindAllStokDto,
 } from 'src/master/dto/create-master.dto';
 import { Satuan, SatuanDocument } from '../schemas/satuan.schema';
 import { HistoryBahanMasukDetail } from '../schemas/history_bahan_masuk_detail.schema';
+import { Karyawan, KaryawanDocument } from '../schemas/karyawan.schema';
 
 @Injectable()
 export class ProyekProdukRepository {
@@ -25,6 +27,8 @@ export class ProyekProdukRepository {
     private readonly proyekProdukModel: Model<ProyekProdukDocument>,
     @InjectModel(Satuan.name)
     private readonly SatuanModel: Model<SatuanDocument>,
+    @InjectModel(Karyawan.name)
+    private readonly karyawanModel: Model<KaryawanDocument>,
     private readonly produkRepo: ProdukRepository,
     private readonly proyekRepo: ProyekRepository,
     private readonly teamRepo: TeamRepository,
@@ -288,6 +292,7 @@ export class ProyekProdukRepository {
       });
   }
 
+  // ===============  master find all func ===============
   // yang pake id proyek produk dipindah ke sini supaya nda import loop
   async masterFindAllSatuan(
     satuanFilterQuery: FilterQuery<MasterFindAllSatuanDto>,
@@ -348,5 +353,72 @@ export class ProyekProdukRepository {
     }
 
     return await this.SatuanModel.find(filter, showedField.main);
+  }
+
+  async masterFindAllKaryawan(
+    karyawanFilterQuery: FilterQuery<MasterFindAllKaryawanDto>,
+    showedField: any,
+  ) {
+    // buat temporary object untuk isi filter sesuai syarat yang diberikan
+    let filter: FilterQuery<Karyawan> = { deleted_at: null };
+
+    if (
+      karyawanFilterQuery.id_proyek_produk &&
+      karyawanFilterQuery.id_proyek_produk > 0
+    ) {
+      // cari produk id dari proyek produk
+      let proyekProdukData = await this.findOne(
+        {
+          id: karyawanFilterQuery.id_proyek_produk,
+          deleted_at: null,
+        },
+        {
+          main: {},
+          field1: 'id nama',
+          field2: 'id nama',
+          field3: 'id',
+          nestedField3: 'id nama',
+        },
+      );
+
+      // // cari detail bahan dari produk
+      // let teamData: any = await this.teamRepo.findAllAnggota(
+      //   {
+      //     id: proyekProdukData ? proyekProdukData.id_team.id : null,
+      //     deleted_at: null,
+      //   },
+      //   {
+      //     main: {},
+      //     field1: 'id nama role',
+      //   },
+      // );
+
+      // ambil seluruh id karyawan dari anggota team
+      let detailKaryawanIds = proyekProdukData
+        ? proyekProdukData.id_team.anggota.map((item) => item.id)
+        : [];
+
+      // tambahkan seluruh id satuan dari detail produk ke filterBahan
+      filter = { ...filter, id: { $in: detailKaryawanIds } };
+    }
+
+    if (karyawanFilterQuery.search && karyawanFilterQuery.search != '') {
+      filter = {
+        ...filter,
+        nama: {
+          $regex: karyawanFilterQuery.search, // like isi regex
+          $options: 'i', // i artinya case-insensitive
+        },
+      };
+    }
+
+    if (karyawanFilterQuery.role && karyawanFilterQuery.role != '') {
+      filter = {
+        ...filter,
+        role: karyawanFilterQuery.role,
+      };
+    }
+
+    return await this.karyawanModel.find(filter, showedField.main);
   }
 }
