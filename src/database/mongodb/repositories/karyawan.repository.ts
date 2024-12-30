@@ -104,7 +104,7 @@ export class KaryawanRepository {
 
   /* NOTE:
   ----------------------------------------------------------------------------------
-  Master find all satuan function dipindah ke proyek_produk.repository.ts supaya nda import loop 
+  Master find all karyawan function dipindah ke proyek_produk.repository.ts supaya nda import loop 
   ----------------------------------------------------------------------------------
   */
 }
