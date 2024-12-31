@@ -269,7 +269,12 @@ export class HistoryMasukService {
     const detailData =
       await this.historyBahanMasukRepo.findAllDetailByHistoryBahanMasukID(
         { id, deleted_at: null },
-        { main: {}, field1: 'id', nestedField1: '', field2: 'id', field3: '' },
+        {
+          main: {},
+          field1: 'id nama',
+          nestedField1: '',
+          field2: 'id nama',
+        },
       );
 
     // buat response
@@ -284,7 +289,9 @@ export class HistoryMasukService {
       detail: detailData.map((s) => {
         const formattedData: HistoryBahanMasukDetailData = {
           id_bahan: s.id_bahan.id,
+          nama_bahan: s.id_bahan.nama,
           id_satuan: s.id_satuan.id,
+          nama_satuan: s.id_satuan.nama,
           qty: s.qty,
         };
         return formattedData;
@@ -319,7 +326,7 @@ export class HistoryMasukService {
         field1: 'id tgl_nota',
         nestedField1: '',
         field2: 'id nama',
-        field3: 'id nama',
+        field3: 'id nama satuan_terkecil',
       },
     );
 
@@ -340,7 +347,7 @@ export class HistoryMasukService {
         const formattedData: StokFindAllResponseData = {
           tgl_nota: s.id_history_bahan_masuk.tgl_nota,
           nama_bahan: s.id_bahan.nama,
-          nama_satuan: s.id_satuan.nama,
+          nama_satuan: s.id_satuan.satuan_terkecil,
           qty: s.qtyPakai,
           created_at: s.created_at,
           updated_at: s.updated_at,

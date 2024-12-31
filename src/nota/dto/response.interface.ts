@@ -3,7 +3,9 @@ import { Types } from 'mongoose';
 
 export interface NotaDetailArrayData {
   id_bahan: number;
+  nama_bahan: string;
   id_satuan: number;
+  nama_satuan: string;
   qty: number;
   harga_satuan: number;
   diskon: number;
@@ -16,6 +18,7 @@ export interface NotaFindOneResponse {
   id?: number;
   kode_nota: string;
   id_supplier: number;
+  nama_suplier?: string;
   tgl_nota: Date;
   total_pajak: number;
   diskon_akhir: number;

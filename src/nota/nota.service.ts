@@ -214,9 +214,9 @@ export class NotaService {
       {
         main: {},
         field1: 'id',
-        nestedField1: 'id',
-        field2: 'id',
-        field3: 'id',
+        nestedField1: 'id nama',
+        field2: 'id nama',
+        field3: 'id nama',
       },
     );
 
@@ -228,6 +228,7 @@ export class NotaService {
       id: notaData.id,
       kode_nota: notaData.id_history_bahan_masuk.kode_nota,
       id_supplier: notaData.id_history_bahan_masuk.id_supplier.id,
+      nama_suplier: notaData.id_history_bahan_masuk.id_supplier.nama,
       tgl_nota: notaData.id_history_bahan_masuk.tgl_nota,
       total_pajak: notaData.total_pajak,
       diskon_akhir: notaData.diskon_akhir,
@@ -235,7 +236,9 @@ export class NotaService {
       detail: notaData.detail.map((d) => {
         const temp: NotaDetailArrayData = {
           id_bahan: d.id_bahan.id,
+          nama_bahan: d.id_bahan.nama,
           id_satuan: d.id_satuan.id,
+          nama_satuan: d.id_satuan.nama,
           qty: d.qty,
           harga_satuan: d.harga_satuan,
           diskon: d.diskon,

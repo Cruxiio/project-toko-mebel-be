@@ -15,7 +15,9 @@ export interface HistoryBahanMasukFindOneResponse {
 export interface HistoryBahanMasukDetailData {
   id?: number;
   id_bahan?: number;
+  nama_bahan?: string;
   id_satuan?: number;
+  nama_satuan?: string;
   qty: number;
   qty_pakai?: number;
 }
@@ -64,6 +66,8 @@ export interface HistoryBahanMasukDetailDatabaseInput {
 
   id_satuan: Types.ObjectId;
 
+  qtyPakai: number;
+
   qty: number;
 }
 
@@ -77,6 +81,12 @@ export class HistoryMasukDtoDatabaseInput {
   no_spb: string;
 
   detail: HistoryBahanMasukDetailDatabaseInput[];
+}
+
+export class HistoryBahanMasukDetailUpdateDatabaseInput {
+  id: number;
+
+  qtyPakai: number;
 }
 
 export interface HistoryBahanMasukFindAllResponseData {

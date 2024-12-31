@@ -22,6 +22,15 @@ import {
   ProyekProduk,
   ProyekProdukSchema,
 } from './schemas/proyek_produk.schema';
+import {
+  HistoryBahanKeluar,
+  HistoryBahanKeluarSchema,
+} from './schemas/history_bahan_keluar.schema';
+import {
+  HistoryBahanKeluarDetail,
+  HistoryBahanKeluarDetailSchema,
+} from './schemas/history_bahan_keluar_detail.schema';
+import { BahanSisa } from './schemas/bahan_sisa.schema';
 
 // kasih tau mongoose schema mana yang mau diimport
 export const MongoDBProvider = MongooseModule.forFeatureAsync([
@@ -215,6 +224,36 @@ export const MongoDBProvider = MongooseModule.forFeatureAsync([
       schema.plugin(AutoIncrement, {
         inc_field: 'id',
         id: 'proyek_produk_id_counter', //ini nama unik untuk counter id proyek_produk yang disimpan di collection counters
+      });
+      return schema;
+    },
+    inject: [getConnectionToken()],
+  },
+  {
+    name: HistoryBahanKeluar.name,
+    useFactory: async (connection: Connection) => {
+      const schema = HistoryBahanKeluarSchema;
+
+      const AutoIncrement = require('mongoose-sequence')(connection);
+
+      schema.plugin(AutoIncrement, {
+        inc_field: 'id',
+        id: 'history_bahan_keluar_id_counter', //ini nama unik untuk counter id history_bahan_keluar yang disimpan di collection counters
+      });
+      return schema;
+    },
+    inject: [getConnectionToken()],
+  },
+  {
+    name: HistoryBahanKeluarDetail.name,
+    useFactory: async (connection: Connection) => {
+      const schema = HistoryBahanKeluarDetailSchema;
+
+      const AutoIncrement = require('mongoose-sequence')(connection);
+
+      schema.plugin(AutoIncrement, {
+        inc_field: 'id',
+        id: 'history_bahan_keluar_detail_id_counter', //ini nama unik untuk counter id history_bahan_keluar_detail yang disimpan di collection counters
       });
       return schema;
     },

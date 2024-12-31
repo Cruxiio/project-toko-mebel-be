@@ -10,9 +10,10 @@ import { BahanRepository } from 'src/database/mongodb/repositories/bahan.reposit
 import { NotaRepository } from 'src/database/mongodb/repositories/nota.repository';
 import { ProyekRepository } from 'src/database/mongodb/repositories/proyek.repository';
 import { ProyekProdukRepository } from 'src/database/mongodb/repositories/proyek_produk.repository';
+import { HelperModule } from 'src/helper/helper.module';
 
 @Module({
-  imports: [MongoDBModule, MongoDBProvider],
+  imports: [MongoDBModule, MongoDBProvider, HelperModule],
   controllers: [HistoryMasukController],
   providers: [
     HistoryMasukService,

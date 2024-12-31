@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectConnection, InjectModel } from '@nestjs/mongoose';
 import { Connection, FilterQuery, Model, Types } from 'mongoose';
 import {
@@ -14,6 +18,7 @@ import {
 } from 'src/history-masuk/dto/create-history-masuk.dto';
 import {
   HistoryBahanMasukDetailDatabaseInput,
+  HistoryBahanMasukDetailUpdateDatabaseInput,
   HistoryMasukDtoDatabaseInput,
 } from 'src/history-masuk/dto/response.interface';
 import {
@@ -24,6 +29,7 @@ import { SupplierRepository } from './supplier.repository';
 import { MasterFindAllStokDto } from 'src/master/dto/create-master.dto';
 import { ProyekProdukRepository } from './proyek_produk.repository';
 import { ProdukRepository } from './produk.repository';
+import { HelperService } from 'src/helper/helper.service';
 
 @Injectable()
 export class HistoryBahanMasukRepository {
@@ -37,6 +43,7 @@ export class HistoryBahanMasukRepository {
     private readonly supplierRepo: SupplierRepository,
     private readonly proyekProdukRepo: ProyekProdukRepository,
     private readonly produkRepo: ProdukRepository,
+    private readonly helperService: HelperService,
   ) {}
 
   async findOne(historyBahanMasukFilterQuery: FilterQuery<HistoryBahanMasuk>) {
@@ -162,7 +169,7 @@ export class HistoryBahanMasukRepository {
             id_bahan: d.id_bahan,
             id_satuan: d.id_satuan,
             qty: d.qty,
-            qtyPakai: d.qty,
+            qtyPakai: d.qtyPakai,
           });
         await newHistoryBahanMasukDetail.save();
       }
@@ -208,6 +215,31 @@ export class HistoryBahanMasukRepository {
     }
   }
 
+  // ini buat find history bahan masuk detail by history bahan masuk detail  id
+  async findOneHistoryBahanMasukDetail(
+    historyBahanMasukDetailFilterQuery: FilterQuery<HistoryBahanMasukDetail>,
+    showedField: any,
+  ) {
+    return await this.historyBahanMasukModelDetail
+      .findOne(historyBahanMasukDetailFilterQuery, showedField.main)
+      .populate({
+        path: 'id_history_bahan_masuk', // Populate data id_history_bahan_masuk
+        select: showedField.field1, // Ambil hanya field id dari koleksi
+        populate: {
+          path: 'id_supplier', // Populate data supplier
+          select: showedField.nestedField1, // Ambil hanya field id dari koleksi
+        },
+      })
+      .populate({
+        path: 'id_bahan', // Populate data bahan
+        select: showedField.field1, // Ambil hanya field id dari koleksi Bahan
+      })
+      .populate({
+        path: 'id_satuan', // Populate data satuan
+        select: showedField.field2, // Ambil hanya field id dari koleksi Satuan
+      });
+  }
+
   // =============== FUNC NON-GENERIC ===============
 
   async findAllDetailByHistoryBahanMasukID(
@@ -222,7 +254,7 @@ export class HistoryBahanMasukRepository {
     // cari seluruh history bahan masuk detail berdasarkan id history bahan masuk
     return await this.historyBahanMasukModelDetail
       .find(
-        { id_history_bahan_masuk: historyBahanMasukData._id },
+        { id_history_bahan_masuk: historyBahanMasukData._id, deleted_at: null },
         showedField.main,
       )
       .populate({
@@ -233,6 +265,50 @@ export class HistoryBahanMasukRepository {
         path: 'id_satuan', // Populate data satuan
         select: showedField.field2, // Ambil hanya field id dari koleksi Satuan
       });
+  }
+
+  async findAllDetail(
+    stokFilterQuery: FilterQuery<HistoryBahanMasukDetail>,
+    showedField: any,
+  ) {
+    let filter: FilterQuery<HistoryBahanMasukDetail> = {
+      deleted_at: null,
+      qtyPakai: { $gt: 0 },
+    };
+
+    filter = { ...filter, ...stokFilterQuery };
+
+    return await this.historyBahanMasukModelDetail
+      .find(filter, showedField.main)
+      .populate({
+        path: 'id_history_bahan_masuk', // Populate data bahan
+        select: showedField.field1, // Ambil hanya field id dari koleksi history_bahan_masuk
+        populate: {
+          path: 'id_supplier', // Populate data supplier
+          select: showedField.nestedField1,
+        },
+      })
+      .populate({
+        path: 'id_bahan', // Populate data bahan
+        select: showedField.field2, // Ambil hanya field id dari koleksi Bahan
+      })
+      .populate({
+        path: 'id_satuan', // Populate data satuan
+        select: showedField.field3, // Ambil hanya field id dari koleksi Satuan
+      });
+  }
+
+  async updateQtyStokBatch(
+    stokData: HistoryBahanMasukDetailUpdateDatabaseInput[],
+  ) {
+    const bulkOps = stokData.map((item) => ({
+      updateOne: {
+        filter: { id: item.id }, // Filter berdasarkan id produk
+        update: { $set: { qtyPakai: item.qtyPakai } }, // Set stok baru
+      },
+    }));
+
+    return await this.historyBahanMasukModelDetail.bulkWrite(bulkOps); // Eksekusi bulkWrite
   }
 
   // findAllHistoryBahanMasukDetail untuk tampilin stok sekarang berdasarkan tanggal nota/surat jalan
@@ -506,33 +582,80 @@ export class HistoryBahanMasukRepository {
   ): Promise<HistoryBahanMasukDetailDatabaseInput[]> {
     let temp: HistoryBahanMasukDetailDatabaseInput[] = [];
 
+    // simpan seluruh id bahan dalam bentuk array
+    let bahanIds = historyBahanMasukDetail.map((d) => d.id_bahan);
+
+    // cek apakah seluruh id bahan unique
+    let isBahanIdsUnique = this.helperService.cekUnique(bahanIds);
+
+    if (!isBahanIdsUnique) {
+      throw new BadRequestException('Seluruh bahan yang dipilih harus unique');
+    }
+
+    // cek apakah id bahan exist
+    let listBahanData = await this.bahanRepo.findAllWithoutPagination(
+      {
+        id: { $in: bahanIds },
+      },
+      {
+        id: 1,
+        _id: 1,
+      },
+    );
+
+    if (listBahanData.length != bahanIds.length) {
+      throw new NotFoundException('One of ID Bahan not found');
+    }
+
+    // buat mapping id bahan supaya bisa diformatting ke ProdukDetailDatabaseInput
+    let bahanMap: Map<number, Types.ObjectId> = new Map();
+    listBahanData.forEach((s) => {
+      bahanMap.set(s.id, s._id as Types.ObjectId);
+    });
+
+    // simpan seluruh id satuan dalam bentuk array
+    let satuanIds = historyBahanMasukDetail.map((d) => d.id_satuan);
+
+    // dari seluruh id satuan, buang duplikatnya pake Set
+    // kemudian diubah kembali ke array
+    let uniqueSatuanIds = [...new Set(satuanIds)];
+
+    // cek apakah id satuan exist
+    let listSatuanData = await this.satuanRepo.findAll(
+      {
+        id: { $in: uniqueSatuanIds },
+      },
+      {
+        id: 1,
+        _id: 1,
+        konversi: 1,
+      },
+    );
+
+    if (listSatuanData.length != uniqueSatuanIds.length) {
+      throw new NotFoundException('One of ID Satuan not found');
+    }
+
+    // buat mapping id satuan supaya bisa diformatting ke ProdukDetailDatabaseInput
+    let satuanMap: Map<number, any> = new Map();
+    listSatuanData.forEach((s) => {
+      satuanMap.set(s.id, {
+        _id: s._id as Types.ObjectId,
+        konversi: s.konversi,
+      });
+    });
+
+    // format ke ProdukDetailDatabaseInput
     for (let i = 0; i < historyBahanMasukDetail.length; i++) {
       const d = historyBahanMasukDetail[i];
 
-      //cek id_supplier valid
-      let bahanData = await this.bahanRepo.findOne({
-        id: d.id_bahan,
-        deleted_at: null,
-      });
-
-      if (!bahanData) {
-        throw new NotFoundException('Bahan not found');
-      }
-
-      //cek id_supplier valid
-      let satuanData = await this.satuanRepo.findOne({
-        id: d.id_satuan,
-        deleted_at: null,
-      });
-
-      if (!satuanData) {
-        throw new NotFoundException('Satuan not found');
-      }
+      const satuanData = satuanMap.get(d.id_satuan);
 
       const newHistroyBahanMasukDetail: HistoryBahanMasukDetailDatabaseInput = {
-        id_bahan: bahanData._id as Types.ObjectId,
+        id_bahan: bahanMap.get(d.id_bahan) as Types.ObjectId,
         id_satuan: satuanData._id as Types.ObjectId,
         qty: d.qty,
+        qtyPakai: d.qty * satuanData.konversi,
       };
 
       temp.push(newHistroyBahanMasukDetail);

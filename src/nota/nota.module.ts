@@ -8,9 +8,10 @@ import { SatuanRepository } from 'src/database/mongodb/repositories/satuan.repos
 import { BahanRepository } from 'src/database/mongodb/repositories/bahan.repository';
 import { SupplierRepository } from 'src/database/mongodb/repositories/supplier.repository';
 import { HistoryBahanMasukRepository } from 'src/database/mongodb/repositories/historyBahanMasuk.repository';
+import { HelperModule } from 'src/helper/helper.module';
 
 @Module({
-  imports: [MongoDBModule, MongoDBProvider],
+  imports: [MongoDBModule, MongoDBProvider, HelperModule],
   controllers: [NotaController],
   providers: [
     NotaService,
