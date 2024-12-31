@@ -49,3 +49,13 @@ export interface HistoryBahanKeluarDetailFindOneByIDResponse
   extends HistoryBahanKeluarFindOneResponse {
   detail: HistoryBahanKeluarDetailData[];
 }
+
+export interface HistoryBahanKeluarFindAllResponseData
+  extends HistoryBahanKeluarFindOneResponse {}
+
+export interface HistoryBahanKeluarFindAllResponse {
+  page: number;
+  per_page: number;
+  data: HistoryBahanKeluarFindAllResponseData[];
+  total_page: number;
+}

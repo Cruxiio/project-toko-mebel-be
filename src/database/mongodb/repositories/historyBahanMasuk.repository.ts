@@ -117,13 +117,16 @@ export class HistoryBahanMasukRepository {
     if (historyBahanMasukFilterQuery.kode_nota != '') {
       filter = {
         ...filter,
-        kode_nota: historyBahanMasukFilterQuery.kode_nota,
+        kode_nota: {
+          $regex: historyBahanMasukFilterQuery.kode_nota, // like isi regex
+          $options: 'i', // i artinya case-insensitive
+        },
       };
     }
 
     if (historyBahanMasukFilterQuery.id_supplier != null) {
-      let supplierData = await this.findOne({
-        id: historyBahanMasukFilterQuery.id,
+      let supplierData = await this.supplierRepo.findOne({
+        id: historyBahanMasukFilterQuery.id_supplier,
         deleted_at: null,
       });
 
@@ -137,10 +140,10 @@ export class HistoryBahanMasukRepository {
       // ubah ke format date
       const tglNota = new Date(historyBahanMasukFilterQuery.tgl_nota);
       // cek apakah valid atau tidak
-      const valid = isNaN(tglNota.getTime());
+      const notValid = isNaN(tglNota.getTime());
       filter = {
         ...filter,
-        tgl_nota: valid ? tglNota : null,
+        tgl_nota: notValid ? null : tglNota,
       };
     }
 

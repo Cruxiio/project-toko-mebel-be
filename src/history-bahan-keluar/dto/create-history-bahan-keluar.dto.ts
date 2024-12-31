@@ -3,6 +3,7 @@ import {
   IsArray,
   IsNotEmpty,
   IsNumber,
+  IsOptional,
   Min,
   ValidateNested,
 } from 'class-validator';
@@ -45,4 +46,31 @@ export class CreateHistoryBahanKeluarDto {
   detail: HistoryBahanKeluarDetailDto[];
 }
 
-export class UpdateHistoryBahanKeluarDto {}
+export class UpdateHistoryBahanKeluarDto extends CreateHistoryBahanKeluarDto {}
+
+export class FindAllHistoryBahanKeluarDto {
+  @IsNumber({}, { message: 'id_proyek_produk must be a number' })
+  @IsOptional()
+  @Transform(({ value }) => Number(value))
+  id_proyek_produk?: number = 0;
+
+  @IsNumber({}, { message: 'id_karyawan must be a number' })
+  @IsOptional()
+  //transform buat olah value field sebelum masuk ke validasi
+  @Transform(({ value }) => Number(value))
+  id_karyawan?: number = 0;
+
+  @IsNumber({}, { message: 'page must be a number' })
+  @IsOptional()
+  @Min(1, { message: 'per_page must be greater than 0' })
+  //transform buat olah value field sebelum masuk ke validasi
+  @Transform(({ value }) => Number(value))
+  page?: number = 1;
+
+  @IsNumber({}, { message: 'per_page must be a number' })
+  @IsOptional()
+  @Min(1, { message: 'per_page must be greater than 0' })
+  //transform buat olah value field sebelum masuk ke validasi
+  @Transform(({ value }) => Number(value))
+  per_page?: number = 10;
+}

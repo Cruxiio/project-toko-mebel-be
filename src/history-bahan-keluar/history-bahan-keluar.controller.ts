@@ -6,10 +6,12 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { HistoryBahanKeluarService } from './history-bahan-keluar.service';
 import {
   CreateHistoryBahanKeluarDto,
+  FindAllHistoryBahanKeluarDto,
   UpdateHistoryBahanKeluarDto,
 } from './dto/create-history-bahan-keluar.dto';
 
@@ -21,34 +23,20 @@ export class HistoryBahanKeluarController {
 
   @Post()
   create(@Body() createHistoryBahanKeluarDto: CreateHistoryBahanKeluarDto) {
-    return this.historyBahanKeluarService.HandleCreateHistoryBahanKeluar(
+    return this.historyBahanKeluarService.handleCreateHistoryBahanKeluar(
       createHistoryBahanKeluarDto,
     );
   }
 
   @Get()
-  findAll() {
-    return this.historyBahanKeluarService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.historyBahanKeluarService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updateHistoryBahanKeluarDto: UpdateHistoryBahanKeluarDto,
-  ) {
-    return this.historyBahanKeluarService.update(
-      +id,
-      updateHistoryBahanKeluarDto,
+  findAll(@Query() requestFilter: FindAllHistoryBahanKeluarDto) {
+    return this.historyBahanKeluarService.handleFindAllHistoryBahanKeluar(
+      requestFilter,
     );
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.historyBahanKeluarService.remove(+id);
+  @Get(':id')
+  findOne(@Param('id') id: number) {
+    return this.historyBahanKeluarService.handleFindOneHistoryBahanKeluar(id);
   }
 }

@@ -12,16 +12,22 @@ import {
   HistoryBahanKeluarDetail,
   HistoryBahanKeluarDetailDocument,
 } from '../schemas/history_bahan_keluar_detail.schema';
-import { Model, Types } from 'mongoose';
+import { FilterQuery, Model, Types } from 'mongoose';
 import {
   HistoryBahanKeluarDetailDatabaseInput,
   HistoryKeluarDtoDatabaseInput,
 } from 'src/history-bahan-keluar/dto/response.interface';
-import { HistoryBahanKeluarDetailDto } from 'src/history-bahan-keluar/dto/create-history-bahan-keluar.dto';
+import {
+  FindAllHistoryBahanKeluarDto,
+  HistoryBahanKeluarDetailDto,
+} from 'src/history-bahan-keluar/dto/create-history-bahan-keluar.dto';
 import { HelperService } from 'src/helper/helper.service';
 import { HistoryBahanMasukRepository } from './historyBahanMasuk.repository';
 import { SatuanRepository } from './satuan.repository';
 import { HistoryBahanMasukDetailUpdateDatabaseInput } from 'src/history-masuk/dto/response.interface';
+import { KaryawanRepository } from './karyawan.repository';
+import { ProyekProdukRepository } from './proyek_produk.repository';
+import path from 'path';
 
 @Injectable()
 export class HistoryBahanKeluarRepository {
@@ -33,6 +39,8 @@ export class HistoryBahanKeluarRepository {
     private readonly helperService: HelperService,
     private readonly historyBahanMasukRepo: HistoryBahanMasukRepository,
     private readonly satuanRepo: SatuanRepository,
+    private readonly karyawanRepo: KaryawanRepository,
+    private readonly proyekProdukRepo: ProyekProdukRepository,
   ) {}
 
   // =======================   GENERIC FUNCTION  =======================
@@ -100,6 +108,44 @@ export class HistoryBahanKeluarRepository {
     }
   }
 
+  async findAll(
+    requestFilter: FilterQuery<HistoryBahanKeluar>,
+    showedField: any,
+  ) {
+    let filter: FilterQuery<HistoryBahanKeluar> = { deleted_at: null };
+
+    filter = { ...filter, ...requestFilter };
+
+    return await this.historyBahanKeluarModel
+      .find(filter, showedField.main)
+      .populate({
+        path: 'id_proyek_produk',
+        select: showedField.field1,
+        populate: [
+          { path: 'id_proyek', select: showedField.nestedField1 },
+          { path: 'id_produk', select: showedField.nestedField2 },
+        ],
+      })
+      .populate({ path: 'id_karyawan', select: showedField.field2 });
+  }
+
+  async findOne(
+    requestFilter: FilterQuery<HistoryBahanKeluar>,
+    showedField: any,
+  ) {
+    return await this.historyBahanKeluarModel
+      .findOne(requestFilter, showedField.main)
+      .populate({
+        path: 'id_proyek_produk',
+        select: showedField.field1,
+        populate: [
+          { path: 'id_proyek', select: showedField.nestedField1 },
+          { path: 'id_produk', select: showedField.nestedField2 },
+        ],
+      })
+      .populate({ path: 'id_karyawan', select: showedField.field2 });
+  }
+
   async findLastID() {
     // cari data terakhir
     const lastData = await this.historyBahanKeluarModel
@@ -116,6 +162,135 @@ export class HistoryBahanKeluarRepository {
   }
 
   // ======================= NON-GENERIC FUNCTION  =======================
+
+  async findAllPagination(
+    requestFilter: FilterQuery<FindAllHistoryBahanKeluarDto>,
+    paginationQuery: any,
+    showedField: any,
+  ) {
+    let filter: FilterQuery<HistoryBahanKeluar> = { deleted_at: null };
+
+    // filter berdasarkan id_proyek_produk
+    if (requestFilter.id_proyek_produk && requestFilter.id_proyek_produk > 0) {
+      const proyekProdukData = await this.proyekProdukRepo.findOne(
+        {
+          id: requestFilter.id_proyek_produk,
+          deleted_at: null,
+        },
+        {
+          main: {},
+          field1: 'id nama',
+          field2: 'id nama',
+          field3: 'id',
+          nestedField3: '',
+        },
+      );
+
+      filter = {
+        ...filter,
+        id_proyek_produk: proyekProdukData._id as Types.ObjectId,
+      };
+    }
+
+    // filter berdasarkan id_karyawan
+    if (requestFilter.id_karyawan && requestFilter.id_karyawan > 0) {
+      const karyawanData = await this.karyawanRepo.findOne({
+        id: requestFilter.id_karyawan,
+        deleted_at: null,
+      });
+      filter = { ...filter, id_karyawan: karyawanData._id as Types.ObjectId };
+    }
+
+    // ini untuk paginationnya
+    const { page, per_page } = paginationQuery;
+    // skip untuk mulai dari data ke berapa (mirip OFFSET pada SQL)
+    const skip = (page - 1) * per_page;
+
+    return await this.historyBahanKeluarModel
+      .find(filter, showedField.main)
+      .populate({
+        path: 'id_proyek_produk',
+        select: showedField.field1,
+        populate: [
+          { path: 'id_proyek', select: showedField.nestedField1 },
+          { path: 'id_produk', select: showedField.nestedField2 },
+        ],
+      })
+      .populate({ path: 'id_karyawan', select: showedField.field2 })
+      .skip(skip)
+      .limit(per_page);
+  }
+
+  async countAll(requestFilter: FilterQuery<FindAllHistoryBahanKeluarDto>) {
+    let filter: FilterQuery<HistoryBahanKeluar> = { deleted_at: null };
+
+    // filter berdasarkan id_proyek_produk
+    if (requestFilter.id_proyek_produk && requestFilter.id_proyek_produk > 0) {
+      const proyekProdukData = await this.proyekProdukRepo.findOne(
+        {
+          id: requestFilter.id_proyek_produk,
+          deleted_at: null,
+        },
+        {
+          main: {},
+          field1: 'id nama',
+          field2: 'id nama',
+          field3: 'id',
+          nestedField3: '',
+        },
+      );
+
+      filter = {
+        ...filter,
+        id_proyek_produk: proyekProdukData._id as Types.ObjectId,
+      };
+    }
+
+    // filter berdasarkan id_karyawan
+    if (requestFilter.id_karyawan && requestFilter.id_karyawan > 0) {
+      const karyawanData = await this.karyawanRepo.findOne({
+        id: requestFilter.id_karyawan,
+        deleted_at: null,
+      });
+      filter = { ...filter, id_karyawan: karyawanData._id as Types.ObjectId };
+    }
+
+    return await this.historyBahanKeluarModel.countDocuments(filter);
+  }
+
+  async findOneByHistoryBahanKeluarByID(
+    requestFilter: FilterQuery<HistoryBahanKeluar>,
+    showedField: any,
+  ) {
+    const historyBahanKeluarData = await this.findOne(requestFilter, {
+      main: {},
+      field1: 'id',
+      nestedField1: 'id nama',
+      nestedField2: 'id nama',
+      field2: 'id nama',
+    });
+
+    const historyBahanKeluarDetailData =
+      await this.historyBahanKeluarDetailModel
+        .find(
+          {
+            id_history_bahan_keluar: historyBahanKeluarData._id,
+            deleted_at: null,
+          },
+          showedField.main,
+        )
+        .populate({
+          path: 'id_history_bahan_masuk_detail',
+          select: showedField.field1,
+          populate: { path: 'id_bahan', select: showedField.nestedField1 },
+        })
+        .populate({
+          path: 'id_satuan',
+          select: showedField.field2,
+        });
+
+    return historyBahanKeluarDetailData;
+  }
 
   async validateInputSatuanIds(
     historyBahanKeluarDetail: HistoryBahanKeluarDetailDto[],

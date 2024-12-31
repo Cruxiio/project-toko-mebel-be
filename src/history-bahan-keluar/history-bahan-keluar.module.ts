@@ -20,6 +20,8 @@ import { SatuanRepository } from 'src/database/mongodb/repositories/satuan.repos
     ProyekProdukRepository,
     HistoryBahanMasukRepository,
     SatuanRepository,
+    ProyekProdukRepository,
+    KaryawanRepository,
   ],
   exports: [HistoryBahanKeluarService],
 })
