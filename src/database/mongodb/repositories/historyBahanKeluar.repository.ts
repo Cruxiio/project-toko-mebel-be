@@ -20,6 +20,7 @@ import {
 import {
   FindAllHistoryBahanKeluarDto,
   HistoryBahanKeluarDetailDto,
+  LaporanStokBahanKeluarDto,
 } from 'src/history-bahan-keluar/dto/create-history-bahan-keluar.dto';
 import { HelperService } from 'src/helper/helper.service';
 import { HistoryBahanMasukRepository } from './historyBahanMasuk.repository';
@@ -28,6 +29,9 @@ import { HistoryBahanMasukDetailUpdateDatabaseInput } from 'src/history-masuk/dt
 import { KaryawanRepository } from './karyawan.repository';
 import { ProyekProdukRepository } from './proyek_produk.repository';
 import path from 'path';
+import { CustomerRepository } from './customer.repository';
+import { ProyekRepository } from './proyek.repository';
+import { populate } from 'dotenv';
 
 @Injectable()
 export class HistoryBahanKeluarRepository {
@@ -41,6 +45,8 @@ export class HistoryBahanKeluarRepository {
     private readonly satuanRepo: SatuanRepository,
     private readonly karyawanRepo: KaryawanRepository,
     private readonly proyekProdukRepo: ProyekProdukRepository,
+    private readonly customerRepo: CustomerRepository,
+    private readonly proyekRepo: ProyekRepository,
   ) {}
 
   // =======================   GENERIC FUNCTION  =======================
@@ -290,6 +296,123 @@ export class HistoryBahanKeluarRepository {
         });
 
     return historyBahanKeluarDetailData;
+  }
+
+  async laporanStokBahanKeluar(
+    requestFilter: FilterQuery<LaporanStokBahanKeluarDto>,
+    showedField: any,
+  ) {
+    let filter: FilterQuery<HistoryBahanKeluarDetail> = { deleted_at: null };
+
+    // filter berdasarkan start_date dan end_date
+    if (requestFilter.start_date != null && requestFilter.end_date != null) {
+      // waktu hasil dari new Date() pada validasi otomatis di set ke 00:00:00.000
+      // jadi waktu start_date tidak perlu di set
+
+      // set waktu end_date ke 23:59:59.999
+      requestFilter.end_date.setUTCHours(23, 59, 59, 999);
+
+      filter = {
+        ...filter,
+        created_at: {
+          $gte: requestFilter.start_date,
+          $lte: requestFilter.end_date,
+        },
+      };
+    }
+
+    // filter berdasarkan nama customer
+    if (requestFilter.id_customer && requestFilter.id_customer > 0) {
+      // cari _id customer
+      const customerData = await this.customerRepo.findOne({
+        id: requestFilter.id_customer,
+        deleted_at: null,
+      });
+
+      // cari semua _id proyek yang dimiliki customer
+      const proyekData = await this.proyekRepo.findAll(
+        {
+          id_customer: customerData._id,
+        },
+        {
+          main: { _id: 1, id: 1 },
+          field1: '',
+        },
+      );
+
+      const proyekIds = proyekData.map((p) => p._id);
+
+      // cari semua proyek produk yang dimiliki proyek
+      const proyekProdukData = await this.proyekProdukRepo.findAll(
+        {
+          id_proyek: { $in: proyekIds },
+        },
+        {
+          main: { _id: 1, id: 1 },
+          field1: '',
+          field2: '',
+          field3: '',
+          nestedField3: '',
+        },
+      );
+
+      const proyekProdukIds = proyekProdukData.map((p) => p._id);
+
+      // cari semua history bahan keluar yang dimiliki proyek produk
+      const historyBahanKeluarData = await this.findAll(
+        {
+          id_proyek_produk: { $in: proyekProdukIds },
+        },
+        {
+          main: { _id: 1, id: 1 },
+          field1: '',
+          nestedField1: '',
+          nestedField2: '',
+          field2: '',
+        },
+      );
+
+      const historyBahanKeluarIds = historyBahanKeluarData.map((h) => h._id);
+
+      filter = {
+        ...filter,
+        id_history_bahan_keluar: { $in: historyBahanKeluarIds },
+      };
+    }
+
+    return await this.historyBahanKeluarDetailModel
+      .find(filter, showedField.main)
+      .populate({
+        path: 'id_history_bahan_keluar',
+        select: showedField.field1,
+        populate: [
+          { path: 'id_karyawan', select: showedField.nestedField1 },
+          {
+            path: 'id_proyek_produk',
+            select: showedField.nestedField2,
+            populate: {
+              path: 'id_proyek',
+              select: showedField.nestedField3,
+              populate: {
+                path: 'id_customer',
+                select: showedField.nestedField4,
+              },
+            },
+          },
+        ],
+      })
+      .populate({
+        path: 'id_history_bahan_masuk_detail',
+        select: showedField.field2,
+        populate: {
+          path: 'id_bahan',
+          select: showedField.nestedField5,
+        },
+      })
+      .populate({
+        path: 'id_satuan',
+        select: showedField.field3,
+      });
   }
 
   async validateInputSatuanIds(

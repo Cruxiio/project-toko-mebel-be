@@ -12,6 +12,7 @@ import { HistoryBahanKeluarService } from './history-bahan-keluar.service';
 import {
   CreateHistoryBahanKeluarDto,
   FindAllHistoryBahanKeluarDto,
+  LaporanStokBahanKeluarDto,
   UpdateHistoryBahanKeluarDto,
 } from './dto/create-history-bahan-keluar.dto';
 
@@ -31,6 +32,13 @@ export class HistoryBahanKeluarController {
   @Get()
   findAll(@Query() requestFilter: FindAllHistoryBahanKeluarDto) {
     return this.historyBahanKeluarService.handleFindAllHistoryBahanKeluar(
+      requestFilter,
+    );
+  }
+
+  @Get('laporan')
+  getLaporan(@Query() requestFilter: LaporanStokBahanKeluarDto) {
+    return this.historyBahanKeluarService.handleLaporanStokBahanKeluar(
       requestFilter,
     );
   }

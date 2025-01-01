@@ -9,6 +9,8 @@ import { KaryawanRepository } from 'src/database/mongodb/repositories/karyawan.r
 import { ProyekProdukRepository } from 'src/database/mongodb/repositories/proyek_produk.repository';
 import { HistoryBahanMasukRepository } from 'src/database/mongodb/repositories/historyBahanMasuk.repository';
 import { SatuanRepository } from 'src/database/mongodb/repositories/satuan.repository';
+import { CustomerRepository } from 'src/database/mongodb/repositories/customer.repository';
+import { ProyekRepository } from 'src/database/mongodb/repositories/proyek.repository';
 
 @Module({
   imports: [MongoDBModule, MongoDBProvider, HelperModule],
@@ -20,8 +22,9 @@ import { SatuanRepository } from 'src/database/mongodb/repositories/satuan.repos
     ProyekProdukRepository,
     HistoryBahanMasukRepository,
     SatuanRepository,
-    ProyekProdukRepository,
     KaryawanRepository,
+    CustomerRepository,
+    ProyekRepository,
   ],
   exports: [HistoryBahanKeluarService],
 })

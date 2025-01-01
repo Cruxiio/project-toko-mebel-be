@@ -6,6 +6,7 @@ import {
 import {
   CreateHistoryBahanKeluarDto,
   FindAllHistoryBahanKeluarDto,
+  LaporanStokBahanKeluarDto,
   UpdateHistoryBahanKeluarDto,
 } from './dto/create-history-bahan-keluar.dto';
 import { ProyekProdukRepository } from 'src/database/mongodb/repositories/proyek_produk.repository';
@@ -18,8 +19,11 @@ import {
   HistoryBahanKeluarFindAllResponseData,
   HistoryBahanKeluarFindOneResponse,
   HistoryKeluarDtoDatabaseInput,
+  LaporanStokBahanKeluarResponse,
+  LaporanStokBahanKeluarResponseData,
 } from './dto/response.interface';
 import { Types } from 'mongoose';
+import { HelperService } from 'src/helper/helper.service';
 
 @Injectable()
 export class HistoryBahanKeluarService {
@@ -27,6 +31,7 @@ export class HistoryBahanKeluarService {
     private readonly proyekProdukRepository: ProyekProdukRepository,
     private readonly karyawanRepository: KaryawanRepository,
     private readonly historyBahanKeluarRepository: HistoryBahanKeluarRepository,
+    private readonly helperService: HelperService,
   ) {}
   async handleCreateHistoryBahanKeluar(
     createHistoryBahanKeluarDto: CreateHistoryBahanKeluarDto,
@@ -219,6 +224,90 @@ export class HistoryBahanKeluarService {
       updated_at: historyBahanKeluarData.updated_at,
       deleted_at: historyBahanKeluarData.deleted_at,
     };
+
+    return res;
+  }
+
+  async handleLaporanStokBahanKeluar(requestFilter: LaporanStokBahanKeluarDto) {
+    const laporanStokBahanKeluarData =
+      await this.historyBahanKeluarRepository.laporanStokBahanKeluar(
+        requestFilter,
+        {
+          main: {},
+          field1: 'id',
+          nestedField1: 'id nama',
+          nestedField2: 'id',
+          nestedField3: 'id',
+          nestedField4: 'id nama',
+          field2: 'id',
+          nestedField5: 'id nama',
+          field3: 'id nama',
+        },
+      );
+
+    // buat response
+    const res: LaporanStokBahanKeluarResponse = {
+      data: Object.values(
+        laporanStokBahanKeluarData.reduce((acc, curr) => {
+          // tampung id bahan, tgl bahan keluar, id satuan
+          let id_bahan = curr.id_history_bahan_masuk_detail.id_bahan.id;
+          let curr_tgl_bahan_keluar = this.helperService.formatDatetoString(
+            curr.created_at,
+          );
+          let nama_satuan = curr.id_satuan.nama;
+
+          // format data
+          const formattedData: LaporanStokBahanKeluarResponseData = {
+            tgl_bahan_keluar: this.helperService.formatDatetoString(
+              curr.created_at,
+            ),
+            id_bahan: curr.id_history_bahan_masuk_detail.id_bahan.id,
+            nama_bahan: curr.id_history_bahan_masuk_detail.id_bahan.nama,
+            qty: curr.qty,
+            nama_satuan: curr.id_satuan.nama,
+            nama_customer:
+              curr.id_history_bahan_keluar.id_proyek_produk.id_proyek
+                .id_customer.nama,
+            nama_karyawan: curr.id_history_bahan_keluar.id_karyawan.nama,
+          };
+
+          // cek apakah id bahan sudah ada di array acc
+          if (!acc[`${id_bahan}_${curr_tgl_bahan_keluar}_${nama_satuan}`]) {
+            // tambahkan ke acc
+            acc[`${id_bahan}_${curr_tgl_bahan_keluar}_${nama_satuan}`] =
+              formattedData;
+          } else if (
+            acc[`${id_bahan}_${curr_tgl_bahan_keluar}_${nama_satuan}`] &&
+            acc[`${id_bahan}_${curr_tgl_bahan_keluar}_${nama_satuan}`]
+              .nama_satuan == nama_satuan
+          ) {
+            // tambahkan qty jika tgl bahan keluar sama dan satuan sama
+            acc[`${id_bahan}_${curr_tgl_bahan_keluar}_${nama_satuan}`].qty +=
+              curr.qty;
+          }
+
+          return acc;
+        }, {}),
+      ),
+    };
+
+    // res buat cek
+    // const res: LaporanStokBahanKeluarResponse = {
+    //   data: laporanStokBahanKeluarData.map((d) => {
+    //     const formattedData: LaporanStokBahanKeluarResponseData = {
+    //       tgl_bahan_keluar: this.helperService.formatDatetoString(d.created_at),
+    //       id_bahan: d.id_history_bahan_masuk_detail.id_bahan.id,
+    //       nama_bahan: d.id_history_bahan_masuk_detail.id_bahan.nama,
+    //       qty: d.qty,
+    //       nama_satuan: d.id_satuan.nama,
+    //       nama_customer:
+    //         d.id_history_bahan_keluar.id_proyek_produk.id_proyek.id_customer
+    //           .nama,
+    //       nama_karyawan: d.id_history_bahan_keluar.id_karyawan.nama,
+    //     };
+    //     return formattedData;
+    //   }),
+    // };
 
     return res;
   }

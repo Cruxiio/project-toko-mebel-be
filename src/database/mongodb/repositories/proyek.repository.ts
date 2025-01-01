@@ -27,7 +27,9 @@ export class ProyekRepository {
   async findAll(proyekFilterQuery: FilterQuery<Proyek>, showedField: any) {
     let filter: FilterQuery<Proyek> = { deleted_at: null };
 
-    if (proyekFilterQuery.nama != '') {
+    filter = { ...filter, ...proyekFilterQuery };
+
+    if (proyekFilterQuery.nama && proyekFilterQuery.nama != '') {
       filter = {
         ...filter,
         nama: {
@@ -211,4 +213,29 @@ export class ProyekRepository {
   //     _id: 0,
   //   });
   // }
+
+  async masterFindAll(
+    proyekFilterQuery: FilterQuery<Proyek>,
+    showedField: any,
+  ) {
+    let filter: FilterQuery<Proyek> = { deleted_at: null };
+
+    if (proyekFilterQuery.nama && proyekFilterQuery.nama != '') {
+      filter = {
+        ...filter,
+        nama: {
+          $regex: proyekFilterQuery.nama, // like isi regex
+          $options: 'i', // i artinya case-insensitive
+        },
+      };
+    }
+
+    const proyekData = await this.proyekModel
+      .find(filter, showedField.main)
+      .populate({
+        path: 'id_customer',
+        select: showedField.field1,
+      });
+    return proyekData;
+  }
 }

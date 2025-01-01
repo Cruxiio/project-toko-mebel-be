@@ -59,3 +59,17 @@ export interface HistoryBahanKeluarFindAllResponse {
   data: HistoryBahanKeluarFindAllResponseData[];
   total_page: number;
 }
+
+export interface LaporanStokBahanKeluarResponseData {
+  tgl_bahan_keluar: string;
+  id_bahan: number;
+  nama_bahan: string;
+  qty: number;
+  nama_satuan: string;
+  nama_customer: string;
+  nama_karyawan: string;
+}
+
+export interface LaporanStokBahanKeluarResponse {
+  data: LaporanStokBahanKeluarResponseData[];
+}

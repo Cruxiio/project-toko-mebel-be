@@ -305,7 +305,7 @@ export class MasterService {
 
   async handleMasterProyekFindAll(requestFilter: FindAllProyekDto) {
     // ambil data proyek
-    const listProyek = await this.proyekRepo.findAll(
+    const listProyek = await this.proyekRepo.masterFindAll(
       {
         nama: requestFilter.search,
       },
