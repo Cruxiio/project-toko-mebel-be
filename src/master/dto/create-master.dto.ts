@@ -18,7 +18,11 @@ export class MasterFindAllStokDto {
   id_proyek_produk?: number = 0;
 }
 
-export class MasterFindAllSatuanDto extends MasterFindAllStokDto {}
+export class MasterFindAllSatuanDto extends MasterFindAllStokDto {
+  @IsString()
+  @IsOptional()
+  satuan_terkecil?: string = '';
+}
 
 export class MasterFindAllKaryawanDto extends MasterFindAllStokDto {
   @ValidateIf((o) => o.role !== '') // Validasi hanya dilakukan ketika role != ''

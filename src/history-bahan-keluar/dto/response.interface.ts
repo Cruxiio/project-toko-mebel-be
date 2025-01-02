@@ -29,6 +29,7 @@ export interface HistoryBahanKeluarDetailData {
   id_history_bahan_masuk_detail?: number;
   nama_bahan: string;
   id_satuan?: number;
+  satuan_terkecil?: string;
   nama_satuan: string;
   qty: number;
 }

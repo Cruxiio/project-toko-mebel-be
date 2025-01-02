@@ -145,6 +145,7 @@ export class MasterService {
       {
         search: requestFilter.search,
         id_proyek_produk: requestFilter.id_proyek_produk,
+        satuan_terkecil: requestFilter.satuan_terkecil,
       },
       {
         main: {},

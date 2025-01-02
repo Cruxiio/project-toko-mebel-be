@@ -198,7 +198,7 @@ export class HistoryBahanKeluarService {
           main: {},
           field1: 'id',
           nestedField1: 'id nama',
-          field2: 'id nama',
+          field2: 'id nama satuan_terkecil',
         },
       );
 
@@ -217,6 +217,7 @@ export class HistoryBahanKeluarService {
           nama_bahan: d.id_history_bahan_masuk_detail.id_bahan.nama,
           id_satuan: d.id_satuan.id,
           nama_satuan: d.id_satuan.nama,
+          satuan_terkecil: d.id_satuan.satuan_terkecil,
           qty: d.qty,
         };
         return formattedData;

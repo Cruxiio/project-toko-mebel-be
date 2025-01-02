@@ -352,6 +352,16 @@ export class ProyekProdukRepository {
       };
     }
 
+    if (
+      satuanFilterQuery.satuan_terkecil &&
+      satuanFilterQuery.satuan_terkecil != ''
+    ) {
+      filter = {
+        ...filter,
+        satuan_terkecil: satuanFilterQuery.satuan_terkecil,
+      };
+    }
+
     return await this.SatuanModel.find(filter, showedField.main);
   }
 
