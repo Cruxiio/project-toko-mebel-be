@@ -152,6 +152,39 @@ export class HistoryBahanKeluarRepository {
       .populate({ path: 'id_karyawan', select: showedField.field2 });
   }
 
+  async findAllDetail(
+    requestFilter: FilterQuery<HistoryBahanKeluarDetail>,
+    showedField: any,
+  ) {
+    let filter: FilterQuery<HistoryBahanKeluarDetail> = { deleted_at: null };
+
+    filter = { ...filter, ...requestFilter };
+
+    return await this.historyBahanKeluarDetailModel
+      .find(filter, showedField.main)
+      .populate({
+        path: 'id_history_bahan_keluar',
+        select: showedField.field1,
+        populate: {
+          path: 'id_proyek_produk',
+          select: showedField.nestedField1,
+          populate: {
+            path: 'id_proyek',
+            select: showedField.nestedField2,
+          },
+        },
+      })
+      .populate({
+        path: 'id_history_bahan_masuk_detail',
+        select: showedField.field2,
+        populate: { path: 'id_bahan', select: showedField.nestedField3 },
+      })
+      .populate({
+        path: 'id_satuan',
+        select: showedField.field3,
+      });
+  }
+
   async findLastID() {
     // cari data terakhir
     const lastData = await this.historyBahanKeluarModel

@@ -7,6 +7,9 @@ import { HelperModule } from 'src/helper/helper.module';
 import { HistoryBahanKeluarRepository } from 'src/database/mongodb/repositories/historyBahanKeluar.repository';
 import { SatuanRepository } from 'src/database/mongodb/repositories/satuan.repository';
 import { MongoDBModule } from 'src/database/mongodb/mongodb.module';
+import { ProyekRepository } from 'src/database/mongodb/repositories/proyek.repository';
+import { ProyekProdukRepository } from 'src/database/mongodb/repositories/proyek_produk.repository';
+import { HistoryBahanMasukRepository } from 'src/database/mongodb/repositories/historyBahanMasuk.repository';
 
 @Module({
   imports: [MongoDBModule, MongoDBProvider, HelperModule],
@@ -16,6 +19,9 @@ import { MongoDBModule } from 'src/database/mongodb/mongodb.module';
     BahanSisaRepository,
     HistoryBahanKeluarRepository,
     SatuanRepository,
+    ProyekRepository,
+    ProyekProdukRepository,
+    HistoryBahanMasukRepository,
   ],
   exports: [BahanSisaService],
 })

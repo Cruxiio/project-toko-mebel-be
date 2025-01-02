@@ -6,10 +6,12 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { BahanSisaService } from './bahan-sisa.service';
 import {
   CreateBahanSisaDto,
+  FindAllBahanSisaDto,
   UpdateBahanSisaDto,
 } from './dto/create-bahan-sisa.dto';
 
@@ -23,8 +25,8 @@ export class BahanSisaController {
   }
 
   @Get()
-  findAll() {
-    return this.bahanSisaService.findAll();
+  findAll(@Query() requestFilter: FindAllBahanSisaDto) {
+    return this.bahanSisaService.handleFindAllBahanSisa(requestFilter);
   }
 
   @Get(':id')

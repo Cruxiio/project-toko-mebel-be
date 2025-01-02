@@ -14,6 +14,16 @@ export interface FindOneBahanSisaResponse {
   deleted_at?: Date;
 }
 
+export interface FindAllBahanSisaResponseData
+  extends FindOneBahanSisaResponse {}
+
+export interface FindAllBahanSisaResponse {
+  page: number;
+  per_page: number;
+  data: FindAllBahanSisaResponseData[];
+  total_page: number;
+}
+
 export interface BahanSisaInputDatabaseDto {
   id_history_bahan_keluar_detail: Types.ObjectId;
   id_satuan: Types.ObjectId;

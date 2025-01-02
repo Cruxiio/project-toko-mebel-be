@@ -235,11 +235,11 @@ export class HistoryBahanMasukRepository {
       })
       .populate({
         path: 'id_bahan', // Populate data bahan
-        select: showedField.field1, // Ambil hanya field id dari koleksi Bahan
+        select: showedField.field2, // Ambil hanya field id dari koleksi Bahan
       })
       .populate({
         path: 'id_satuan', // Populate data satuan
-        select: showedField.field2, // Ambil hanya field id dari koleksi Satuan
+        select: showedField.field3, // Ambil hanya field id dari koleksi Satuan
       });
   }
 
