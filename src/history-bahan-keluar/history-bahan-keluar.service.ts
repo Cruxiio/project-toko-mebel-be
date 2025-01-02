@@ -241,7 +241,7 @@ export class HistoryBahanKeluarService {
           nestedField4: 'id nama',
           field2: 'id',
           nestedField5: 'id nama',
-          field3: 'id nama',
+          field3: 'id nama satuan_terkecil konversi',
         },
       );
 
@@ -254,7 +254,7 @@ export class HistoryBahanKeluarService {
           let curr_tgl_bahan_keluar = this.helperService.formatDatetoString(
             curr.created_at,
           );
-          let nama_satuan = curr.id_satuan.nama;
+          let nama_satuan = curr.id_satuan.satuan_terkecil;
 
           // format data
           const formattedData: LaporanStokBahanKeluarResponseData = {
@@ -263,8 +263,8 @@ export class HistoryBahanKeluarService {
             ),
             id_bahan: curr.id_history_bahan_masuk_detail.id_bahan.id,
             nama_bahan: curr.id_history_bahan_masuk_detail.id_bahan.nama,
-            qty: curr.qty,
-            nama_satuan: curr.id_satuan.nama,
+            qty: curr.qty * curr.id_satuan.konversi,
+            nama_satuan: curr.id_satuan.satuan_terkecil,
             nama_customer:
               curr.id_history_bahan_keluar.id_proyek_produk.id_proyek
                 .id_customer.nama,
@@ -272,18 +272,17 @@ export class HistoryBahanKeluarService {
           };
 
           // cek apakah id bahan sudah ada di array acc
-          if (!acc[`${id_bahan}_${curr_tgl_bahan_keluar}_${nama_satuan}`]) {
+          if (!acc[`${id_bahan}_${curr_tgl_bahan_keluar}`]) {
             // tambahkan ke acc
-            acc[`${id_bahan}_${curr_tgl_bahan_keluar}_${nama_satuan}`] =
-              formattedData;
+            acc[`${id_bahan}_${curr_tgl_bahan_keluar}`] = formattedData;
           } else if (
-            acc[`${id_bahan}_${curr_tgl_bahan_keluar}_${nama_satuan}`] &&
-            acc[`${id_bahan}_${curr_tgl_bahan_keluar}_${nama_satuan}`]
-              .nama_satuan == nama_satuan
+            acc[`${id_bahan}_${curr_tgl_bahan_keluar}`] &&
+            acc[`${id_bahan}_${curr_tgl_bahan_keluar}`].nama_satuan ==
+              nama_satuan
           ) {
             // tambahkan qty jika tgl bahan keluar sama dan satuan sama
-            acc[`${id_bahan}_${curr_tgl_bahan_keluar}_${nama_satuan}`].qty +=
-              curr.qty;
+            acc[`${id_bahan}_${curr_tgl_bahan_keluar}`].qty +=
+              curr.qty * curr.id_satuan.konversi;
           }
 
           return acc;
