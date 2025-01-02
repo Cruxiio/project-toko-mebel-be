@@ -30,7 +30,7 @@ export class NotaDetailDto {
 
   @IsNumber({}, { message: 'harga_satuan must be a number' })
   @IsNotEmpty({ message: 'harga_satuan is required' })
-  @Min(1000, { message: 'harga_satuan must be greater than 1000' })
+  @Min(0, { message: 'harga_satuan must be positive number' })
   @Transform(({ value }) => Number(value))
   harga_satuan: number;
 
