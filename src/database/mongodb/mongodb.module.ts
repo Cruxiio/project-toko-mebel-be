@@ -14,6 +14,8 @@ import { ProdukRepository } from './repositories/produk.repository';
 import { TeamRepository } from './repositories/team.repository';
 import { ProyekProdukRepository } from './repositories/proyek_produk.repository';
 import { HelperModule } from 'src/helper/helper.module';
+import { HistoryBahanKeluarRepository } from './repositories/historyBahanKeluar.repository';
+import { BahanSisaRepository } from './repositories/bahanSisa.repository';
 
 @Module({
   imports: [
@@ -34,6 +36,8 @@ import { HelperModule } from 'src/helper/helper.module';
     ProdukRepository,
     TeamRepository,
     ProyekProdukRepository,
+    HistoryBahanKeluarRepository,
+    BahanSisaRepository,
   ],
   exports: [
     UserRepository,
@@ -48,6 +52,8 @@ import { HelperModule } from 'src/helper/helper.module';
     ProdukRepository,
     TeamRepository,
     ProyekProdukRepository,
+    HistoryBahanKeluarRepository,
+    BahanSisaRepository,
   ], // Ekspor agar dapat digunakan di fitur lain
 })
 export class MongoDBModule {}

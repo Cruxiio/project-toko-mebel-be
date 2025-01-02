@@ -298,6 +298,38 @@ export class HistoryBahanKeluarRepository {
     return historyBahanKeluarDetailData;
   }
 
+  async findOneByHistoryBahanKeluarDetailByID(
+    requestFilter: FilterQuery<HistoryBahanKeluarDetail>,
+    showedField: any,
+  ) {
+    const historyBahanKeluarDetailData =
+      await this.historyBahanKeluarDetailModel
+        .findOne(requestFilter, showedField.main)
+        .populate({
+          path: 'id_history_bahan_keluar',
+          select: showedField.field1,
+          populate: {
+            path: 'id_proyek_produk',
+            select: showedField.nestedField1,
+            populate: {
+              path: 'id_proyek',
+              select: showedField.nestedField2,
+            },
+          },
+        })
+        .populate({
+          path: 'id_history_bahan_masuk_detail',
+          select: showedField.field2,
+          populate: { path: 'id_bahan', select: showedField.nestedField3 },
+        })
+        .populate({
+          path: 'id_satuan',
+          select: showedField.field3,
+        });
+
+    return historyBahanKeluarDetailData;
+  }
+
   async laporanStokBahanKeluar(
     requestFilter: FilterQuery<LaporanStokBahanKeluarDto>,
     showedField: any,

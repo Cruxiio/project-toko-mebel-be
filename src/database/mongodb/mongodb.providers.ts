@@ -30,7 +30,7 @@ import {
   HistoryBahanKeluarDetail,
   HistoryBahanKeluarDetailSchema,
 } from './schemas/history_bahan_keluar_detail.schema';
-import { BahanSisa } from './schemas/bahan_sisa.schema';
+import { BahanSisa, BahanSisaSchema } from './schemas/bahan_sisa.schema';
 
 // kasih tau mongoose schema mana yang mau diimport
 export const MongoDBProvider = MongooseModule.forFeatureAsync([
@@ -254,6 +254,21 @@ export const MongoDBProvider = MongooseModule.forFeatureAsync([
       schema.plugin(AutoIncrement, {
         inc_field: 'id',
         id: 'history_bahan_keluar_detail_id_counter', //ini nama unik untuk counter id history_bahan_keluar_detail yang disimpan di collection counters
+      });
+      return schema;
+    },
+    inject: [getConnectionToken()],
+  },
+  {
+    name: BahanSisa.name,
+    useFactory: async (connection: Connection) => {
+      const schema = BahanSisaSchema;
+
+      const AutoIncrement = require('mongoose-sequence')(connection);
+
+      schema.plugin(AutoIncrement, {
+        inc_field: 'id',
+        id: 'bahan_sisa_id_counter', //ini nama unik untuk counter id history_bahan_keluar_detail yang disimpan di collection counters
       });
       return schema;
     },

@@ -16,7 +16,7 @@ export class BahanSisa {
   @Prop({
     required: true,
     type: SchemaTypes.ObjectId,
-    ref: 'history_bahan_keluar_detail',
+    ref: HistoryBahanKeluarDetail.name,
   })
   id_history_bahan_keluar_detail: HistoryBahanKeluarDetail;
 
