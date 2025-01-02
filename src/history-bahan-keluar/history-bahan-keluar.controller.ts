@@ -43,6 +43,13 @@ export class HistoryBahanKeluarController {
     );
   }
 
+  @Get('detail/:id')
+  getHistoryKeluarDetail(@Param('id') id: number) {
+    return this.historyBahanKeluarService.handleFindOneHistoryBahanKeluarDetail(
+      id,
+    );
+  }
+
   @Get(':id')
   findOne(@Param('id') id: number) {
     return this.historyBahanKeluarService.handleFindOneHistoryBahanKeluar(id);

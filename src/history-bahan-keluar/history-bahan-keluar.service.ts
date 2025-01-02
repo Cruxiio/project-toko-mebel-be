@@ -15,6 +15,7 @@ import { HistoryBahanKeluarRepository } from 'src/database/mongodb/repositories/
 import {
   HistoryBahanKeluarDetailData,
   HistoryBahanKeluarDetailFindOneByIDResponse,
+  HistoryBahanKeluarDetailFindOneResponse,
   HistoryBahanKeluarFindAllResponse,
   HistoryBahanKeluarFindAllResponseData,
   HistoryBahanKeluarFindOneResponse,
@@ -223,6 +224,58 @@ export class HistoryBahanKeluarService {
       created_at: historyBahanKeluarData.created_at,
       updated_at: historyBahanKeluarData.updated_at,
       deleted_at: historyBahanKeluarData.deleted_at,
+    };
+
+    return res;
+  }
+
+  async handleFindOneHistoryBahanKeluarDetail(id: number) {
+    // cek apakah id adalah int atau bukan
+    if (Number.isNaN(id)) {
+      throw new BadRequestException('id must be a number');
+    }
+
+    // find History Bahan Masuk Detail by id
+    const historyBahanKeluarDetailData =
+      await this.historyBahanKeluarRepository.findOneByHistoryBahanKeluarDetailByID(
+        {
+          id,
+          deleted_at: null,
+        },
+        {
+          main: {},
+          field1: 'id',
+          nestedField1: '',
+          nestedField2: 'id nama',
+          field2: 'id',
+          nestedField3: 'id nama',
+          field3: 'id nama',
+        },
+      );
+
+    if (!historyBahanKeluarDetailData) {
+      throw new NotFoundException('History Bahan Keluar Detail not found');
+    }
+
+    // buat response
+    const res: HistoryBahanKeluarDetailFindOneResponse = {
+      id: historyBahanKeluarDetailData.id,
+      id_history_bahan_keluar:
+        historyBahanKeluarDetailData.id_history_bahan_keluar.id,
+      nama_proyek:
+        historyBahanKeluarDetailData.id_history_bahan_keluar.id_proyek_produk
+          .id_proyek.nama,
+      id_history_bahan_masuk_detail:
+        historyBahanKeluarDetailData.id_history_bahan_masuk_detail.id,
+      nama_bahan:
+        historyBahanKeluarDetailData.id_history_bahan_masuk_detail.id_bahan
+          .nama,
+      id_satuan: historyBahanKeluarDetailData.id_satuan.id,
+      nama_satuan: historyBahanKeluarDetailData.id_satuan.nama,
+      qty: historyBahanKeluarDetailData.qty,
+      created_at: historyBahanKeluarDetailData.created_at,
+      updated_at: historyBahanKeluarDetailData.updated_at,
+      deleted_at: historyBahanKeluarDetailData.deleted_at,
     };
 
     return res;

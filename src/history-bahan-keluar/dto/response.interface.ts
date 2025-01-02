@@ -45,6 +45,20 @@ export interface HistoryBahanKeluarFindOneResponse {
   deleted_at?: Date | null;
 }
 
+export interface HistoryBahanKeluarDetailFindOneResponse {
+  id: number;
+  id_history_bahan_keluar: number;
+  nama_proyek: string;
+  id_history_bahan_masuk_detail: number;
+  nama_bahan: string;
+  id_satuan: number;
+  nama_satuan: string;
+  qty: number;
+  created_at: Date;
+  updated_at?: Date;
+  deleted_at?: Date;
+}
+
 export interface HistoryBahanKeluarDetailFindOneByIDResponse
   extends HistoryBahanKeluarFindOneResponse {
   detail: HistoryBahanKeluarDetailData[];
