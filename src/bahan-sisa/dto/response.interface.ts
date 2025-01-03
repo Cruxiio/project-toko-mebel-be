@@ -6,7 +6,7 @@ export interface FindOneBahanSisaResponse {
   nama_proyek: string;
   nama_bahan: string;
   id_satuan: number;
-  nama_satuan: string;
+  satuan_terkecil?: string;
   qty: number;
   keterangan: string;
   created_at: Date;
@@ -28,5 +28,6 @@ export interface BahanSisaInputDatabaseDto {
   id_history_bahan_keluar_detail: Types.ObjectId;
   id_satuan: Types.ObjectId;
   qty: number;
+  qty_pakai?: number;
   keterangan: string;
 }

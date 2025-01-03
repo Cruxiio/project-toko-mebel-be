@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   Query,
+  Put,
 } from '@nestjs/common';
 import { BahanSisaService } from './bahan-sisa.service';
 import {
@@ -34,12 +35,12 @@ export class BahanSisaController {
     return this.bahanSisaService.findOne(+id);
   }
 
-  @Patch(':id')
+  @Put(':id')
   update(
-    @Param('id') id: string,
+    @Param('id') id: number,
     @Body() updateBahanSisaDto: UpdateBahanSisaDto,
   ) {
-    return this.bahanSisaService.update(+id, updateBahanSisaDto);
+    return this.bahanSisaService.handleUpdateBahanSisa(id, updateBahanSisaDto);
   }
 
   @Delete(':id')

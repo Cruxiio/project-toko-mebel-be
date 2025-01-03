@@ -29,6 +29,7 @@ export class BahanSisaRepository {
           bahanSisaData.id_history_bahan_keluar_detail,
         id_satuan: bahanSisaData.id_satuan,
         qty: bahanSisaData.qty,
+        qty_pakai: bahanSisaData.qty_pakai,
         keterangan: bahanSisaData.keterangan,
       });
       await newBahanSisa.save();
@@ -66,8 +67,36 @@ export class BahanSisaRepository {
     return await this.bahanSisaModel.find(filter, showField.main);
   }
 
-  async findOne(requestFilter: FilterQuery<BahanSisa>, showField: any) {
-    return await this.bahanSisaModel.findOne(requestFilter, showField);
+  async findOne(requestFilter: FilterQuery<BahanSisa>, showedField: any) {
+    return await this.bahanSisaModel
+      .findOne(requestFilter, showedField.main)
+      .populate({
+        path: 'id_history_bahan_keluar_detail',
+        select: showedField.field1,
+        populate: [
+          {
+            path: 'id_history_bahan_keluar',
+            select: showedField.nestedField1,
+            populate: {
+              path: 'id_proyek_produk',
+              select: showedField.nestedField2,
+              populate: {
+                path: 'id_proyek',
+                select: showedField.nestedField3,
+              },
+            },
+          },
+          {
+            path: 'id_history_bahan_masuk_detail',
+            select: showedField.nestedField4,
+            populate: { path: 'id_bahan', select: showedField.nestedField5 },
+          },
+        ],
+      })
+      .populate({
+        path: 'id_satuan',
+        select: showedField.field2,
+      });
   }
 
   async filterFindAllPagination(
@@ -199,7 +228,10 @@ export class BahanSisaRepository {
     paginationQuery: any,
     showedField: any,
   ) {
-    let filter: FilterQuery<BahanSisa> = { deleted_at: null, qty: { $gt: 0 } };
+    let filter: FilterQuery<BahanSisa> = {
+      deleted_at: null,
+      qty_pakai: { $gt: 0 },
+    };
 
     // filter berdasarkan requestFilter
     const filteredRequest = await this.filterFindAllPagination(requestFilter);

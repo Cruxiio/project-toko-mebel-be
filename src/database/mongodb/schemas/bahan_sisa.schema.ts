@@ -26,6 +26,9 @@ export class BahanSisa {
   @Prop({ required: true, type: Number })
   qty: number;
 
+  @Prop({ type: Number, default: 0 })
+  qty_pakai: number;
+
   @Prop({ type: String })
   keterangan: string;
 

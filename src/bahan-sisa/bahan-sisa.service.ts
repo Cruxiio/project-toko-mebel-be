@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import {
   CreateBahanSisaDto,
   FindAllBahanSisaDto,
@@ -61,6 +65,7 @@ export class BahanSisaService {
         historyBahanKeluarDetailData._id as Types.ObjectId,
       id_satuan: satuanData._id as Types.ObjectId,
       qty: createBahanSisaDto.qty,
+      qty_pakai: createBahanSisaDto.qty * satuanData.konversi,
       keterangan: createBahanSisaDto.keterangan,
     };
 
@@ -81,8 +86,8 @@ export class BahanSisaService {
         historyBahanKeluarDetailData.id_history_bahan_masuk_detail.id_bahan
           .nama,
       id_satuan: satuanData.id,
-      nama_satuan: satuanData.nama,
-      qty: createBahanSisaDto.qty,
+      satuan_terkecil: satuanData.satuan_terkecil,
+      qty: newBahanSisaData.qty_pakai,
       keterangan: newBahanSisaData.keterangan,
       created_at: newBahanSisaData.created_at,
       updated_at: newBahanSisaData.updated_at,
@@ -113,7 +118,7 @@ export class BahanSisaService {
         nestedField3: 'id nama',
         nestedField4: '',
         nestedField5: 'id nama',
-        field2: 'id nama',
+        field2: 'id nama satuan_terkecil',
       },
     );
 
@@ -146,8 +151,8 @@ export class BahanSisaService {
             bahanSisa.id_history_bahan_keluar_detail
               .id_history_bahan_masuk_detail.id_bahan.nama,
           id_satuan: bahanSisa.id_satuan.id,
-          nama_satuan: bahanSisa.id_satuan.nama,
-          qty: bahanSisa.qty,
+          satuan_terkecil: bahanSisa.id_satuan.satuan_terkecil,
+          qty: bahanSisa.qty_pakai,
           keterangan: bahanSisa.keterangan,
           created_at: bahanSisa.created_at,
           updated_at: bahanSisa.updated_at,
@@ -165,8 +170,89 @@ export class BahanSisaService {
     return `This action returns a #${id} bahanSisa`;
   }
 
-  update(id: number, updateBahanSisaDto: UpdateBahanSisaDto) {
-    return `This action updates a #${id} bahanSisa`;
+  async handleUpdateBahanSisa(
+    id: number,
+    updateBahanSisaDto: UpdateBahanSisaDto,
+  ) {
+    // cek apakah id adalah int atau bukan
+    if (Number.isNaN(id)) {
+      throw new BadRequestException('id must be a number');
+    }
+
+    // cek apakah id bahan sisa ada atau tidak
+    const bahanSisaData = await this.bahanSisaRepository.findOne(
+      {
+        id: id,
+        deleted_at: null,
+      },
+      {
+        main: {},
+        field1: 'id',
+        nestedField1: '',
+        nestedField2: '',
+        nestedField3: 'id nama',
+        nestedField4: '',
+        nestedField5: 'id nama',
+        field2: 'id nama satuan_terkecil',
+      },
+    );
+
+    if (!bahanSisaData) {
+      throw new NotFoundException('Bahan Sisa not found');
+    }
+
+    // cari satuan data
+    const satuanData = await this.satuanRepository.findOne({
+      id: updateBahanSisaDto.id_satuan,
+      deleted_at: null,
+    });
+
+    if (!satuanData) {
+      throw new NotFoundException('Satuan not found');
+    }
+
+    if (
+      updateBahanSisaDto.qty * satuanData.konversi >
+      bahanSisaData.qty_pakai
+    ) {
+      throw new BadRequestException('Input qty melebihi stok bahan sisa');
+    }
+
+    // update qty berdasarkan id dan satuan
+    const updatedBahanSisaData = await this.bahanSisaRepository.update(
+      {
+        id: id,
+        deleted_at: null,
+      },
+      {
+        qty_pakai:
+          bahanSisaData.qty_pakai -
+          updateBahanSisaDto.qty * satuanData.konversi,
+      },
+    );
+
+    // buat response
+
+    const res: FindOneBahanSisaResponse = {
+      id: updatedBahanSisaData.id,
+      id_history_bahan_keluar_detail:
+        bahanSisaData.id_history_bahan_keluar_detail.id,
+      nama_proyek:
+        bahanSisaData.id_history_bahan_keluar_detail.id_history_bahan_keluar
+          .id_proyek_produk.id_proyek.nama,
+      nama_bahan:
+        bahanSisaData.id_history_bahan_keluar_detail
+          .id_history_bahan_masuk_detail.id_bahan.nama,
+      id_satuan: satuanData.id,
+      satuan_terkecil: satuanData.satuan_terkecil,
+      qty: updatedBahanSisaData.qty_pakai,
+      keterangan: updatedBahanSisaData.keterangan,
+      created_at: updatedBahanSisaData.created_at,
+      updated_at: updatedBahanSisaData.updated_at,
+      deleted_at: updatedBahanSisaData.deleted_at,
+    };
+
+    return res;
   }
 
   remove(id: number) {
