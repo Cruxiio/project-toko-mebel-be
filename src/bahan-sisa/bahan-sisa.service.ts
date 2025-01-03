@@ -285,8 +285,4 @@ export class BahanSisaService {
 
     return res;
   }
-
-  remove(id: number) {
-    return `This action removes a #${id} bahanSisa`;
-  }
 }
