@@ -218,7 +218,7 @@ export class ProyekRepository {
     proyekFilterQuery: FilterQuery<Proyek>,
     showedField: any,
   ) {
-    let filter: FilterQuery<Proyek> = { deleted_at: null };
+    let filter: FilterQuery<Proyek> = { deleted_at: null, status: false };
 
     if (proyekFilterQuery.nama && proyekFilterQuery.nama != '') {
       filter = {

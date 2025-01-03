@@ -252,7 +252,7 @@ export class ProyekProdukRepository {
     proyekProdukFilterQuery: FilterQuery<FindAllProyekProdukDto>,
     showedField: any,
   ) {
-    let filter: FilterQuery<ProyekProduk> = { deleted_at: null };
+    let filter: FilterQuery<ProyekProduk> = { deleted_at: null, status: false };
 
     if (
       proyekProdukFilterQuery.id_proyek &&
