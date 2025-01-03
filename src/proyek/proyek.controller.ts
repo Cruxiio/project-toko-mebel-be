@@ -67,6 +67,12 @@ export class ProyekController {
   }
 
   @Roles('superadmin', 'adminworkshop')
+  @Put(':id/status')
+  updateProyekStatus(@Param('id') id: number) {
+    return this.proyekService.handleUpdateStatusProyek(id);
+  }
+
+  @Roles('superadmin', 'adminworkshop')
   @Put(':id/produk/:id_proyek_produk')
   updateProyekProduk(
     @Param('id') id: number,
@@ -77,6 +83,18 @@ export class ProyekController {
       id,
       id_proyek_produk,
       updateProyekProdukDto,
+    );
+  }
+
+  @Roles('superadmin', 'adminworkshop')
+  @Put(':id/produk/:id_proyek_produk/status')
+  updateStatusProyekProduk(
+    @Param('id') id: number,
+    @Param('id_proyek_produk') id_proyek_produk: number,
+  ) {
+    return this.proyekService.handleUpdateStatusProyekProduk(
+      id,
+      id_proyek_produk,
     );
   }
 

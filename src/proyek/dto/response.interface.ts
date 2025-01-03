@@ -7,6 +7,7 @@ export interface ProyekDtoDatabaseInput {
   start?: Date;
   deadline?: Date;
   alamat_pengiriman?: string;
+  status?: boolean;
   deleted_at?: Date | null;
 }
 
@@ -19,6 +20,7 @@ export interface ProyekFindOneResponse {
   start: Date;
   deadline: Date;
   alamat_pengiriman: string;
+  status: boolean;
   created_at?: Date;
   updated_at?: Date | null;
   deleted_at?: Date | null;
@@ -48,6 +50,7 @@ export interface ProyekProdukDtoDatabaseInput {
   id_team?: Types.ObjectId;
   qty?: number;
   tipe?: string;
+  status?: boolean;
   deleted_at?: Date | null;
 }
 
@@ -64,6 +67,7 @@ export interface ProyekProdukFindAllResponseData {
   nama_karyawan2: string;
   qty: number;
   tipe: string;
+  status: boolean;
   created_at?: Date;
   updated_at?: Date | null;
   deleted_at?: Date | null;

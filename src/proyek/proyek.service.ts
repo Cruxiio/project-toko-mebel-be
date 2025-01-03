@@ -96,6 +96,7 @@ export class ProyekService {
       start: newProyekData.start,
       deadline: newProyekData.deadline,
       alamat_pengiriman: newProyekData.alamat_pengiriman,
+      status: newProyekData.status,
       created_at: newProyekData.created_at,
       updated_at: newProyekData.updated_at,
       deleted_at: newProyekData.deleted_at,
@@ -146,6 +147,7 @@ export class ProyekService {
           start: s.start,
           deadline: s.deadline,
           alamat_pengiriman: s.alamat_pengiriman,
+          status: s.status,
           created_at: s.created_at,
           updated_at: s.updated_at,
           deleted_at: s.deleted_at,
@@ -189,6 +191,7 @@ export class ProyekService {
       start: proyekData.start,
       deadline: proyekData.deadline,
       alamat_pengiriman: proyekData.alamat_pengiriman,
+      status: proyekData.status,
       created_at: proyekData.created_at,
       updated_at: proyekData.updated_at,
       deleted_at: proyekData.deleted_at,
@@ -276,9 +279,54 @@ export class ProyekService {
       start: updatedProyekData.start,
       deadline: updatedProyekData.deadline,
       alamat_pengiriman: updatedProyekData.alamat_pengiriman,
+      status: updatedProyekData.status,
       created_at: updatedProyekData.created_at,
       updated_at: updatedProyekData.updated_at,
       deleted_at: updatedProyekData.deleted_at,
+    };
+
+    return res;
+  }
+
+  async handleUpdateStatusProyek(id: number) {
+    // cek apakah id adalah int atau bukan
+    if (Number.isNaN(id)) {
+      throw new BadRequestException('id must be a number');
+    }
+
+    // find proyek by id
+    const proyekData = await this.proyekRepo.findOne(
+      {
+        id,
+        deleted_at: null,
+      },
+      {
+        main: {},
+        field1: 'id nama',
+      },
+    );
+
+    if (!proyekData) {
+      throw new NotFoundException('Proyek not found');
+    }
+
+    if (proyekData.status) {
+      throw new BadRequestException('Proyek already completed');
+    }
+
+    // buat proyek input database interface
+    const proyekInputDB: ProyekDtoDatabaseInput = {
+      status: true,
+    };
+
+    const updatedProyekData = await this.proyekRepo.update(
+      { id, deleted_at: null },
+      proyekInputDB,
+    );
+
+    // buat response
+    const res: ProyekDeleteResponse = {
+      message: 'OK',
     };
 
     return res;
@@ -436,6 +484,7 @@ export class ProyekService {
       nama_karyawan2: anggotaTeamData.anggota[2].nama,
       qty: newProyekProdukData.qty,
       tipe: newProyekProdukData.tipe,
+      status: newProyekProdukData.status,
       created_at: newProyekProdukData.created_at,
       updated_at: newProyekProdukData.updated_at,
       deleted_at: newProyekProdukData.deleted_at,
@@ -569,9 +618,79 @@ export class ProyekService {
       nama_karyawan2: anggotaTeamData.anggota[2].nama,
       qty: updatedProyekProdukData.qty,
       tipe: updatedProyekProdukData.tipe,
+      status: updatedProyekProdukData.status,
       created_at: updatedProyekProdukData.created_at,
       updated_at: updatedProyekProdukData.updated_at,
       deleted_at: updatedProyekProdukData.deleted_at,
+    };
+
+    return res;
+  }
+
+  async handleUpdateStatusProyekProduk(id: number, id_proyek_produk: number) {
+    // cek apakah id proyek adalah int atau bukan
+    if (Number.isNaN(id)) {
+      throw new BadRequestException('id proyek must be a number');
+    }
+
+    // cek apakah id proyek produk adalah int atau bukan
+    if (Number.isNaN(id_proyek_produk)) {
+      throw new BadRequestException('id proyek produk must be a number');
+    }
+
+    // find proyek produk by id
+    // harus pake any supaya bisa baca field hasil populate produk
+    const proyekProdukData = await this.proyekProdukRepo.findOne(
+      {
+        id: id_proyek_produk,
+        deleted_at: null,
+      },
+      {
+        main: {},
+        field1: 'id nama',
+        field2: 'id nama',
+        field3: 'id',
+        nestedField3: 'id nama role',
+      },
+    );
+
+    if (!proyekProdukData) {
+      throw new NotFoundException('Proyek Produk not found');
+    }
+
+    //validasi id proyek
+    const proyekData = await this.proyekRepo.findOne(
+      {
+        id: id,
+        deleted_at: null,
+      },
+      {
+        main: {},
+        field1: 'id nama',
+      },
+    );
+
+    if (!proyekData) {
+      throw new NotFoundException('Proyek not found');
+    }
+
+    if (proyekProdukData.status) {
+      throw new BadRequestException('Produk already completed');
+    }
+
+    // update proyek produk
+    const proyekProdukInputData: ProyekProdukDtoDatabaseInput = {
+      status: true,
+    };
+
+    // update proyek produk
+    const updatedProyekProdukData = await this.proyekProdukRepo.update(
+      { id: proyekProdukData.id, deleted_at: null },
+      proyekProdukInputData,
+    );
+
+    const res: ProyekDeleteResponse = {
+      message: 'OK',
     };
 
     return res;
@@ -653,6 +772,7 @@ export class ProyekService {
           nama_karyawan2: s.id_team.anggota[2].nama,
           qty: s.qty,
           tipe: s.tipe,
+          status: s.status,
           created_at: s.created_at,
           updated_at: s.updated_at,
           deleted_at: s.deleted_at,

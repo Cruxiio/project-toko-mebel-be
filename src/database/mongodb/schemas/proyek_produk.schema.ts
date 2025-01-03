@@ -33,6 +33,9 @@ export class ProyekProduk {
   })
   tipe: string;
 
+  @Prop({ type: Boolean, default: false })
+  status?: boolean;
+
   @Prop({ type: Date, default: null })
   deleted_at?: Date;
 

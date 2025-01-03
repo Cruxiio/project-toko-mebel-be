@@ -27,6 +27,9 @@ export class Proyek {
   @Prop({ required: true, type: String })
   alamat_pengiriman: string;
 
+  @Prop({ type: Boolean, default: false })
+  status?: boolean;
+
   @Prop({ type: Date, default: null })
   deleted_at?: Date;
 
