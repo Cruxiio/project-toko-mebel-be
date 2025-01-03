@@ -41,12 +41,34 @@ export class BahanSisaService {
           nestedField2: 'id nama',
           field2: '',
           nestedField3: 'id nama',
-          field3: 'id nama',
+          field3: 'id nama konversi',
         },
       );
 
     if (!historyBahanKeluarDetailData) {
       throw new NotFoundException('ID History Bahan Keluar Detail not found');
+    }
+
+    // validate apakah id_history_bahan_keluar_detail sudah ada bahan sisa atau belum
+    const bahanSisaData = await this.bahanSisaRepository.findOne(
+      {
+        id_history_bahan_keluar_detail: historyBahanKeluarDetailData._id,
+        deleted_at: null,
+      },
+      {
+        main: {},
+        field1: 'id',
+        nestedField1: '',
+        nestedField2: '',
+        nestedField3: 'id nama',
+        nestedField4: '',
+        nestedField5: 'id nama',
+        field2: 'id nama satuan_terkecil',
+      },
+    );
+
+    if (bahanSisaData) {
+      throw new BadRequestException('Bahan Sisa already exists');
     }
 
     // validate id_satuan
@@ -57,6 +79,15 @@ export class BahanSisaService {
 
     if (!satuanData) {
       throw new NotFoundException('ID Satuan not found');
+    }
+
+    // cek apakah input qty bahan sisa melebihi qty bahan keluar detail
+    if (
+      createBahanSisaDto.qty * satuanData.konversi >
+      historyBahanKeluarDetailData.qty *
+        historyBahanKeluarDetailData.id_satuan.konversi
+    ) {
+      throw new BadRequestException('Input qty melebihi qty bahan keluar');
     }
 
     // format ke bahan input dto
