@@ -352,11 +352,21 @@ export class NotaRepository {
   // }
 
   // validateDetailArray digunakan untuk validasi detail array, dan mengembalikannya dalam bentuk data yang siap dimasukkan ke database
+  /*
+    TODO: ganti supaya validate id bahan dan satuan detail array nda satu2 di for loop
+  */
   async validateDetailArray(
     notaDetail: NotaDetailDto[],
     historyBahanMasukDetail: HistoryBahanMasukDetailData[],
   ): Promise<NotaDetailDatabaseInput[]> {
     let temp: NotaDetailDatabaseInput[] = [];
+
+    // cek apakah jumlah detail nota dan history bahan masuk detail sama
+    if (notaDetail.length != historyBahanMasukDetail.length) {
+      throw new BadRequestException(
+        'Jumlah detail item pada nota tidak sesuai detail item pada stok bahan masuk',
+      );
+    }
 
     for (let i = 0; i < notaDetail.length; i++) {
       const d = notaDetail[i];
@@ -399,9 +409,15 @@ export class NotaRepository {
       let subtotal = d.qty * d.harga_satuan;
 
       // hitung jumlah diskon
-      let jumlahDiskon = Math.floor((d.diskon / 100) * subtotal);
+      let jumlahDiskon = (d.diskon / 100) * subtotal;
+
+      // pastikan decimal jumlahDiskon maksimal 2 digit di belakang koma
+      jumlahDiskon = parseFloat(jumlahDiskon.toFixed(2));
 
       subtotal = subtotal - jumlahDiskon;
+
+      // pastikan decimal subtotal maksimal 2 digit di belakang koma
+      subtotal = parseFloat(subtotal.toFixed(2));
 
       const newNotaDetail: NotaDetailDatabaseInput = {
         id_bahan: bahanData._id as Types.ObjectId,

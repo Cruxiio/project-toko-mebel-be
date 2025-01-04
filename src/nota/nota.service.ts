@@ -103,12 +103,17 @@ export class NotaService {
       0,
     );
 
-    // hitung jumlah diskon
-    let jumlahDiskon = Math.ceil(
-      (createNotaDto.diskon_akhir / 100) * totalHarga,
-    );
+    //pastikan decimal totalHarga maksimal 2 digit di belakang koma
+    totalHarga = parseFloat(totalHarga.toFixed(2));
 
+    // hitung jumlah diskon
+    let jumlahDiskon = (createNotaDto.diskon_akhir / 100) * totalHarga;
+
+    // hitung grand total harga
     totalHarga = totalHarga + createNotaDto.total_pajak - jumlahDiskon;
+
+    // pastikan decimal totalHarga maksimal 2 digit di belakang koma
+    totalHarga = parseFloat(totalHarga.toFixed(2));
 
     // buat database input untuk nota
     let notaInputDB: NotaDtoDatabaseInput = {
