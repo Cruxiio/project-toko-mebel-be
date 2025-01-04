@@ -94,6 +94,14 @@ export class FindAllProyekDto {
   })
   deadline?: Date = null;
 
+  @ValidateIf((o) => o.tipe !== 'all')
+  @IsString()
+  @IsOptional()
+  @IsIn(['all', 'true', 'false'], {
+    message: 'status proyek must be all, true, or false',
+  })
+  status?: string = 'all';
+
   @IsNumber({}, { message: 'page must be a number' })
   @IsOptional()
   //transform buat olah value field sebelum masuk ke validasi
@@ -176,6 +184,14 @@ export class FindAllProyekProdukDto {
     message: 'tipe proyek must be kayu, finishing, or resin',
   })
   tipe?: string = '';
+
+  @ValidateIf((o) => o.tipe !== 'all')
+  @IsString()
+  @IsOptional()
+  @IsIn(['all', 'true', 'false'], {
+    message: 'status proyek must be all, true, or false',
+  })
+  status?: string = 'all';
 
   @IsNumber({}, { message: 'page must be a number' })
   @Min(1, { message: 'page must be greater than 0' })

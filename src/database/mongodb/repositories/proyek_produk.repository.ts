@@ -120,6 +120,18 @@ export class ProyekProdukRepository {
   ) {
     let filter: FilterQuery<ProyekProduk> = { deleted_at: null };
 
+    // cek status
+    if (
+      proyekProdukFilterQuery.status &&
+      proyekProdukFilterQuery.status != 'all'
+    ) {
+      let status: boolean = false;
+      if (proyekProdukFilterQuery.status == 'true') {
+        status = true;
+      }
+      filter = { ...filter, status: status };
+    }
+
     if (proyekProdukFilterQuery.id_proyek > 0) {
       // cari id proyek
       const proyekData = await this.proyekRepo.findOne(
@@ -252,7 +264,19 @@ export class ProyekProdukRepository {
     proyekProdukFilterQuery: FilterQuery<FindAllProyekProdukDto>,
     showedField: any,
   ) {
-    let filter: FilterQuery<ProyekProduk> = { deleted_at: null, status: false };
+    let filter: FilterQuery<ProyekProduk> = { deleted_at: null };
+
+    // cek status proyek
+    if (
+      proyekProdukFilterQuery.status &&
+      proyekProdukFilterQuery.status != 'all'
+    ) {
+      let status: boolean = false;
+      if (proyekProdukFilterQuery.status == 'true') {
+        status = true;
+      }
+      filter = { ...filter, status: status };
+    }
 
     if (
       proyekProdukFilterQuery.id_proyek &&

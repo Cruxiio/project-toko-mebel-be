@@ -113,6 +113,7 @@ export class ProyekService {
         id_customer: requestFilter.id_customer,
         start: requestFilter.start,
         deadline: requestFilter.deadline,
+        status: requestFilter.status,
       },
       {
         page: requestFilter.page,
@@ -727,6 +728,7 @@ export class ProyekService {
           id_produk: requestFilter.id_produk,
           id_karyawan: requestFilter.id_karyawan,
           tipe: requestFilter.tipe,
+          status: requestFilter.status,
         },
         {
           page: requestFilter.page,

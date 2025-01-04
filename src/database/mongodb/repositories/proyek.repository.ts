@@ -56,6 +56,15 @@ export class ProyekRepository {
     // buat temporary object untuk isi filter sesuai syarat yang diberikan
     let filter: FilterQuery<Proyek> = { deleted_at: null };
 
+    // cek status proyek
+    if (proyekFilterQuery.status && proyekFilterQuery.status != 'all') {
+      let status: boolean = false;
+      if (proyekFilterQuery.status == 'true') {
+        status = true;
+      }
+      filter = { ...filter, status: status };
+    }
+
     if (proyekFilterQuery.nama != '') {
       filter = {
         ...filter,
@@ -218,7 +227,16 @@ export class ProyekRepository {
     proyekFilterQuery: FilterQuery<Proyek>,
     showedField: any,
   ) {
-    let filter: FilterQuery<Proyek> = { deleted_at: null, status: false };
+    let filter: FilterQuery<Proyek> = { deleted_at: null };
+
+    // cek status proyek
+    if (proyekFilterQuery.status && proyekFilterQuery.status != 'all') {
+      let status: boolean = false;
+      if (proyekFilterQuery.status == 'true') {
+        status = true;
+      }
+      filter = { ...filter, status: status };
+    }
 
     if (proyekFilterQuery.nama && proyekFilterQuery.nama != '') {
       filter = {

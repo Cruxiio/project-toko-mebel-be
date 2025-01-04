@@ -309,6 +309,7 @@ export class MasterService {
     const listProyek = await this.proyekRepo.masterFindAll(
       {
         nama: requestFilter.search,
+        status: requestFilter.status,
       },
       {
         main: {},
@@ -335,6 +336,7 @@ export class MasterService {
     const listProyekProduk = await this.proyekProdukRepo.masterFindAll(
       {
         id_proyek: requestFilter.id_proyek,
+        status: requestFilter.status,
       },
       {
         main: {},
