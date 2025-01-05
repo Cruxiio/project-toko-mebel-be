@@ -229,6 +229,14 @@ export class ProyekRepository {
   ) {
     let filter: FilterQuery<Proyek> = { deleted_at: null };
 
+    // cek id customer
+    if (
+      proyekFilterQuery.id_customer &&
+      proyekFilterQuery.id_customer != null
+    ) {
+      filter = { ...filter, id_customer: proyekFilterQuery.id_customer };
+    }
+
     // cek status proyek
     if (proyekFilterQuery.status && proyekFilterQuery.status != 'all') {
       let status: boolean = false;

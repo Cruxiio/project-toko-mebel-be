@@ -37,53 +37,32 @@ export class NotaRepository {
     return notaData;
   }
 
-  // MASIH NDA NDE PAKE
-  async findAll(
-    historyBahanMasukFilterQuery: FilterQuery<HistoryBahanMasuk>,
-    paginationQuery: any,
+  async findAllNotaAndNotaDetail(
+    notaFilterQuery: FilterQuery<Nota>,
     showedField: any,
   ) {
     // buat temporary object untuk isi filter sesuai syarat yang diberikan
-    let filter: FilterQuery<HistoryBahanMasuk> = { deleted_at: null };
+    let filter: FilterQuery<Nota> = { deleted_at: null };
 
-    if (historyBahanMasukFilterQuery.kode_nota != '') {
-      filter = {
-        ...filter,
-        kode_nota: {
-          $regex: historyBahanMasukFilterQuery.kode_nota, // like isi regex
-          $options: 'i', // i artinya case-insensitive
-        },
-      };
-    }
+    filter = { ...filter, ...notaFilterQuery };
 
-    if (historyBahanMasukFilterQuery.id_supplier != null) {
-      let supplierData = await this.supplierRepo.findOne({
-        id: historyBahanMasukFilterQuery.id_supplier,
-        deleted_at: null,
-      });
-
-      filter = {
-        ...filter,
-        id_supplier: supplierData ? supplierData._id : null,
-      };
-    }
-
-    if (historyBahanMasukFilterQuery.tgl_nota != null) {
-      // ubah ke format date
-      const tglNota = new Date(historyBahanMasukFilterQuery.tgl_nota);
-      // cek apakah valid atau tidak
-      const notValid = isNaN(tglNota.getTime());
-      filter = {
-        ...filter,
-        tgl_nota: notValid ? null : tglNota,
-      };
-    }
-
-    return await this.historyBahanMasukModel
-      .find(filter, showedField)
+    return await this.notaModel
+      .find(filter, showedField.main)
       .populate({
-        path: 'id_supplier',
-        select: 'id',
+        path: 'id_history_bahan_masuk', // Populate data bahan
+        select: showedField.field1, // Ambil hanya field id dari koleksi history_bahan_masuk
+        populate: {
+          path: 'id_supplier', // Populate data supplier
+          select: showedField.nestedField1, // Ambil hanya field id dari koleksi supplier
+        },
+      })
+      .populate({
+        path: 'detail.id_bahan', // Populate data bahan
+        select: showedField.field2, // Ambil hanya field id dari koleksi bahan
+      })
+      .populate({
+        path: 'detail.id_satuan', // Populate data satuan
+        select: showedField.field3, // Ambil hanya field id dari koleksi satuan
       });
   }
 
@@ -270,7 +249,10 @@ export class NotaRepository {
     if (notaFilterQuery.search != '') {
       tempFilter = {
         ...tempFilter,
-        kode_nota: notaFilterQuery.search,
+        kode_nota: {
+          $regex: notaFilterQuery.search, // like isi regex
+          $options: 'i', // i artinya case-insensitive
+        },
       };
     }
 
@@ -327,7 +309,7 @@ export class NotaRepository {
       }
 
       filter = {
-        ...tempFilter,
+        ...filter,
         created_at: notValid
           ? null
           : {

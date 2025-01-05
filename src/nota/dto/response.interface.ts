@@ -28,10 +28,15 @@ export interface NotaFindOneResponse {
   deleted_at?: Date | null;
 }
 
+export interface NotaFindAllResponseData extends NotaFindOneResponse {
+  nama_bank?: string;
+  no_rekening?: string;
+}
+
 export interface NotaFindAllResponse {
   page: number;
   per_page: number;
-  data: NotaFindOneResponse[];
+  data: NotaFindAllResponseData[];
   total_page: number;
 }
 

@@ -305,11 +305,18 @@ export class MasterService {
   }
 
   async handleMasterProyekFindAll(requestFilter: FindAllProyekDto) {
+    // cari _id dari id customer
+    const customerData = await this.customerRepo.findOne({
+      id: requestFilter.id_customer,
+      deleted_at: null,
+    });
+
     // ambil data proyek
     const listProyek = await this.proyekRepo.masterFindAll(
       {
         nama: requestFilter.search,
         status: requestFilter.status,
+        id_customer: customerData ? customerData._id : null,
       },
       {
         main: {},

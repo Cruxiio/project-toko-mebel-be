@@ -177,7 +177,11 @@ export class HistoryBahanKeluarRepository {
       .populate({
         path: 'id_history_bahan_masuk_detail',
         select: showedField.field2,
-        populate: { path: 'id_bahan', select: showedField.nestedField3 },
+        populate: [
+          { path: 'id_bahan', select: showedField.nestedField3 },
+          { path: 'id_satuan', select: showedField.nestedField4 },
+          { path: 'id_history_bahan_masuk', select: showedField.nestedField5 },
+        ],
       })
       .populate({
         path: 'id_satuan',
@@ -543,6 +547,7 @@ export class HistoryBahanKeluarRepository {
       await this.historyBahanMasukRepo.findAllDetail(
         {
           id: { $in: historyBahanMasukDetailIds },
+          qtyPakai: { $gt: 0 },
         },
         {
           main: {},

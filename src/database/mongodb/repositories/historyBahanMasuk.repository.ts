@@ -276,7 +276,6 @@ export class HistoryBahanMasukRepository {
   ) {
     let filter: FilterQuery<HistoryBahanMasukDetail> = {
       deleted_at: null,
-      qtyPakai: { $gt: 0 },
     };
 
     filter = { ...filter, ...stokFilterQuery };

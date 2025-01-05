@@ -15,6 +15,7 @@ import {
   NotaDetailArrayData,
   NotaDtoDatabaseInput,
   NotaFindAllResponse,
+  NotaFindAllResponseData,
   NotaFindOneFullDataResponse,
   NotaFindOneResponse,
 } from './dto/response.interface';
@@ -130,6 +131,7 @@ export class NotaService {
       id: newNota.id,
       kode_nota: historyBahanMasukData.kode_nota,
       id_supplier: supplierData.id,
+      nama_suplier: supplierData.nama,
       tgl_nota: historyBahanMasukData.tgl_nota,
       total_pajak: newNota.total_pajak,
       diskon_akhir: newNota.diskon_akhir,
@@ -164,7 +166,7 @@ export class NotaService {
       {
         main: {},
         field1: 'id tgl_nota kode_nota',
-        nestedField1: 'id',
+        nestedField1: 'id nama no_rekening nama_bank',
       },
     );
 
@@ -184,11 +186,14 @@ export class NotaService {
       page: requestFilter.page,
       per_page: requestFilter.per_page,
       data: listNota.map((n) => {
-        const formattedData: NotaFindOneResponse = {
+        const formattedData: NotaFindAllResponseData = {
           id: n.id,
           kode_nota: n.id_history_bahan_masuk.kode_nota,
           tgl_nota: n.id_history_bahan_masuk.tgl_nota,
           id_supplier: n.id_history_bahan_masuk.id_supplier.id,
+          nama_suplier: n.id_history_bahan_masuk.id_supplier.nama,
+          no_rekening: n.id_history_bahan_masuk.id_supplier.no_rekening,
+          nama_bank: n.id_history_bahan_masuk.id_supplier.nama_bank,
           total_pajak: n.total_pajak,
           diskon_akhir: n.diskon_akhir,
           total_harga: n.total_harga,
@@ -374,6 +379,7 @@ export class NotaService {
       id: updatedNota.id,
       kode_nota: historyBahanMasukData.kode_nota,
       id_supplier: supplierData.id,
+      nama_suplier: supplierData.nama,
       tgl_nota: historyBahanMasukData.tgl_nota,
       total_pajak: updatedNota.total_pajak,
       diskon_akhir: updatedNota.diskon_akhir,

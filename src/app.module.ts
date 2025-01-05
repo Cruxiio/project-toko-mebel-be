@@ -18,6 +18,7 @@ import { ProdukModule } from './produk/produk.module';
 import { HistoryBahanKeluarModule } from './history-bahan-keluar/history-bahan-keluar.module';
 import { BahanSisaModule } from './bahan-sisa/bahan-sisa.module';
 import { ProdukJasaModule } from './produk-jasa/produk-jasa.module';
+import { LaporanModule } from './laporan/laporan.module';
 
 @Module({
   imports: [
@@ -44,6 +45,7 @@ import { ProdukJasaModule } from './produk-jasa/produk-jasa.module';
     HistoryBahanKeluarModule,
     BahanSisaModule,
     ProdukJasaModule,
+    LaporanModule,
   ],
   controllers: [AppController],
   providers: [AppService],

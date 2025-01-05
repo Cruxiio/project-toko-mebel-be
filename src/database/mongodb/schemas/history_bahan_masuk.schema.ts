@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, SchemaTypes } from 'mongoose';
+import { Document, SchemaTypes, Types } from 'mongoose';
 import { Supplier } from './supplier.schema';
 import {
   HistoryBahanMasukDetail,
@@ -13,6 +13,8 @@ export type HistoryBahanMasukDocument = HistoryBahanMasuk & Document;
   collection: 'history_bahan_masuk',
 })
 export class HistoryBahanMasuk {
+  _id?: Types.ObjectId;
+
   @Prop({ index: true, unique: true, type: Number, auto: true })
   id: number;
 

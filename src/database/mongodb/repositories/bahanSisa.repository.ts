@@ -207,6 +207,8 @@ export class BahanSisaRepository {
           nestedField2: '',
           field2: '',
           nestedField3: '',
+          nestedField4: '',
+          nestedField5: '',
           field3: '',
         },
       );
