@@ -8,7 +8,7 @@ export class CreateBahanDto {
   nama: string;
 }
 
-export class UpdateBahanDto extends PartialType(CreateBahanDto) {}
+export class UpdateBahanDto extends CreateBahanDto {}
 
 export class FindAllBahanDto {
   @IsString()
