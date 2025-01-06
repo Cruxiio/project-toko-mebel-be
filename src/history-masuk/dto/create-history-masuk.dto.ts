@@ -63,7 +63,7 @@ export class CreateHistoryMasukDto {
   detail: HistoryBahanMasukDetailDto[];
 }
 
-export class UpdateHistoryMasukDto extends PartialType(CreateHistoryMasukDto) {}
+export class UpdateHistoryMasukDto extends CreateHistoryMasukDto {}
 
 export class FindAllHistoryMasukDto {
   @IsString()

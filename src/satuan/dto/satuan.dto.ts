@@ -24,7 +24,7 @@ export class CreateSatuanDto {
   konversi: number;
 }
 
-export class UpdateSatuanDto extends PartialType(CreateSatuanDto) {}
+export class UpdateSatuanDto extends CreateSatuanDto {}
 
 export class FindAllSatuanDto {
   @IsString()

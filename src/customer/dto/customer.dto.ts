@@ -28,7 +28,7 @@ export class CreateCustomerDto {
   alamat: string;
 }
 
-export class UpdateCustomerDto extends PartialType(CreateCustomerDto) {}
+export class UpdateCustomerDto extends CreateCustomerDto {}
 
 export class FindAllCustomerDto {
   @IsString()
