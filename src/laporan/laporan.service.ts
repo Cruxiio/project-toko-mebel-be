@@ -39,17 +39,30 @@ export class LaporanService {
       },
     );
 
-    // cari detail laporan HPP Kayu + validate
-    const detailLaporanHppKayu =
-      await this.laporanRepository.laporanHPPKayu(createLaporanDto);
+    let detailLaporanHpp = [];
+    let totalBahan = 0;
+    if (proyekProdukData.tipe != 'kayu') {
+      // cari detail laporan HPP Resin dan Finishing + validate
+      detailLaporanHpp =
+        await this.laporanRepository.laporanHPP(proyekProdukData);
 
-    let totalBahan = detailLaporanHppKayu.reduce(
-      (acc, curr) => acc + curr.total_harga_realisasi,
-      0,
-    );
+      totalBahan = detailLaporanHpp.reduce(
+        (acc, curr) => acc + curr.total_harga,
+        0,
+      );
+    } else {
+      // cari detail laporan HPP Kayu + validate
+      detailLaporanHpp =
+        await this.laporanRepository.laporanHPPKayu(proyekProdukData);
+
+      totalBahan = detailLaporanHpp.reduce(
+        (acc, curr) => acc + curr.total_harga_realisasi,
+        0,
+      );
+    }
 
     // buat response
-    const res: HPPKayuReportData = {
+    const res: HPPKayuReportData | HPPAllReportData = {
       jenis_proyek: createLaporanDto.jenis_proyek,
       sj_no: createLaporanDto.sj_no,
       acc: createLaporanDto.acc,
@@ -68,14 +81,10 @@ export class LaporanService {
         createLaporanDto.total_harian +
         createLaporanDto.total_borongan +
         totalBahan,
-      detail: detailLaporanHppKayu,
+      detail: detailLaporanHpp,
     };
 
     return res;
-  }
-
-  findAll() {
-    return `This action returns all laporan`;
   }
 
   findOne(id: number) {
