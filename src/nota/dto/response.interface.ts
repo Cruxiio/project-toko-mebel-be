@@ -40,6 +40,26 @@ export interface NotaFindAllResponse {
   total_page: number;
 }
 
+export interface LaporanNotaData {
+  id?: number;
+  kode_nota: string;
+  id_supplier: number;
+  nama_suplier?: string;
+  tgl_nota: string;
+  total_pajak: number;
+  diskon_akhir: number;
+  total_harga: number;
+  nama_bank?: string;
+  no_rekening?: string;
+  created_at?: string;
+  updated_at?: string | null;
+  deleted_at?: string | null;
+}
+
+export interface LaporanNotaResponse {
+  data: LaporanNotaData[];
+}
+
 //
 export interface NotaFindOneFullDataResponse extends NotaFindOneResponse {
   detail: NotaDetailArrayData[];

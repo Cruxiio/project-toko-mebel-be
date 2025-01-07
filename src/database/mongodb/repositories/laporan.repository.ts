@@ -141,18 +141,16 @@ export class LaporanRepository {
       },
       new Map(),
     );
-    console.log(dataRealisasiTanpaHarga);
+    // console.log('dataRealisasiTanpaHarga', dataRealisasiTanpaHarga);
 
     const historyBahanMasukIds = historyBahanKeluarDetailData.map(
       (hd) => hd.id_history_bahan_masuk_detail.id_history_bahan_masuk._id,
     );
 
-    // console.log('historyBahanMasukIds', historyBahanMasukIds);
-
     // buat unique id history bahan masuk
     const uniqueHistoryBahanMasukIds = [...new Set(historyBahanMasukIds)];
 
-    console.log('uniqueHistoryBahanMasukIds', uniqueHistoryBahanMasukIds);
+    // console.log('uniqueHistoryBahanMasukIds', uniqueHistoryBahanMasukIds);
 
     // cari data nota by id history bahan masuk
     const notaDataAndDetails = await this.notaRepo.findAllNotaAndNotaDetail(
@@ -319,8 +317,6 @@ export class LaporanRepository {
     );
 
     let result = [...reducedDetailLaporanHPPKayu.values()];
-
-    console.log('detailLaporanHPPKayu', result);
 
     return result;
   }

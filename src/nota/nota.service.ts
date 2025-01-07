@@ -12,6 +12,8 @@ import { NotaRepository } from 'src/database/mongodb/repositories/nota.repositor
 import { SupplierRepository } from 'src/database/mongodb/repositories/supplier.repository';
 import { HistoryBahanMasukRepository } from 'src/database/mongodb/repositories/historyBahanMasuk.repository';
 import {
+  LaporanNotaData,
+  LaporanNotaResponse,
   NotaDetailArrayData,
   NotaDtoDatabaseInput,
   NotaFindAllResponse,
@@ -21,6 +23,7 @@ import {
 } from './dto/response.interface';
 import { Types } from 'mongoose';
 import { HistoryBahanMasukDetailData } from 'src/history-masuk/dto/response.interface';
+import { HelperService } from 'src/helper/helper.service';
 
 @Injectable()
 export class NotaService {
@@ -28,6 +31,7 @@ export class NotaService {
     private readonly notaRepo: NotaRepository,
     private readonly supplierRepo: SupplierRepository,
     private readonly historyBahanMasukRepo: HistoryBahanMasukRepository,
+    private readonly helperService: HelperService,
   ) {}
 
   async handleCreateNota(createNotaDto: CreateNotaDto) {
@@ -152,7 +156,7 @@ export class NotaService {
             field3: '' --> ini buat showed field pada select populate(join table) ke 3,
       }
     */
-    const listNota = await this.notaRepo.findAllNota(
+    const listNota = await this.notaRepo.findAllNotaPagination(
       {
         search: requestFilter.search,
         tgl_nota: requestFilter.tgl_nota,
@@ -419,5 +423,50 @@ export class NotaService {
     }
 
     return await this.handleFindOneNota(notaData.id);
+  }
+
+  async handleLaporanNota(requestFilter: FindAllNotaDto) {
+    const listNotaData = await this.notaRepo.findAllNota(
+      {
+        search: requestFilter.search,
+        tgl_nota: requestFilter.tgl_nota,
+        tgl_input: requestFilter.tgl_input,
+        id_supplier: requestFilter.id_supplier,
+      },
+      {
+        main: {},
+        field1: 'id tgl_nota kode_nota',
+        nestedField1: 'id nama no_rekening nama_bank',
+      },
+    );
+
+    // buat response
+    const res: LaporanNotaResponse = {
+      data: listNotaData.map((n) => {
+        const formattedData: LaporanNotaData = {
+          id: n.id,
+          kode_nota: n.id_history_bahan_masuk.kode_nota,
+          tgl_nota: this.helperService.formatDatetoString(
+            n.id_history_bahan_masuk.tgl_nota,
+          ),
+          id_supplier: n.id_history_bahan_masuk.id_supplier.id,
+          nama_suplier: n.id_history_bahan_masuk.id_supplier.nama,
+          no_rekening: n.id_history_bahan_masuk.id_supplier.no_rekening,
+          nama_bank: n.id_history_bahan_masuk.id_supplier.nama_bank,
+          total_pajak: n.total_pajak,
+          diskon_akhir: n.diskon_akhir,
+          total_harga: n.total_harga,
+          created_at: this.helperService.formatDatetoString(n.created_at),
+          updated_at: this.helperService.formatDatetoString(n.updated_at),
+          deleted_at:
+            n.deleted_at != null
+              ? this.helperService.formatDatetoString(n.deleted_at)
+              : null,
+        };
+        return formattedData;
+      }),
+    };
+
+    return res;
   }
 }

@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Laporan Finishing</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .custom-header {
+            background: linear-gradient(90deg, #2b2b2b 0%, #1a1a1a 100%);
+            border-bottom: 3px solid #d4af37;
+        }
+        
+        .custom-table-header {
+            background: linear-gradient(90deg, #2b2b2b 0%, #1a1a1a 100%);
+        }
+        
+        .section-header {
+            background: #d4af37;
+            color: #000;
+        }
+        
+        .status-cell {
+            width: 40px;
+            height: 20px;
+        }
+    </style>
+</head>
+
+<body class="bg-amber-50">
+    <div class="min-h-screen">
+        <div class="custom-header w-full">
+            <div class="px-6 py-4">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center">
+                        <img src="./company_logo.png" alt="Company Logo" class="h-16 w-16 mr-4" />
+                        <div class="text-amber-300">
+                            <h2 class="text-2xl font-bold">FRANCIS INTERIOR</h2>
+                            <p class="text-sm text-amber-200">
+                                Jl. Mayjen HR. Muhammad No.18 Kav. 391, Putat Gede, Kec. Sukomanunggal, Surabaya, Jawa Timur 60189, Indonesia
+                            </p>
+                            <p class="text-sm text-amber-200">Telp: (+62) 317317173</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-center">
+                    <h1 class="text-4xl font-serif text-amber-300">
+                        HPP Finishing
+                    </h1>
+                </div>
+            </div>
+        </div>
+
+        <div class="p-6">
+            <div class="grid grid-cols-2 gap-4 p-4">
+                <div>
+                    <div class="flex mb-2">
+                        <span class="w-40 font-bold">PEKERJAAN</span>
+                        <span class="text-xl">: FINISHING</span>
+                    </div>
+                    <div class="flex mb-2">
+                        <span class="w-40 font-bold">PENANGGUNG JAWAB</span>
+                        <span>:</span>
+                    </div>
+                    <div class="flex mb-2">
+                        <span class="w-40 font-bold">MARKETING</span>
+                        <span>:</span>
+                    </div>
+                    <div class="flex mb-2">
+                        <span class="w-40 font-bold">PEKERJA</span>
+                        <span>:</span>
+                    </div>
+                    <div class="flex mb-2">
+                        <span class="w-40 font-bold">ACC</span>
+                        <span>:</span>
+                    </div>
+                    <div class="flex mb-2">
+                        <span class="w-40 font-bold">JENIS PROYEK</span>
+                        <span>:</span>
+                    </div>
+                </div>
+                <div class="grid grid-rows-6 gap-2">
+                    <div class="flex">
+                        <span class="w-32 font-bold">SJ No</span>
+                        <span>:</span>
+                    </div>
+                    <div class="flex">
+                        <span class="w-32 font-bold">START</span>
+                        <span>:</span>
+                    </div>
+                    <div class="flex">
+                        <span class="w-32 font-bold">DEADLINE</span>
+                        <span>:</span>
+                    </div>
+                    <div class="flex">
+                        <span class="w-32 font-bold">CUSTOMER</span>
+                        <span>:</span>
+                    </div>
+                    <div class="flex">
+                        <span class="w-32 font-bold">ALAMAT</span>
+                        <span>:</span>
+                    </div>
+                    <div class="flex">
+                        <span class="w-32 font-bold">ITEM</span>
+                        <span>:</span>
+                    </div>
+                </div>
+            </div>
+            <!-- Main Table -->
+            <div class="overflow-x-auto">
+
+                <table class="w-full text-sm" id="budgetTable">
+                    <thead>
+                        <tr class="custom-table-header text-amber-300">
+                            <th class="px-4 py-3 text-left border">No</th>
+                            <th class="px-4 py-3 text-left border">Nama Barang</th>
+                            <th class="px-4 py-3 text-center border">Qty</th>
+                            <th class="px-4 py-3 text-center border">Satuan</th>
+                            <th class="px-4 py-3 text-center border">Harga @</th>
+                            <th class="px-4 py-3 text-center border">Total Harga</th>
+                            <th class="px-4 py-3 text-center border">Keterangan</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200 bg-white">
+                        <!-- ONGKOS KERJA -->
+                        <tr>
+                            <td colspan="2" rowspan="4" class="px-4 py-2 border font-bold">ONGKOS KERJA</td>
+                            <td colspan="2" class="px-4 py-2 border font-bold text-right">TOTAL BAHAN (Rp)</td>
+                            <td colspan="2" class="px-4 py-2 border"></td>
+                            <td colspan="1" class="px-4 py-2 border text-center text-xl">
+                                Note
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2" class="px-4 py-2 border font-bold text-right">HARIAN (Rp)</td>
+                            <td colspan="2" class="px-4 py-2 border"></td>
+                            <td colspan="1" rowspan="3" class="px-4 py-2 border"></td>
+                        </tr>
+                        <tr>
+                            <td colspan="2" class="px-4 py-2 border font-bold text-right">BORONGAN (Rp)</td>
+                            <td colspan="3" class="px-4 py-2 border"></td>
+                        </tr>
+                        <tr>
+                            <td colspan="2" class="px-4 py-2 border font-bold text-right">GRAND TOTAL (Rp)</td>
+                            <td colspan="3" class="px-4 py-2 border"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    </div>
+</body>
+<script>
+    function autoNumber() {
+        let counter = 1;
+        const table = document.getElementById('budgetTable');
+        const rows = table.getElementsByTagName('tr');
+
+        for (let i = 0; i < rows.length; i++) {
+            const row = rows[i];
+
+            // Reset counter jika menemui section header
+            if (row.classList.contains('section-header')) {
+                counter = 1;
+                continue;
+            }
+
+            // Cari sel pertama yang memiliki class number-cell
+            const numberCell = row.querySelector('.number-cell');
+            if (numberCell) {
+                numberCell.textContent = counter;
+                counter++;
+            }
+        }
+    }
+
+    // Jalankan fungsi saat dokumen selesai dimuat
+    document.addEventListener('DOMContentLoaded', autoNumber);
+</script>
+
+</html>

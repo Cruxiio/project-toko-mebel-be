@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rekap Nota per Supplier</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+            font-size: 12px;
+        }
+
+        body {
+            padding: 1rem;
+            background-color: white;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 100%;
+            margin: 0 auto;
+            background-color: white;
+            padding: 1rem;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        .logo {
+            height: 48px;
+        }
+
+        .company-info {
+            text-align: right;
+        }
+
+        .company-name {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #8B0000;
+            margin-bottom: 0.25rem;
+        }
+
+        .company-subtitle {
+            font-size: 0.9rem;
+            color: #4a5568;
+            margin-bottom: 0.25rem;
+        }
+
+        .company-address {
+            font-size: 0.8rem;
+            color: #718096;
+        }
+
+        .title {
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #1a202c;
+            margin-bottom: 1rem;
+            padding: 0.5rem;
+            background-color: #f8fafc;
+        }
+
+        .supplier-info {
+            margin-bottom: 1rem;
+            padding: 0.75rem;
+            background-color: #f8fafc;
+            border-left: 4px solid #8B0000;
+        }
+
+        .supplier-name {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #1a202c;
+            margin-bottom: 0.25rem;
+        }
+
+        .supplier-details {
+            font-size: 0.9rem;
+            color: #4a5568;
+            margin-bottom: 0.25rem;
+        }
+
+        .table-container {
+            width: 100%;
+            margin-bottom: 1rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 11px;
+        }
+
+        th, td {
+            padding: 0.4rem;
+            text-align: left;
+            border: 1px solid #e2e8f0;
+        }
+
+        th {
+            background-color: #8B0000;
+            color: white;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+
+        .text-right {
+            text-align: right;
+        }
+
+        tfoot tr {
+            background-color: #f1f5f9;
+            font-weight: 700;
+        }
+
+        .amount {
+            font-family: 'Courier New', Courier, monospace;
+            white-space: nowrap;
+        }
+
+        .nota-number {
+            font-family: 'Courier New', Courier, monospace;
+            color: #4a5568;
+            font-weight: 500;
+        }
+
+        .date {
+            color: #64748b;
+        }
+
+        /* Adjusted column widths for supplier template */
+        .col-no { width: 5%; }
+        .col-nota { width: 20%; }
+        .col-tanggal { width: 15%; }
+        .col-pajak { width: 20%; }
+        .col-diskon { width: 20%; }
+        .col-total { width: 20%; }
+
+        @media print {
+            body {
+                width: 100%;
+                margin: 0;
+                padding: 0;
+            }
+            
+            .container {
+                width: 100%;
+                padding: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <img src="./company_logo.png" alt="Company Logo" class="logo">
+            <div class="company-info">
+                <h2 class="company-name">FRANCIS</h2>
+                <p class="company-subtitle">Interior</p>
+                <p class="company-address">HR. Muhammad 18 Kav. 391 Surabaya Telp. (031) 7512773</p>
+            </div>
+        </div>
+
+        <h1 class="title">Rekap Nota {{SUPPLIER_NAME}}</h1>
+
+        <div class="supplier-info">
+            <p class="supplier-name">{{SUPPLIER_NAME}}</p>
+            <p class="supplier-details">Bank: {{BANK_NAME}}</p>
+            <p class="supplier-details">No. Rekening: {{ACCOUNT_NUMBER}}</p>
+            <p class="supplier-details">Atas Nama: {{ACCOUNT_NAME}}</p>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th class="col-no">No</th>
+                        <th class="col-nota">No. Nota</th>
+                        <th class="col-tanggal">Tanggal</th>
+                        <th class="col-pajak text-right">Total Pajak</th>
+                        <th class="col-diskon text-right">Diskon</th>
+                        <th class="col-total text-right">Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- TABLE_ROWS_PLACEHOLDER -->
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="5" class="text-right">Total</td>
+                        <td class="text-right amount">{{TOTAL_AMOUNT}}</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+</body>
+</html>

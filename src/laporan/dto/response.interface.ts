@@ -41,3 +41,21 @@ interface HPPKayuReportData extends HPPReportData {
 interface HPPAllReportData extends HPPReportData {
   detail: HPPDetailItem[];
 }
+
+// success response
+interface GenerateReportResponse {
+  message: string;
+}
+
+// buat generate report dto / input
+interface GenerateReportDto {
+  data: any;
+  logo_path: string;
+  template_path: string;
+  output_path: string;
+}
+
+interface GenerateReportHppDto extends GenerateReportDto {
+  kepala_workshop: string;
+  pimpinan: string;
+}

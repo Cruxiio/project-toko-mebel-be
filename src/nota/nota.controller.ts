@@ -37,6 +37,12 @@ export class NotaController {
   }
 
   @Roles('superadmin', 'adminkantor')
+  @Get('laporan')
+  laporanNota(@Query() query: FindAllNotaDto) {
+    return this.notaService.handleLaporanNota(query);
+  }
+
+  @Roles('superadmin', 'adminkantor')
   @Get('kode-nota-pembelian/:id')
   findOneByKodeNota(@Param('id') id: number) {
     return this.notaService.handleFindOneNotaByHistoryBahanMasukID(id);

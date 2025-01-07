@@ -128,7 +128,7 @@ export class NotaRepository {
   }
 
   // findAllHistoryBahanMasukDetail untuk tampilin stok sekarang berdasarkan tanggal nota/surat jalan
-  async findAllNota(
+  async findAllNotaPagination(
     notaFilterQuery: FilterQuery<FindAllNotaDto>,
     paginationQuery: any,
     showedField: any,
@@ -320,6 +320,103 @@ export class NotaRepository {
     }
 
     return this.notaModel.countDocuments(filter);
+  }
+
+  async findAllNota(
+    notaFilterQuery: FilterQuery<FindAllNotaDto>,
+    showedField: any,
+  ) {
+    let filter: FilterQuery<FindAllNotaDto> = {
+      deleted_at: null,
+    };
+
+    // digunakan untuk filter pada history bahan masuk
+    //BAD PRACTICE PAKE ANY JANGAN DITIRU
+    let tempFilter: any = {
+      deleted_at: null,
+    };
+
+    if (notaFilterQuery.search != '') {
+      tempFilter = {
+        ...tempFilter,
+        kode_nota: {
+          $regex: notaFilterQuery.search, // like isi regex
+          $options: 'i', // i artinya case-insensitive
+        },
+      };
+    }
+
+    if (notaFilterQuery.tgl_nota != null) {
+      // ubah ke format date
+      const tglNota = new Date(notaFilterQuery.tgl_nota);
+      // cek apakah valid atau tidak
+      const notValid = isNaN(tglNota.getTime());
+
+      tempFilter = {
+        ...tempFilter,
+        tgl_nota: notValid ? null : tglNota,
+      };
+    }
+
+    if (notaFilterQuery.id_supplier > 0) {
+      // cari supplier _id
+      let supplierData = await this.supplierRepo.findOne({
+        id: notaFilterQuery.id_supplier,
+        deleted_at: null,
+      });
+
+      tempFilter = {
+        ...tempFilter,
+        id_supplier: supplierData ? supplierData._id : null,
+      };
+    }
+
+    // cari history bahan masuk yang sesuai dengan tempFilter
+    let historyBahanMasukData = await this.historyBahanMasukModel.find(
+      tempFilter,
+      { _id: 1 },
+    );
+
+    // tambahkan seluruh _id history bahan masuk yang sesuai dengan tempFilter
+    filter = {
+      ...filter,
+      id_history_bahan_masuk: {
+        $in: historyBahanMasukData,
+      },
+    };
+
+    if (notaFilterQuery.tgl_input != null) {
+      // ubah ke format date
+      const tglInput = new Date(notaFilterQuery.tgl_input);
+      // cek apakah valid atau tidak
+      const notValid = isNaN(tglInput.getTime());
+
+      let startDate = null;
+      let endDate = null;
+      if (!notValid) {
+        startDate = new Date(tglInput.setHours(0, 0, 0, 0));
+        endDate = new Date(tglInput.setHours(23, 59, 59, 999));
+      }
+
+      filter = {
+        ...filter,
+        created_at: notValid
+          ? null
+          : {
+              $gte: startDate,
+              $lte: endDate,
+            },
+      };
+    }
+
+    return await this.notaModel.find(filter, showedField.main).populate({
+      path: 'id_history_bahan_masuk', // Populate data bahan
+      select: showedField.field1, // Ambil hanya field id dari koleksi history_bahan_masuk
+      populate: {
+        path: 'id_supplier', // Populate data supplier
+        select: showedField.nestedField1,
+      },
+    });
   }
 
   // async masterFindAll(

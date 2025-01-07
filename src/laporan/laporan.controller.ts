@@ -6,16 +6,34 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { LaporanService } from './laporan.service';
 import { CreateLaporanHPPDto } from './dto/create-laporan.dto';
+import { LaporanStokBahanKeluarDto } from 'src/history-bahan-keluar/dto/create-history-bahan-keluar.dto';
+import { FindAllNotaDto } from 'src/nota/dto/create-nota.dto';
 
 @Controller('api/laporan')
 export class LaporanController {
   constructor(private readonly laporanService: LaporanService) {}
 
   @Post('hpp')
-  create(@Body() createLaporanDto: CreateLaporanHPPDto) {
-    return this.laporanService.laporanHPPKayu(createLaporanDto);
+  laporanHpp(@Body() createLaporanDto: CreateLaporanHPPDto) {
+    return this.laporanService.saveHppToFile(createLaporanDto);
+    // return this.laporanService.laporanHPPKayu(createLaporanDto);
+  }
+
+  @Post('bahan-keluar')
+  laporanBahanKeluar(
+    @Body() createLaporanBahanKeluarDto: LaporanStokBahanKeluarDto,
+  ) {
+    return this.laporanService.saveLaporanBahanKeluar(
+      createLaporanBahanKeluarDto,
+    );
+  }
+
+  @Post('nota')
+  laporanNota(@Body() createLaporanNotaDto: FindAllNotaDto) {
+    return this.laporanService.saveLaporanNota(createLaporanNotaDto);
   }
 }
