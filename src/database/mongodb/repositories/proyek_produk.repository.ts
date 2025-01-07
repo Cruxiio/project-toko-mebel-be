@@ -139,12 +139,8 @@ export class ProyekProdukRepository {
         { main: { _id: 1 } },
       );
 
-      if (!proyekData) {
-        throw new NotFoundException('Proyek not found');
-      }
-
       // tambahkan id_proyek ke filter
-      filter = { ...filter, id_proyek: proyekData._id };
+      filter = { ...filter, id_proyek: proyekData ? proyekData._id : null };
     }
 
     if (proyekProdukFilterQuery.id_produk > 0) {
@@ -153,12 +149,8 @@ export class ProyekProdukRepository {
         id: proyekProdukFilterQuery.id_produk,
       });
 
-      if (!produkData) {
-        throw new NotFoundException('Produk not found');
-      }
-
       // tambahkan id_produk ke filter
-      filter = { ...filter, id_produk: produkData._id };
+      filter = { ...filter, id_produk: produkData ? produkData._id : null };
     }
 
     if (proyekProdukFilterQuery.id_karyawan > 0) {
@@ -168,19 +160,11 @@ export class ProyekProdukRepository {
         deleted_at: null,
       });
 
-      if (!karyawanData) {
-        throw new NotFoundException('Karyawan not found');
-      }
-
       // cari team
       const teamData: any = await this.teamRepo.findAll(
-        { anggota: karyawanData._id },
+        { anggota: karyawanData ? karyawanData._id : null },
         { main: {}, field1: 'id nama' },
       );
-
-      if (!teamData) {
-        throw new NotFoundException('Team not found');
-      }
 
       // tambahkan id_team ke filter
       filter = {
@@ -228,6 +212,18 @@ export class ProyekProdukRepository {
   ) {
     let filter: FilterQuery<ProyekProduk> = { deleted_at: null };
 
+    // cek status
+    if (
+      proyekProdukFilterQuery.status &&
+      proyekProdukFilterQuery.status != 'all'
+    ) {
+      let status: boolean = false;
+      if (proyekProdukFilterQuery.status == 'true') {
+        status = true;
+      }
+      filter = { ...filter, status: status };
+    }
+
     if (proyekProdukFilterQuery.id_proyek > 0) {
       // cari id proyek
       const proyekData = await this.proyekRepo.findOne(
@@ -235,12 +231,8 @@ export class ProyekProdukRepository {
         { main: { _id: 1 } },
       );
 
-      if (!proyekData) {
-        throw new NotFoundException('Proyek not found');
-      }
-
       // tambahkan id_proyek ke filter
-      filter = { ...filter, id_proyek: proyekData };
+      filter = { ...filter, id_proyek: proyekData ? proyekData._id : null };
     }
 
     if (proyekProdukFilterQuery.id_produk > 0) {
@@ -249,12 +241,35 @@ export class ProyekProdukRepository {
         id: proyekProdukFilterQuery.id_produk,
       });
 
-      if (!produkData) {
-        throw new NotFoundException('Produk not found');
-      }
-
       // tambahkan id_produk ke filter
-      filter = { ...filter, id_produk: produkData._id };
+      filter = { ...filter, id_produk: produkData ? produkData._id : null };
+    }
+
+    if (proyekProdukFilterQuery.id_karyawan > 0) {
+      // cari karyawan untuk dapatkan _id nya
+      const karyawanData = await this.karyawanRepo.findOne({
+        id: proyekProdukFilterQuery.id_karyawan,
+        deleted_at: null,
+      });
+
+      // cari team
+      const teamData: any = await this.teamRepo.findAll(
+        { anggota: karyawanData ? karyawanData._id : null },
+        { main: {}, field1: 'id nama' },
+      );
+
+      // tambahkan id_team ke filter
+      filter = {
+        ...filter,
+        id_team: {
+          $in: teamData,
+        },
+      };
+    }
+
+    // filter berdasarkan tipe proyek
+    if (proyekProdukFilterQuery.tipe !== '') {
+      filter = { ...filter, tipe: proyekProdukFilterQuery.tipe };
     }
 
     return await this.proyekProdukModel.countDocuments(filter);
