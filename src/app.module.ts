@@ -19,6 +19,8 @@ import { HistoryBahanKeluarModule } from './history-bahan-keluar/history-bahan-k
 import { BahanSisaModule } from './bahan-sisa/bahan-sisa.module';
 import { ProdukJasaModule } from './produk-jasa/produk-jasa.module';
 import { LaporanModule } from './laporan/laporan.module';
+import { join } from 'path';
+import { ServeStaticModule } from '@nestjs/serve-static';
 
 @Module({
   imports: [
@@ -27,8 +29,11 @@ import { LaporanModule } from './laporan/laporan.module';
     ConfigModule.forRoot({
       isGlobal: true, // Makes ConfigModule available throughout the app
     }),
-    // mongoose module
-    // MongooseModule.forRoot('mongodb://localhost/db_mebel'),
+    // menyediakan static path untuk mengakses hasil file PDF
+    ServeStaticModule.forRoot({
+      rootPath: join(process.cwd(), 'src', 'laporan', 'reports'), // Lokasi direktori file PDF
+      serveRoot: '/laporan/reports', // URL base untuk akses file
+    }),
     UserModule,
     AuthModule,
     DatabaseModule,
