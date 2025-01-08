@@ -17,6 +17,9 @@ import { LaporanStokBahanKeluarDto } from 'src/history-bahan-keluar/dto/create-h
 import { FindAllNotaDto } from 'src/nota/dto/create-nota.dto';
 import { LaporanNotaResponse } from 'src/nota/dto/response.interface';
 import { NotaService } from 'src/nota/nota.service';
+import { FindAllStokDto } from 'src/history-masuk/dto/create-history-masuk.dto';
+import { LaporanStokBahanMasukResponse } from 'src/history-masuk/dto/response.interface';
+import { HistoryMasukService } from 'src/history-masuk/history-masuk.service';
 
 @Injectable()
 export class LaporanService {
@@ -26,6 +29,7 @@ export class LaporanService {
     private readonly proyekRepo: ProyekRepository,
     private readonly helperService: HelperService,
     private readonly historyBahanKeluarService: HistoryBahanKeluarService,
+    private readonly historyMasukService: HistoryMasukService,
     private readonly notaService: NotaService,
   ) {}
   async laporanHPPKayu(createLaporanDto: CreateLaporanHPPDto) {
@@ -925,6 +929,45 @@ export class LaporanService {
     await this.generatePDF(htmlTemplate, output_path);
   }
 
+  async generateReportBahanMasuk(dataReport: GenerateReportDto): Promise<void> {
+    // ambil field-field dari dataReport
+    const { logo_path, template_path, data, output_path } = dataReport;
+
+    const logoBase64 = await this.getBase64FromUrl(logo_path);
+
+    let htmlTemplate = fs.readFileSync(template_path, 'utf-8');
+
+    const formatDate = (dateStr: string) => {
+      const date = new Date(dateStr);
+      return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
+    };
+
+    const tableRows = data
+      .map(
+        (item, index) =>
+          `<tr class="custom-row">
+          <td class="px-6 py-4">${index + 1}</td>
+          <td class="px-6 py-4">${formatDate(item.tgl_nota)}</td>
+          <td class="px-6 py-4 text-center">${item.id_bahan}</td>
+          <td class="px-6 py-4">${item.nama_bahan}</td>
+          <td class="px-6 py-4 text-center">${item.qty}</td>
+          <td class="px-6 py-4 text-center">${item.nama_satuan}</td>
+          <td class="px-6 py-4">${item.nama_supplier}</td>
+          <td class="px-6 py-4">${item.no_spb}</td>
+        </tr>`,
+      )
+      .join('');
+
+    htmlTemplate = htmlTemplate
+      .replace('./company_logo.png', logoBase64)
+      .replace(
+        '<tbody id="materialList">',
+        `<tbody id="materialList">${tableRows}`,
+      );
+
+    await this.generatePDF(htmlTemplate, output_path);
+  }
+
   async generateRekapByDate(dataReport: GenerateReportDto): Promise<void> {
     // ambil field-field dari dataReport
     const { logo_path, template_path, data, output_path } = dataReport;
@@ -1136,6 +1179,40 @@ export class LaporanService {
     // buat response
     const res: GenerateReportResponse = {
       message: `Laporan bahan keluar berhasil dibuat di ${inputGenerateReport.output_path}`,
+    };
+
+    return res;
+  }
+
+  async saveLaporanBahanMasuk(createLaporanBahanMasukDto: FindAllStokDto) {
+    let reportData: LaporanStokBahanMasukResponse =
+      await this.historyMasukService.HandleLaporanStokBahanMasuk(
+        createLaporanBahanMasukDto,
+      );
+
+    // base path (current directory)
+    let { basePath, logoPath } = await this.getBasePath();
+
+    // buat inputan untuk generate report
+    const inputGenerateReport: GenerateReportDto = {
+      data: reportData.data,
+      logo_path: logoPath,
+      template_path: path.join(
+        basePath,
+        'template_html',
+        'report_template_L_bahan_masuk.html',
+      ),
+      output_path: path.join(basePath, 'reports', 'laporan_bahan_masuk.pdf'),
+    };
+
+    // generate report bahan keluar
+    await this.generateReportBahanMasuk(inputGenerateReport).catch(
+      console.error,
+    );
+
+    // buat response
+    const res: GenerateReportResponse = {
+      message: `Laporan bahan masuk berhasil dibuat di ${inputGenerateReport.output_path}`,
     };
 
     return res;

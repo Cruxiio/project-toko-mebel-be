@@ -40,10 +40,17 @@ export interface StokFindAllResponse {
   total_page: number;
 }
 
-export interface LaporanStokBahanMasukResponseData
-  extends StokFindAllResponseData {
+export interface LaporanStokBahanMasukResponseData {
+  tgl_nota: string;
+  id_bahan: number;
+  nama_bahan: string;
+  qty: number;
+  nama_satuan: string;
   nama_supplier: string;
   no_spb: string;
+  created_at: string;
+  updated_at: string;
+  deleted_at: string | null;
 }
 
 export interface LaporanStokBahanMasukResponse {

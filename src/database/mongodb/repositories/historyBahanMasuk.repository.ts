@@ -314,16 +314,11 @@ export class HistoryBahanMasukRepository {
   }
 
   // findAllHistoryBahanMasukDetail untuk tampilin stok sekarang berdasarkan tanggal nota/surat jalan
-  async findAllStok(
+  async filterFindAllStok(
     StokFilterQuery: FilterQuery<FindAllStokDto>,
-    paginationQuery: any,
-    showedField: any,
+    filter: FilterQuery<HistoryBahanMasukDetail>,
   ) {
-    let filter: FilterQuery<HistoryBahanMasukDetail> = {
-      deleted_at: null,
-      qtyPakai: { $gt: 0 },
-    };
-
+    let filterHistoryBahanMasuk: any = { deleted_at: null };
     if (StokFilterQuery.search != '') {
       // cari seluruh nama bahan yang mengandung keyword search
       let bahanData = await this.bahanRepo.findAllWithoutPagination(
@@ -345,26 +340,28 @@ export class HistoryBahanMasukRepository {
       };
     }
 
-    if (StokFilterQuery.tgl_nota != null) {
-      // ubah ke format date
-      const tglNota = new Date(StokFilterQuery.tgl_nota);
-      // cek apakah valid atau tidak
-      const notValid = isNaN(tglNota.getTime());
+    if (
+      StokFilterQuery.start_date != null &&
+      StokFilterQuery.end_date != null
+    ) {
+      // waktu hasil dari new Date() pada validasi otomatis di set ke 00:00:00.000
+      // jadi waktu start_date tidak perlu di set
 
-      // cari seluruh history bahan masuk yang tgl nota = request tgl nota
-      let historyBahanMasukData = await this.historyBahanMasukModel.find(
-        {
-          deleted_at: null,
-          tgl_nota: notValid ? null : tglNota,
-        },
-        { _id: 1 },
-      );
+      // set waktu end_date ke 23:59:59.999
+      StokFilterQuery.end_date.setUTCHours(23, 59, 59, 999);
 
-      // tambahkan seluruh _id history bahan masuk yang sesuai dengan request tgl nota
-      filter = {
-        ...filter,
-        id_history_bahan_masuk: {
-          $in: historyBahanMasukData,
+      if (StokFilterQuery.end_date < StokFilterQuery.start_date) {
+        throw new BadRequestException(
+          'end_date must be greater than start_date',
+        );
+      }
+
+      // cari seluruh history bahan masuk yang tgl nota diantara start_date dan end_date
+      filterHistoryBahanMasuk = {
+        ...filterHistoryBahanMasuk,
+        tgl_nota: {
+          $gte: StokFilterQuery.start_date,
+          $lte: StokFilterQuery.end_date,
         },
       };
     }
@@ -375,22 +372,40 @@ export class HistoryBahanMasukRepository {
         deleted_at: null,
       });
 
-      // cari seluruh history bahan masuk yang tgl nota = request tgl nota
-      let historyBahanMasukData = await this.historyBahanMasukModel.find(
-        {
-          deleted_at: null,
-          id_supplier: supplierData ? supplierData._id : null,
-        },
-        { _id: 1 },
-      );
-
-      filter = {
-        ...filter,
-        id_history_bahan_masuk: {
-          $in: historyBahanMasukData,
-        },
+      // cari seluruh history bahan masuk yang id supplier sesuai dengan id supplier yang dicari
+      filterHistoryBahanMasuk = {
+        ...filterHistoryBahanMasuk,
+        id_supplier: supplierData ? supplierData._id : null,
       };
     }
+
+    let historyBahanMasukData = await this.historyBahanMasukModel.find(
+      filterHistoryBahanMasuk,
+      { _id: 1 },
+    );
+
+    // tambahkan seluruh _id history bahan masuk
+    filter = {
+      ...filter,
+      id_history_bahan_masuk: {
+        $in: historyBahanMasukData,
+      },
+    };
+
+    return filter;
+  }
+
+  async findAllStokPagination(
+    StokFilterQuery: FilterQuery<FindAllStokDto>,
+    paginationQuery: any,
+    showedField: any,
+  ) {
+    let filter: FilterQuery<HistoryBahanMasukDetail> = {
+      deleted_at: null,
+      qtyPakai: { $gt: 0 },
+    };
+
+    filter = await this.filterFindAllStok(StokFilterQuery, filter);
 
     // ini untuk paginationnya
     const { page, per_page } = paginationQuery;
@@ -425,64 +440,40 @@ export class HistoryBahanMasukRepository {
       qtyPakai: { $gt: 0 },
     };
 
-    if (StokFilterQuery.search != '') {
-      // cari seluruh nama bahan yang mengandung keyword search
-      let bahanData = await this.bahanRepo.findAllWithoutPagination(
-        {
-          nama: {
-            $regex: StokFilterQuery.search, // like isi regex
-            $options: 'i', // i artinya case-insensitive
-          },
-        },
-        { _id: 1 },
-      );
-
-      // tambahkan seluruh _id bahan yang namanya mengandung keyword search ke filter
-      filter = {
-        ...filter,
-        id_bahan: {
-          $in: bahanData,
-        },
-      };
-    }
-
-    if (StokFilterQuery.tgl_nota != null) {
-      // ubah ke format date
-      const tglNota = new Date(StokFilterQuery.tgl_nota);
-      // cek apakah valid atau tidak
-      const notValid = isNaN(tglNota.getTime());
-
-      // cari seluruh history bahan masuk yang tgl nota = request tgl nota
-      let historyBahanMasukData = await this.historyBahanMasukModel.find(
-        {
-          deleted_at: null,
-          tgl_nota: notValid ? null : tglNota,
-        },
-        { _id: 1 },
-      );
-
-      // tambahkan seluruh _id history bahan masuk yang sesuai dengan request tgl nota
-      filter = {
-        ...filter,
-        id_history_bahan_masuk: {
-          $in: historyBahanMasukData,
-        },
-      };
-    }
-
-    if (StokFilterQuery.id_supplier > 0) {
-      let supplierData = await this.supplierRepo.findOne({
-        id: StokFilterQuery.id_supplier,
-        deleted_at: null,
-      });
-
-      filter = {
-        ...filter,
-        id_supplier: supplierData ? supplierData._id : null,
-      };
-    }
+    filter = await this.filterFindAllStok(StokFilterQuery, filter);
 
     return this.historyBahanMasukModelDetail.countDocuments(filter);
+  }
+
+  // ini digunakan untuk laporan stok bahan masuk
+  async findAllStok(
+    StokFilterQuery: FilterQuery<FindAllStokDto>,
+    showedField: any,
+  ) {
+    let filter: FilterQuery<HistoryBahanMasukDetail> = {
+      deleted_at: null,
+    };
+
+    filter = await this.filterFindAllStok(StokFilterQuery, filter);
+
+    return await this.historyBahanMasukModelDetail
+      .find(filter, showedField.main)
+      .populate({
+        path: 'id_history_bahan_masuk', // Populate data bahan
+        select: showedField.field1, // Ambil hanya field id dari koleksi history_bahan_masuk
+        populate: {
+          path: 'id_supplier', // Populate data supplier
+          select: showedField.nestedField1,
+        },
+      })
+      .populate({
+        path: 'id_bahan', // Populate data bahan
+        select: showedField.field2, // Ambil hanya field id dari koleksi Bahan
+      })
+      .populate({
+        path: 'id_satuan', // Populate data satuan
+        select: showedField.field3, // Ambil hanya field id dari koleksi Satuan
+      });
   }
 
   async masterFindAllStok(

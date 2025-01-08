@@ -27,6 +27,7 @@ import { SatuanRepository } from 'src/database/mongodb/repositories/satuan.repos
 import { BahanRepository } from 'src/database/mongodb/repositories/bahan.repository';
 import { Types } from 'mongoose';
 import { NotaRepository } from 'src/database/mongodb/repositories/nota.repository';
+import { HelperService } from 'src/helper/helper.service';
 
 @Injectable()
 export class HistoryMasukService {
@@ -35,6 +36,7 @@ export class HistoryMasukService {
     private readonly supplierRepo: SupplierRepository,
     private readonly notaRepo: NotaRepository,
     private readonly bahanRepo: BahanRepository,
+    private readonly helperService: HelperService,
   ) {}
 
   async HandleCreateHistoryBahanMasuk(
@@ -312,10 +314,12 @@ export class HistoryMasukService {
             field3: '' --> ini buat showed field pada select populate(join table) ke 3,
       }
     */
-    const listStok = await this.historyBahanMasukRepo.findAllStok(
+    const listStok = await this.historyBahanMasukRepo.findAllStokPagination(
       {
         search: requestFilter.search,
-        tgl_nota: requestFilter.tgl_nota,
+        start_date: requestFilter.start_date,
+        end_date: requestFilter.end_date,
+        id_supplier: requestFilter.id_supplier,
       },
       {
         page: requestFilter.page,
@@ -332,7 +336,9 @@ export class HistoryMasukService {
 
     const totalListStok = await this.historyBahanMasukRepo.countAllStok({
       search: requestFilter.search,
-      tgl_nota: requestFilter.tgl_nota,
+      start_date: requestFilter.start_date,
+      end_date: requestFilter.end_date,
+      id_supplier: requestFilter.id_supplier,
     });
 
     // hitung total page
@@ -375,12 +381,9 @@ export class HistoryMasukService {
     const listStok = await this.historyBahanMasukRepo.findAllStok(
       {
         search: requestFilter.search,
-        tgl_nota: requestFilter.tgl_nota,
+        start_date: requestFilter.start_date,
+        end_date: requestFilter.end_date,
         id_supplier: requestFilter.id_supplier,
-      },
-      {
-        page: requestFilter.page,
-        per_page: requestFilter.per_page,
       },
       {
         main: {},
@@ -391,30 +394,24 @@ export class HistoryMasukService {
       },
     );
 
-    const totalListStok = await this.historyBahanMasukRepo.countAllStok({
-      search: requestFilter.search,
-      tgl_nota: requestFilter.tgl_nota,
-      id_supplier: requestFilter.id_supplier,
-    });
-
-    // hitung total page
-    const total_page: number = Math.ceil(
-      totalListStok / requestFilter.per_page,
-    );
-
     const res: LaporanStokBahanMasukResponse = {
       data: listStok.map((s) => {
         const formattedData: LaporanStokBahanMasukResponseData = {
-          tgl_nota: s.id_history_bahan_masuk.tgl_nota,
+          tgl_nota: this.helperService.formatDatetoString(
+            s.id_history_bahan_masuk.tgl_nota,
+          ),
           id_bahan: s.id_bahan.id,
           nama_bahan: s.id_bahan.nama,
           qty: s.qty,
           nama_satuan: s.id_satuan.nama,
           nama_supplier: s.id_history_bahan_masuk.id_supplier.nama,
           no_spb: s.id_history_bahan_masuk.no_spb,
-          created_at: s.created_at,
-          updated_at: s.updated_at,
-          deleted_at: s.deleted_at,
+          created_at: this.helperService.formatDatetoString(s.created_at),
+          updated_at: this.helperService.formatDatetoString(s.updated_at),
+          deleted_at:
+            s.deleted_at != null
+              ? this.helperService.formatDatetoString(s.deleted_at)
+              : null,
         };
         return formattedData;
       }),

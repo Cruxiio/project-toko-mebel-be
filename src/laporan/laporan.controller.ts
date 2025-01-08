@@ -12,6 +12,7 @@ import { LaporanService } from './laporan.service';
 import { CreateLaporanHPPDto } from './dto/create-laporan.dto';
 import { LaporanStokBahanKeluarDto } from 'src/history-bahan-keluar/dto/create-history-bahan-keluar.dto';
 import { FindAllNotaDto } from 'src/nota/dto/create-nota.dto';
+import { FindAllStokDto } from 'src/history-masuk/dto/create-history-masuk.dto';
 
 @Controller('api/laporan')
 export class LaporanController {
@@ -29,6 +30,13 @@ export class LaporanController {
   ) {
     return this.laporanService.saveLaporanBahanKeluar(
       createLaporanBahanKeluarDto,
+    );
+  }
+
+  @Post('bahan-masuk')
+  laporanBahanMasuk(@Body() createLaporanBahanMasukDto: FindAllStokDto) {
+    return this.laporanService.saveLaporanBahanMasuk(
+      createLaporanBahanMasukDto,
     );
   }
 
