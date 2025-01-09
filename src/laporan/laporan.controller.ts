@@ -29,7 +29,7 @@ export class LaporanController {
     // setup header untuk respons
     res.set({
       'Content-Type': 'application/pdf',
-      'Content-Disposition': `attachment; filename="${file_name}"`,
+      'Content-Disposition': `inline; filename="${file_name}"`,
     });
 
     // cek apakah file ada di path yang disimpan di output_path
