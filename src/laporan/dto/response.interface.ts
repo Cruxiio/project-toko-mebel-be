@@ -44,7 +44,8 @@ interface HPPAllReportData extends HPPReportData {
 
 // success response
 interface GenerateReportResponse {
-  message: string;
+  file_name: string;
+  output_path: string;
 }
 
 // buat generate report dto / input

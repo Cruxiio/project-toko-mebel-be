@@ -1055,10 +1055,7 @@ export class LaporanService {
     // base path (current directory)
     let { basePath, logoPath } = await this.getBasePath();
     let pimpinan = 'Bpk. Francis Hariono';
-
-    console.log(reportData);
-    console.log(basePath);
-    console.log(logoPath);
+    let file_name = '';
 
     // buat inputan untuk generate report
     const inputGenerateReport: GenerateReportHppDto = {
@@ -1088,6 +1085,9 @@ export class LaporanService {
         'laporan_HPP_kayu.pdf',
       );
 
+      // isi file name
+      file_name = 'laporan_HPP_kayu.pdf';
+
       // generate report HPP Kayu
       await this.generateReportHppKayu(inputGenerateReport).catch(
         console.error,
@@ -1109,6 +1109,9 @@ export class LaporanService {
         'reports',
         'laporan_HPP_resin.pdf',
       );
+
+      // isi file name
+      file_name = 'laporan_HPP_resin.pdf';
 
       // generate report HPP Resin
       await this.generateReportHppResin(inputGenerateReport).catch(
@@ -1132,6 +1135,9 @@ export class LaporanService {
         'laporan_HPP_finishing.pdf',
       );
 
+      // isi file name
+      file_name = 'laporan_HPP_finishing.pdf';
+
       // generate report HPP Finishing
       await this.generateReportHppFinishing(inputGenerateReport).catch(
         console.error,
@@ -1142,9 +1148,9 @@ export class LaporanService {
 
     // buat response
     const res: GenerateReportResponse = {
-      message: `Laporan HPP ${reportData.tipe_proyek} berhasil dibuat di ${inputGenerateReport.output_path}`,
+      output_path: inputGenerateReport.output_path,
+      file_name: file_name,
     };
-
     return res;
   }
 
@@ -1171,6 +1177,9 @@ export class LaporanService {
       output_path: path.join(basePath, 'reports', 'laporan_bahan_keluar.pdf'),
     };
 
+    // isi file name
+    let file_name = 'laporan_bahan_keluar.pdf';
+
     // generate report bahan keluar
     await this.generateReportBahanKeluar(inputGenerateReport).catch(
       console.error,
@@ -1178,9 +1187,9 @@ export class LaporanService {
 
     // buat response
     const res: GenerateReportResponse = {
-      message: `Laporan bahan keluar berhasil dibuat di ${inputGenerateReport.output_path}`,
+      output_path: inputGenerateReport.output_path,
+      file_name: file_name,
     };
-
     return res;
   }
 
@@ -1205,6 +1214,9 @@ export class LaporanService {
       output_path: path.join(basePath, 'reports', 'laporan_bahan_masuk.pdf'),
     };
 
+    // isi file name
+    let file_name = 'laporan_bahan_masuk.pdf';
+
     // generate report bahan keluar
     await this.generateReportBahanMasuk(inputGenerateReport).catch(
       console.error,
@@ -1212,9 +1224,9 @@ export class LaporanService {
 
     // buat response
     const res: GenerateReportResponse = {
-      message: `Laporan bahan masuk berhasil dibuat di ${inputGenerateReport.output_path}`,
+      output_path: inputGenerateReport.output_path,
+      file_name: file_name,
     };
-
     return res;
   }
 
@@ -1225,6 +1237,8 @@ export class LaporanService {
     // ambil report data
     let reportData: LaporanNotaResponse =
       await this.notaService.handleLaporanNota(createLaporanNota);
+
+    let file_name = '';
 
     // buat inputan untuk generate report
     const inputGenerateReport: GenerateReportDto = {
@@ -1253,6 +1267,9 @@ export class LaporanService {
         'laporan_rekap_nota_per_supplier.pdf',
       );
 
+      // isi file name
+      file_name = 'laporan_rekap_nota_per_supplier.pdf';
+
       // generate report nota supplier
       await this.generateRekapBySupplier(inputGenerateReport).catch(
         console.error,
@@ -1275,6 +1292,9 @@ export class LaporanService {
         'laporan_rekap_nota_per_tanggal.pdf',
       );
 
+      // isi file name
+      file_name = 'laporan_rekap_nota_per_tanggal.pdf';
+
       // generate report nota
       await this.generateRekapByDate(inputGenerateReport).catch(console.error);
     } else {
@@ -1283,9 +1303,9 @@ export class LaporanService {
 
     // buat response
     const res: GenerateReportResponse = {
-      message: `Laporan Nota berhasil dibuat di ${inputGenerateReport.output_path}`,
+      output_path: inputGenerateReport.output_path,
+      file_name: file_name,
     };
-
     return res;
   }
 }
