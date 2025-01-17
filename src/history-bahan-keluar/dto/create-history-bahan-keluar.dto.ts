@@ -24,7 +24,7 @@ export class HistoryBahanKeluarDetailDto {
 
   @IsNumber({}, { message: 'qty must be a number' })
   @IsNotEmpty({ message: 'qty is required' })
-  @Min(1, { message: 'qty must be greater than 0' })
+  @Min(0, { message: 'qty must be postive number' })
   @Transform(({ value }) => Number(value))
   qty: number;
 }

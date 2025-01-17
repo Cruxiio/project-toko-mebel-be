@@ -17,7 +17,6 @@ export class Customer {
   @Prop({
     required: true,
     type: String,
-    unique: true,
   })
   no_telepon: string;
 
@@ -34,11 +33,11 @@ export class Customer {
 export const CustomerSchema = SchemaFactory.createForClass(Customer);
 
 // Tambahkan partial index
-// CustomerSchema.index(
-//   { no_telepon: 1 },
-//   {
-//     unique: true,
-//     // ini buat kasi tau kalau constraint unique hanya berlaku ketika data unya nilai dan nilai != null
-//     partialFilterExpression: { no_telepon: { $exists: true, $ne: null } },
-//   },
-// );
+CustomerSchema.index(
+  { no_telepon: 1 },
+  {
+    unique: true,
+    // ini buat kasi tau kalau constraint unique pada no_telepon hanya berlaku ketika deleted_at: null
+    partialFilterExpression: { deleted_at: null },
+  },
+);

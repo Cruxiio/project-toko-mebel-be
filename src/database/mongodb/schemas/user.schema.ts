@@ -14,7 +14,7 @@ export class User {
   @Prop({ required: true, type: String })
   nama: string;
 
-  @Prop({ required: true, type: String, unique: true })
+  @Prop({ required: true, type: String })
   username: string;
 
   @Prop({ required: true, type: String })
@@ -33,7 +33,7 @@ export class User {
   })
   role: string;
 
-  @Prop({ required: true, type: String, unique: true })
+  @Prop({ required: true, type: String })
   email: string;
 
   @Prop({ type: Date, default: null })
@@ -44,3 +44,21 @@ export class User {
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
+
+UserSchema.index(
+  { username: 1 },
+  {
+    unique: true,
+    // ini buat kasi tau kalau constraint unique pada username hanya berlaku ketika deleted_at: null
+    partialFilterExpression: { deleted_at: null },
+  },
+);
+
+UserSchema.index(
+  { email: 1 },
+  {
+    unique: true,
+    // ini buat kasi tau kalau constraint unique pada email hanya berlaku ketika deleted_at: null
+    partialFilterExpression: { deleted_at: null },
+  },
+);

@@ -11,7 +11,7 @@ export class Satuan {
   @Prop({ index: true, unique: true, type: Number, auto: true })
   id: number;
 
-  @Prop({ required: true, type: String, unique: true })
+  @Prop({ required: true, type: String })
   nama: string;
 
   @Prop({ required: true, type: String })
@@ -28,3 +28,13 @@ export class Satuan {
 }
 
 export const SatuanSchema = SchemaFactory.createForClass(Satuan);
+
+// Buat partial index
+SatuanSchema.index(
+  { nama: 1 },
+  {
+    unique: true,
+    // ini buat kasi tau kalau constraint unique pada nama hanya berlaku ketika deleted_at: null
+    partialFilterExpression: { deleted_at: null },
+  },
+);

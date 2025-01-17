@@ -22,7 +22,6 @@ export class Supplier {
 
   @Prop({
     type: String,
-    unique: true,
     default: null,
   })
   no_telepon: string;
@@ -44,3 +43,12 @@ export const SupplierSchema = SchemaFactory.createForClass(Supplier);
 
 // Membuat composite unique index untuk no_rekening dan nama_bank
 SupplierSchema.index({ no_rekening: 1, nama_bank: 1 }, { unique: true });
+
+SupplierSchema.index(
+  { no_telepon: 1 },
+  {
+    unique: true,
+    // ini buat kasi tau kalau constraint unique pada no_telepon hanya berlaku ketika deleted_at: null
+    partialFilterExpression: { deleted_at: null },
+  },
+);
