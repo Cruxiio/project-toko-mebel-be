@@ -1,0 +1,12 @@
+node_modules
+dist
+test
+.gitignore
+.git
+.env
+.prettierrc
+.eslintrc.js
+DevNote.md
+Dockerfile
+README.md
+
