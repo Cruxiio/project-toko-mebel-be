@@ -17,10 +17,20 @@ import { HelperModule } from 'src/helper/helper.module';
 import { HistoryBahanKeluarRepository } from './repositories/historyBahanKeluar.repository';
 import { BahanSisaRepository } from './repositories/bahanSisa.repository';
 import { ProdukJasaRepository } from './repositories/produkJasa.repository';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
-    MongooseModule.forRoot('mongodb://localhost/db_mebel'),
+    // MongooseModule.forRoot('mongodb://localhost/db_mebel'),
+    MongooseModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => ({
+        uri: configService.get<string>('MONGODB_URI'), // Ambil URI dari .env
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+      }),
+      inject: [ConfigService],
+    }),
     MongoDBProvider,
     HelperModule,
   ], // Koneksi MongoDB
