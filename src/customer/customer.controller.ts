@@ -31,13 +31,13 @@ export class CustomerController {
     return this.customerService.HandleCreateCustomer(createCustomerDto);
   }
 
-  @Roles('superadmin')
+  @Roles('superadmin', 'adminworkshop')
   @Get()
   findAll(@Query() requestFilter: FindAllCustomerDto) {
     return this.customerService.HandleFindAllCustomer(requestFilter);
   }
 
-  @Roles('superadmin')
+  @Roles('superadmin', 'adminworkshop')
   @Get(':id')
   findOne(@Param('id') id: number) {
     return this.customerService.HandleFindOneCustomer(id);

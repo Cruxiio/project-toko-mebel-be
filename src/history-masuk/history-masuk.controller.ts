@@ -54,7 +54,7 @@ export class HistoryMasukController {
     return this.historyMasukService.HandleLaporanStokBahanMasuk(query);
   }
 
-  @Roles('superadmin', 'adminworkshop')
+  @Roles('superadmin', 'adminworkshop', 'adminkantor')
   @Get(':id')
   findOne(@Param('id') id: number) {
     return this.historyMasukService.HandleFindOneHistoryBahanMasuk(id);

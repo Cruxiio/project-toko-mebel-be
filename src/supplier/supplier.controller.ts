@@ -30,13 +30,13 @@ export class SupplierController {
     return this.supplierService.HandleCreateSupplier(createSupplierDto);
   }
 
-  @Roles('superadmin')
+  @Roles('superadmin', 'adminworkshop', 'adminkantor')
   @Get()
   findAll(@Query() requestFilter: FindAllSupplierDto) {
     return this.supplierService.HandleFindAllSupplier(requestFilter);
   }
 
-  @Roles('superadmin')
+  @Roles('superadmin', 'adminworkshop', 'adminkantor')
   @Get(':id')
   findOne(@Param('id') id: number) {
     return this.supplierService.HandleFindOneSupplier(id);
